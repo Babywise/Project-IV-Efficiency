@@ -7,9 +7,13 @@
 using namespace std;
 
 unsigned int GetSize();
-
+/// <summary>
+/// main loop 
+/// </summary>
+/// <returns></returns>
 int main()
 {
+	//setup
 	WSADATA wsaData;
 	SOCKET ClientSocket;
 	sockaddr_in SvrAddr;
@@ -22,61 +26,68 @@ int main()
 	SvrAddr.sin_family = AF_INET;
 	SvrAddr.sin_port = htons(27001);
 	SvrAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-	connect(ClientSocket, (struct sockaddr*)&SvrAddr, sizeof(SvrAddr));
+	connect(ClientSocket, (struct sockaddr*)&SvrAddr, sizeof(SvrAddr)); // connect
 
-	uiSize = GetSize();
+	uiSize = GetSize(); // get until end of file
 	for (unsigned int l = 0; l < uiSize; l++)
 	{
 		string strInput;
-		ifstream ifs("DataFile.txt");
-		for (unsigned int iStart = 0; iStart < l; iStart++)
+		ifstream ifs("DataFile.txt"); // open datafile.txt | file opens on every loop execution
+		for (unsigned int iStart = 0; iStart < l; iStart++) // get next line which is L
 			getline(ifs, strInput);
 
 		getline(ifs, strInput);
+		// l != column headers it l is data values
 		if (l > 0)
 		{
 			size_t offset, preOffset;
 			offset = preOffset = 0;
 			unsigned int iParamIndex = 0;
 			//while (offset != std::string::npos)
-			while(iParamIndex != 8)
+			while(iParamIndex != 8) // for all headers
 			{
 				offset = strInput.find_first_of(',', preOffset+1);
 				string strTx = strInput.substr(preOffset+1, offset - (preOffset+1));
-				send(ClientSocket, ParamNames[iParamIndex].c_str(), (int)ParamNames[iParamIndex].length(), 0);
-				recv(ClientSocket, Rx, sizeof(Rx), 0);
-				send(ClientSocket, strTx.c_str(), (int)strTx.length(), 0);
-				recv(ClientSocket, Rx, sizeof(Rx), 0);
-				cout << ParamNames[iParamIndex] << " Avg: " << Rx << endl;
+				send(ClientSocket, ParamNames[iParamIndex].c_str(), (int)ParamNames[iParamIndex].length(), 0); // send type
+				recv(ClientSocket, Rx, sizeof(Rx), 0);// get ack
+				send(ClientSocket, strTx.c_str(), (int)strTx.length(), 0); // send current value
+				recv(ClientSocket, Rx, sizeof(Rx), 0); // recv avg from server
+				cout << ParamNames[iParamIndex] << " Avg: " << Rx << endl; //write average
 				preOffset = offset;
-				iParamIndex++;
+				iParamIndex++; // move to next variable type
 			}
 		}
-		else
+		else // if zero index ie: column names
 		{
-			ParamNames.push_back("TIME STAMP");
+			ParamNames.push_back("TIME STAMP"); // if is index 0 write timestamp
 			size_t offset, preOffset;
 			offset = 0;
 			preOffset = -1;
 			while (offset != std::string::npos)
 			{
-				offset = strInput.find_first_of(',', preOffset + 1);
+				offset = strInput.find_first_of(',', preOffset + 1); // find next value after , from the offset ie: offset = 1 get value after second csv
 				string newParam = strInput.substr(preOffset + 1, offset - (preOffset + 1));
-				ParamNames.push_back(newParam);
+				ParamNames.push_back(newParam); // set param names to next paramater
 				preOffset = offset;
 			}
 		}
-		ifs.close();
+		ifs.close(); // close file
 	}
 
-	closesocket(ClientSocket);
+	closesocket(ClientSocket); // cleanup
 	WSACleanup();
 
 	return 1;
 }
 
+/// <summary>
+/// gets the size of the file DataFile.txt
+/// Note. should run before looking for clients perhaps in a thread
+/// </summary>
+/// <returns></returns>
 unsigned int GetSize()
-{
+{ 
+	// ANCHOR 
 	string strInput;
 	unsigned int uiSize = 0;
 	ifstream ifs("DataFile.txt");

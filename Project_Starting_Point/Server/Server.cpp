@@ -13,11 +13,16 @@ StorageTypes RxData[7];
 void UpdateData(unsigned int, float);
 float CalcAvg(unsigned int);
 
+/// <summary>
+/// main loop that only accepts a single client
+/// </summary>
+/// <returns></returns>
 int main()
 {
+	//setup
 	WSADATA wsaData;
 	SOCKET ServerSocket, ConnectionSocket;
-	char RxBuffer[128] = {};
+	char RxBuffer[128] = {}; // magic number
 	sockaddr_in SvrAddr;
 
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -32,7 +37,7 @@ int main()
 
 	if (ServerSocket == SOCKET_ERROR)
 		return -1;
-
+	// accepts a single connection
 	listen(ServerSocket, 1);
 	cout << "Waiting for client connection\n" << endl;
 	ConnectionSocket = SOCKET_ERROR;
@@ -43,19 +48,22 @@ int main()
 
 	cout << "Connection Established" << endl;
 
+	// if first byte of buffer is an asterisk close connection
 	while (RxBuffer[0] != '*')
 	{
 		float fValue = 0;
 		memset(RxBuffer, 0, sizeof(RxBuffer));
-		recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
-		send(ConnectionSocket, "ACK", sizeof("ACK"), 0);
+		recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0); // get variable we want ie xbody, ybody
+		send(ConnectionSocket, "ACK", sizeof("ACK"), 0); // send ack
+
+		// go to variable type we got
 		if (strcmp(RxBuffer, "ACCELERATION BODY X") == 0)
 		{
 			memset(RxBuffer, 0, sizeof(RxBuffer));
-			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
+			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0); // get current value for variable
 			fValue = (float)atof(RxBuffer);
-			UpdateData(0, fValue);
-			fValue = CalcAvg(0);
+			UpdateData(0, fValue);// add data to list
+			fValue = CalcAvg(0);// calculate the average | fValue sends at end of elif
 		}
 		else if (strcmp(RxBuffer, "ACCELERATION BODY Y") == 0)
 		{
@@ -105,7 +113,7 @@ int main()
 			UpdateData(6, fValue);
 			fValue = CalcAvg(6);
 		}
-		else
+		else // default if none above is correct
 		{
 			memset(RxBuffer, 0, sizeof(RxBuffer));
 			recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
@@ -114,7 +122,7 @@ int main()
 
 		char Tx[128];
 		sprintf_s(Tx, "%f", fValue);
-		send(ConnectionSocket, Tx, sizeof(Tx), 0);
+		send(ConnectionSocket, Tx, sizeof(Tx), 0);//send average back 
 	}
 
 	closesocket(ConnectionSocket);	//closes incoming socket
@@ -124,27 +132,37 @@ int main()
 	return 1;
 }
 
+/// <summary>
+/// updates the data in the RxData array with another float value
+/// </summary>
+/// <param name="uiIndex"></param>
+/// <param name="value"></param>
 void UpdateData(unsigned int uiIndex, float value)
 {
-	if (RxData[uiIndex].size == 0)
+	if (RxData[uiIndex].size == 0) // if first value
 	{
-		RxData[uiIndex].pData = new float[1];
+		RxData[uiIndex].pData = new float[1]; // init pdata
 		RxData[uiIndex].pData[0] = value;
-		RxData[uiIndex].size = 1;
+		RxData[uiIndex].size = 1; // size is 1
 	}
-	else
+	else // not first value
 	{
 		float* pNewData = new float[RxData[uiIndex].size + 1];
 		for (unsigned int x = 0; x < RxData[uiIndex].size; x++)
-			pNewData[x] = RxData[uiIndex].pData[x];
+			pNewData[x] = RxData[uiIndex].pData[x]; // set next pdata to data input
 
 		pNewData[RxData[uiIndex].size] = value;
-		delete[] RxData[uiIndex].pData;
-		RxData[uiIndex].pData = pNewData;
+		delete[] RxData[uiIndex].pData; // delete old memory
+		RxData[uiIndex].pData = pNewData; // replace with new data added
 		RxData[uiIndex].size++;
 	}
 }
 
+/// <summary>
+/// calculates the average for whatever index is passed in ie 1 = body x 2 = body y
+/// </summary>
+/// <param name="uiIndex"></param>
+/// <returns></returns>
 float CalcAvg(unsigned int uiIndex)
 {
 	float Avg = 0;

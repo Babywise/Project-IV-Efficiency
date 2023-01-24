@@ -13,10 +13,24 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Shared_CPP">
+      <UniqueIdentifier>{b58a5177-dc78-4344-b4a5-8717fac47c56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shared_H">
+      <UniqueIdentifier>{5f2f1517-d76f-4129-ae44-1ceb4ed4e6cb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Shared\Logger.cpp">
+      <Filter>Shared_CPP</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Shared\Logger.h">
+      <Filter>Shared_H</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

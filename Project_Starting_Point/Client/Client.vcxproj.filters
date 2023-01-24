@@ -37,5 +37,8 @@
     <ClInclude Include="..\Shared\Logger.h">
       <Filter>Shared_H</Filter>
     </ClInclude>
+    <ClInclude Include="..\Shared\Metrics.h">
+      <Filter>Shared_H</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

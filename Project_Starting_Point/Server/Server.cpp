@@ -1,5 +1,6 @@
 #include <windows.networking.sockets.h>
 #include <iostream>
+#include "../Shared/Metrics.h"
 #pragma comment(lib, "Ws2_32.lib")
 using namespace std;
 
@@ -19,6 +20,8 @@ float CalcAvg(unsigned int);
 /// <returns></returns>
 int main()
 {
+	
+
 	//setup
 	WSADATA wsaData;
 	SOCKET ServerSocket, ConnectionSocket;

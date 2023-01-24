@@ -36,9 +36,7 @@ void Logger::log(std::string message, int severity)
 /// <param name="logname"></param>
 void Logger::log(std::string message, int severity, std::string logname)
 {
-	#ifdef _WIN32
-	system("mkdir Logs");
-	#endif
+
 	
 	auto now = std::chrono::system_clock::now();
 	std::time_t end_time = std::chrono::system_clock::to_time_t(now);

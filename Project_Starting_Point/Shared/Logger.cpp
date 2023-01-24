@@ -36,9 +36,7 @@ void Logger::log(std::string message, int severity)
 /// <param name="logname"></param>
 void Logger::log(std::string message, int severity, std::string logname)
 {
-	#ifdef _WIN32
-	system("mkdir Logs");
-	#endif
+
 	
 	auto now = std::chrono::system_clock::now();
 	std::time_t end_time = std::chrono::system_clock::to_time_t(now);
@@ -47,5 +45,23 @@ void Logger::log(std::string message, int severity, std::string logname)
 	outfile.open((std::string)LOGSPATH + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
 
 	outfile << message << "\t\t Severity :" << severity << "\t\t" << std::ctime(&end_time);
+	outfile.close();
+}
+/// <summary>
+/// this log function is primarily designed for storing metrics without severity
+/// </summary>
+/// <param name="message"></param>
+/// <param name="logname"></param>
+void Logger::log(std::string message, std::string logname)
+{
+
+
+	auto now = std::chrono::system_clock::now();
+	std::time_t end_time = std::chrono::system_clock::to_time_t(now);
+
+	std::ofstream outfile;
+	outfile.open((std::string)LOGSPATH + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
+
+	outfile << message << "\t\t" << std::ctime(&end_time);
 	outfile.close();
 }

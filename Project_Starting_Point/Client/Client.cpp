@@ -4,8 +4,20 @@
 #include <fstream>
 #include <string>
 #include <vector>
-using namespace std;
+#include "../Shared/Metrics.h"
+#include "../Shared/Logger.h"
 
+#define METRICS
+/*
+* When in calculating metrics mode... Set above
+*/
+#ifdef METRICS
+Metrics::Calculations calculations;
+Logger logger;
+Metrics::Timer timer;
+#endif
+
+using namespace std;
 unsigned int GetSize();
 /// <summary>
 /// main loop 
@@ -32,11 +44,17 @@ int main()
 	for (unsigned int l = 0; l < uiSize; l++)
 	{
 		string strInput;
+		#ifdef METRICS
+		timer.start();
+		#endif
 		ifstream ifs("DataFile.txt"); // open datafile.txt | file opens on every loop execution
 		for (unsigned int iStart = 0; iStart < l; iStart++) // get next line which is L
 			getline(ifs, strInput);
 
 		getline(ifs, strInput);
+		#ifdef METRICS
+		calculations.addPoint(timer.getTime());
+		#endif
 		// l != column headers it l is data values
 		if (l > 0)
 		{
@@ -76,7 +94,10 @@ int main()
 
 	closesocket(ClientSocket); // cleanup
 	WSACleanup();
-
+#ifdef METRICS
+	logger.log("Average time to get line from file : " + to_string(calculations.getAverage())+"ms","metrics");
+	logger.log("TotalTime reading files to get specific lines : " + to_string(calculations.getSum())+"ms","metrics");
+#endif
 	return 1;
 }
 
@@ -87,6 +108,9 @@ int main()
 /// <returns></returns>
 unsigned int GetSize()
 { 
+#ifdef METRICS
+	timer.start();
+#endif
 	// ANCHOR 
 	string strInput;
 	unsigned int uiSize = 0;
@@ -99,6 +123,8 @@ unsigned int GetSize()
 			uiSize++;
 		}
 	}
-
+#ifdef METRICS
+	logger.log("Get File Size :"+to_string((timer.getTime()))+"ms","metrics");
+#endif
 	return uiSize;
 }

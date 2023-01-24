@@ -1,6 +1,5 @@
 #include <windows.networking.sockets.h>
 #include <iostream>
-#include "../Shared/Metrics.h"
 #pragma comment(lib, "Ws2_32.lib")
 using namespace std;
 

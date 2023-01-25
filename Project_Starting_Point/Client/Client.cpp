@@ -103,6 +103,9 @@ int main()
 	logger.log("Average time to get line from file : " + to_string(calculations.getAverage())+"ms","metrics");
 	logger.log("TotalTime reading files to get specific lines : " + to_string(calculations.getSum())+"ms","metrics");
 	logger.log("Total lines reading files ( not including get file length ) : " + to_string(lineCounter.getSum()), "metrics");
+	logger.emptyLine("metrics");
+	logger.log("------------------------------ End of metrics run -------------------------", "metrics");
+
 #endif
 	return 1;
 }
@@ -116,9 +119,13 @@ unsigned int GetSize()
 { 
 #ifdef METRICS
 	logger.emptyLine("metrics"); // write system information to lof before start of metrics logging
+	logger.log("------------------------------ Start of metrics run -------------------------","metrics");
 	logger.emptyLine("metrics");
 	system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> %cd%/Logs/metrics.log");
+	logger.emptyLine("metrics");
 	system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> %cd%/Logs/metrics.log");
+	logger.emptyLine("metrics");
+	system("wmic diskdrive get manufacturer, size,name, model, description >> %cd%/Logs/metrics.log");
 	logger.emptyLine("metrics");
 	timer.start();
 #endif

@@ -34,7 +34,7 @@ int main()
 
 	SvrAddr.sin_family = AF_INET;
 	SvrAddr.sin_addr.s_addr = INADDR_ANY;
-	SvrAddr.sin_port = htons(27001);
+	SvrAddr.sin_port = htons(27001); // Magic Number
 	bind(ServerSocket, (struct sockaddr*)&SvrAddr, sizeof(SvrAddr));
 
 	if (ServerSocket == SOCKET_ERROR)
@@ -55,10 +55,10 @@ int main()
 	{
 		float fValue = 0;
 		memset(RxBuffer, 0, sizeof(RxBuffer));
-		recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0); // get variable we want ie xbody, ybody
+		recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0); // get param name
 		send(ConnectionSocket, "ACK", sizeof("ACK"), 0); // send ack
 
-		// go to variable type we got
+		// find param name recieved
 		if (strcmp(RxBuffer, "ACCELERATION BODY X") == 0)
 		{
 			memset(RxBuffer, 0, sizeof(RxBuffer));
@@ -115,7 +115,7 @@ int main()
 			UpdateData(6, fValue);
 			fValue = CalcAvg(6);
 		}
-		else // default if none above is correct
+		else // if param not found, reset buffer (sends 0 back to client)
 		{
 			memset(RxBuffer, 0, sizeof(RxBuffer));
 			recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
@@ -123,6 +123,7 @@ int main()
 		}
 
 		char Tx[128];
+		// format fvalue to tx and send to client
 		sprintf_s(Tx, "%f", fValue);
 		send(ConnectionSocket, Tx, sizeof(Tx), 0);//send average back 
 	}

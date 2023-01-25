@@ -42,23 +42,17 @@ int main(int argc, char* argv[])
 	SvrAddr.sin_port = htons(27001); // Get from Config File later (Magic Number)
 	SvrAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); // Get from Config File later (Magic Number)
 	connect(ClientSocket, (struct sockaddr*)&SvrAddr, sizeof(SvrAddr)); // connect
-<<<<<<< HEAD
-	string file = "DataFile.txt";
-	uiSize = GetSize(); // get until end of file
-
-=======
 
 	uiSize = GetSize(); // Gets the total number of lines from the file
 
 	// Loop through number of lines in the file
->>>>>>> 45f1b67665a0a783a64fcf98174e2843d65c2d9f
 	for (unsigned int l = 0; l < uiSize; l++)
 	{
 		string strInput;
 #ifdef METRICS
 		timer.start();
 #endif
-		ifstream ifs(file); // open datafile.txt | file opens on every loop execution
+		ifstream ifs("DataFile.txt"); // open datafile.txt | file opens on every loop execution
 		for (unsigned int iStart = 0; iStart < l; iStart++) {// get next line which is L
 			getline(ifs, strInput);
 		}
@@ -75,19 +69,7 @@ int main(int argc, char* argv[])
 			offset = preOffset = 0;
 			unsigned int iParamIndex = 0;
 			//while (offset != std::string::npos)
-<<<<<<< HEAD
-			while (iParamIndex != 8) // for all headers
-			{
-				offset = strInput.find_first_of(',', preOffset + 1);
-				string strTx = strInput.substr(preOffset + 1, offset - (preOffset + 1));
-				send(ClientSocket, ParamNames[iParamIndex].c_str(), (int)ParamNames[iParamIndex].length(), 0); // send type
-				recv(ClientSocket, Rx, sizeof(Rx), 0);// get ack
-				send(ClientSocket, strTx.c_str(), (int)strTx.length(), 0); // send current value
-				recv(ClientSocket, Rx, sizeof(Rx), 0); // recv avg from server
-				cout << ParamNames[iParamIndex] << " Avg: " << Rx << endl; //write average
-				preOffset = offset;
-				iParamIndex++; // move to next variable type
-=======
+
 
 			// This loop gets the parameter names and values. These are sent to the server where we recieve an acknowledgement
 			while(iParamIndex != 8)
@@ -102,7 +84,7 @@ int main(int argc, char* argv[])
 				cout << ParamNames[iParamIndex] << " Avg: " << Rx << endl; // Print param name and average
 				preOffset = offset; // Update offset to next column
 				iParamIndex++; // Increment index of param to read from buffer
->>>>>>> 45f1b67665a0a783a64fcf98174e2843d65c2d9f
+
 			}
 		}
 		else
@@ -134,13 +116,9 @@ int main(int argc, char* argv[])
 /// </summary>
 /// <returns>uiSize (number of lines in the file)</returns>
 unsigned int GetSize()
-<<<<<<< HEAD
-{ 
 
-	
-=======
 {
->>>>>>> 45f1b67665a0a783a64fcf98174e2843d65c2d9f
+
 	string strInput;
 	unsigned int uiSize = 0;
 	ifstream ifs("DataFile.txt");

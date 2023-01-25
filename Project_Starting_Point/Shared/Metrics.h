@@ -23,8 +23,14 @@ namespace Metrics {
 		/// <summary>
 		/// starts a timer
 		/// </summary>
-		void start() {
-			startTime = high_resolution_clock::now();
+		bool start() {
+			try {
+				startTime = high_resolution_clock::now();
+				return true;
+			}
+			catch (exception e) {
+				return false;
+			}
 		}
 		/// <summary>
 		/// returns the time since the timer was started in milliseconds

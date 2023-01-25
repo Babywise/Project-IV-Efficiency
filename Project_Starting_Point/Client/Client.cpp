@@ -103,11 +103,6 @@ int main()
 	logger.log("Average time to get line from file : " + to_string(calculations.getAverage())+"ms","metrics");
 	logger.log("TotalTime reading files to get specific lines : " + to_string(calculations.getSum())+"ms","metrics");
 	logger.log("Total lines reading files ( not including get file length ) : " + to_string(lineCounter.getSum()), "metrics");
-
-	system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> %cd%/Logs/metrics.log");
-	system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> %cd%/Logs/metrics.log");
-	std::cout << system("cd");
-	Sleep(3000);
 #endif
 	return 1;
 }
@@ -120,9 +115,13 @@ int main()
 unsigned int GetSize()
 { 
 #ifdef METRICS
+	logger.emptyLine("metrics"); // write system information to lof before start of metrics logging
+	logger.emptyLine("metrics");
+	system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> %cd%/Logs/metrics.log");
+	system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> %cd%/Logs/metrics.log");
+	logger.emptyLine("metrics");
 	timer.start();
 #endif
-	// ANCHOR 
 	string strInput;
 	unsigned int uiSize = 0;
 	ifstream ifs("DataFile.txt");

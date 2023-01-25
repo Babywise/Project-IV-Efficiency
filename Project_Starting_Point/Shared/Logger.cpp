@@ -65,3 +65,10 @@ void Logger::log(std::string message, std::string logname)
 	outfile << message << "\t\t" << std::ctime(&end_time);
 	outfile.close();
 }
+void Logger::emptyLine(std::string logname) {
+	std::ofstream outfile;
+	outfile.open((std::string)LOGSPATH + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
+
+	outfile << "\n";
+	outfile.close();
+}

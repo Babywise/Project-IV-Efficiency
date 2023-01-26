@@ -154,7 +154,7 @@ int main()
 	//data parsing results
 	logger.log("Server - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()), DPSvrTimeMetrics);
 	logger.log("Server - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()), DPSvrTimeMetrics);
-	logger.log("Server - DataParsing - # of Parses = " + to_string(numDataParsesServer), DPSvrTimeMetrics);
+	logger.log("Server - DataParsing - # of Conversions = " + to_string(numDataParsesServer), DPSvrTimeMetrics);
 #endif
 
 	return 1;

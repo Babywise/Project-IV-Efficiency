@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
 	//data parsing results
 	logger.log("Client - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()), DPCltTimeMetrics);
 	logger.log("Client - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()), DPCltTimeMetrics);
-	logger.log("Client - DataParsing - Average = " + to_string(numDataParsesClient), DPCltTimeMetrics);
+	logger.log("Client - DataParsing - # of Conversions = " + to_string(numDataParsesClient), DPCltTimeMetrics);
 #endif
 
 	return 1;

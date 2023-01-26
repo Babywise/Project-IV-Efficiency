@@ -9,10 +9,11 @@
 /*
 * When in calculating metrics mode... Set above
 */
+const string DPSvrTimeMetrics = "ServerDataParsingMetrics";
 #ifdef METRICS
 Logger logger;
 Metrics::Timer timer;
-Metrics::Calculations dataParsingCalc;
+Metrics::Calculations dataParsingTimeCalc;
 #endif
 
 using namespace std;
@@ -34,7 +35,7 @@ float CalcAvg(unsigned int);
 int main()
 {
 #ifdef METRICS
-	logger.log("Server Started","ServerDataParsingMetrics");
+	logger.log("Server Started", DPSvrTimeMetrics);
 #endif
 
 	//setup
@@ -150,8 +151,8 @@ int main()
 
 #ifdef METRICS
 	//data parsing results
-	logger.log("Server - DataParsing - Sum = " + to_string(dataParsingCalc.getSum()), "ServerDataParsingMetrics");
-	logger.log("Server - DataParsing - Average = " + to_string(dataParsingCalc.getAverage()), "ServerDataParsingMetrics");
+	logger.log("Server - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()), DPSvrTimeMetrics);
+	logger.log("Server - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()), DPSvrTimeMetrics);
 #endif
 
 	return 1;
@@ -186,7 +187,7 @@ void UpdateData(unsigned int uiIndex, float value)
 		RxData[uiIndex].size++;
 	}
 #ifdef METRICS
-	dataParsingCalc.addPoint(timer.getTime());
+	dataParsingTimeCalc.addPoint(timer.getTime());
 #endif
 }
 

@@ -13,11 +13,12 @@
 * When in calculating metrics mode... Set above
 */
 #ifdef METRICS
+const string DPCltTimeMetrics = "ClientDataParsingMetrics";
 Metrics::Calculations calculations;
 Logger logger;
 Metrics::Timer timer;
 Metrics::Calculations lineCounter; // line counter used to determine total number of lines used in fileIO
-Metrics::Calculations dataParsingCalc;
+Metrics::Calculations dataParsingTimeCalc;
 #endif
 void logSystemInfo();
 #include <filesystem>
@@ -31,7 +32,7 @@ int main(int argc, char* argv[])
 {
 
 #ifdef METRICS
-	logger.log("Client Started", "ClientDataParsingMetrics");
+	logger.log("Client Started", DPCltTimeMetrics);
 #endif
 
 	//setup
@@ -89,7 +90,7 @@ int main(int argc, char* argv[])
 				string strTx = strInput.substr(preOffset+1, offset - (preOffset+1)); 
 				//get timer for data parsing
 #ifdef METRICS
-				dataParsingCalc.addPoint(timer.getTime());
+				dataParsingTimeCalc.addPoint(timer.getTime());
 #endif
 				send(ClientSocket, ParamNames[iParamIndex].c_str(), (int)ParamNames[iParamIndex].length(), 0); // Send parameter name to server
 				recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve Ack
@@ -120,7 +121,7 @@ int main(int argc, char* argv[])
 			}
 #ifdef METRICS
 			//get timer for data parsing
-			dataParsingCalc.addPoint(timer.getTime());
+			dataParsingTimeCalc.addPoint(timer.getTime());
 #endif
 		}
 		ifs.close(); // close file
@@ -131,8 +132,8 @@ int main(int argc, char* argv[])
 
 #ifdef METRICS
 	//data parsing results
-	logger.log("Client - DataParsing - Sum = " + to_string(dataParsingCalc.getSum()), "ClientDataParsingMetrics");
-	logger.log("Client - DataParsing - Average = " + to_string(dataParsingCalc.getAverage()), "ClientDataParsingMetrics");
+	logger.log("Client - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()), DPCltTimeMetrics);
+	logger.log("Client - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()), DPCltTimeMetrics);
 #endif
 
 	return 1;

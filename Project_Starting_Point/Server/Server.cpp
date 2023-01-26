@@ -1,6 +1,19 @@
 #include <windows.networking.sockets.h>
-#include <iostream>
 #pragma comment(lib, "Ws2_32.lib")
+#include <iostream>
+
+#include "../Shared/Metrics.h"
+#include "../Shared/Logger.h"
+
+#define METRICS
+/*
+* When in calculating metrics mode... Set above
+*/
+#ifdef METRICS
+Metrics::Timer timer;
+Logger logger;
+#endif
+
 using namespace std;
 
 struct StorageTypes 
@@ -12,6 +25,8 @@ StorageTypes RxData[7];
 
 void UpdateData(unsigned int, float);
 float CalcAvg(unsigned int);
+static int numCalc = 0;		//number of calculations
+static float calcTime = 0;
 
 /// <summary>
 /// main loop that only accepts a single client
@@ -19,8 +34,6 @@ float CalcAvg(unsigned int);
 /// <returns></returns>
 int main()
 {
-	
-
 	//setup
 	WSADATA wsaData;
 	SOCKET ServerSocket, ConnectionSocket;
@@ -65,7 +78,13 @@ int main()
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0); // get current value for variable
 			fValue = (float)atof(RxBuffer);
 			UpdateData(0, fValue);// add data to list
+#ifdef METRICS
+			timer.start();
+#endif
 			fValue = CalcAvg(0);// calculate the average | fValue sends at end of elif
+#ifdef METRICS
+			calcTime += timer.getTime();
+#endif
 		}
 		else if (strcmp(RxBuffer, "ACCELERATION BODY Y") == 0)
 		{
@@ -73,7 +92,11 @@ int main()
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
 			fValue = (float)atof(RxBuffer);
 			UpdateData(1, fValue);
+#ifdef METRICS
+			timer.start();
+#endif
 			fValue = CalcAvg(1);
+			calcTime += timer.getTime();
 		}
 		else if (strcmp(RxBuffer, "ACCELERATION BODY Z") == 0)
 		{
@@ -81,7 +104,11 @@ int main()
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
 			fValue = (float)atof(RxBuffer);
 			UpdateData(2, fValue);
+#ifdef METRICS
+			timer.start();
+#endif
 			fValue = CalcAvg(2);
+			calcTime += timer.getTime();
 		}
 		else if (strcmp(RxBuffer, "TOTAL WEIGHT") == 0)
 		{
@@ -89,7 +116,11 @@ int main()
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
 			fValue = (float)atof(RxBuffer);
 			UpdateData(3, fValue);
+#ifdef METRICS
+			timer.start();
+#endif
 			fValue = CalcAvg(3);
+			calcTime += timer.getTime();
 		}
 		else if (strcmp(RxBuffer, "PLANE ALTITUDE") == 0)
 		{
@@ -97,7 +128,11 @@ int main()
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
 			fValue = (float)atof(RxBuffer);
 			UpdateData(4, fValue);
+#ifdef METRICS
+			timer.start();
+#endif
 			fValue = CalcAvg(4);
+			calcTime += timer.getTime();
 		}
 		else if (strcmp(RxBuffer, "ATTITUDE INDICATOR PICTH DEGREES") == 0)
 		{
@@ -105,7 +140,11 @@ int main()
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
 			fValue = (float)atof(RxBuffer);
 			UpdateData(5, fValue);
+#ifdef METRICS
+			timer.start();
+#endif
 			fValue = CalcAvg(5);
+			calcTime += timer.getTime();
 		}
 		else if (strcmp(RxBuffer, "ATTITUDE INDICATOR BANK DEGREES") == 0)
 		{
@@ -113,7 +152,12 @@ int main()
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
 			fValue = (float)atof(RxBuffer);
 			UpdateData(6, fValue);
+#ifdef METRICS
+			timer.start();
+#endif
 			fValue = CalcAvg(6);
+			calcTime += timer.getTime();
+
 		}
 		else // if param not found, reset buffer (sends 0 back to client)
 		{
@@ -127,7 +171,7 @@ int main()
 		sprintf_s(Tx, "%f", fValue);
 		send(ConnectionSocket, Tx, sizeof(Tx), 0);//send average back 
 	}
-
+	logCalcInfo();
 	closesocket(ConnectionSocket);	//closes incoming socket
 	closesocket(ServerSocket);	    //closes server socket	
 	WSACleanup();					//frees Winsock resources
@@ -169,9 +213,25 @@ void UpdateData(unsigned int uiIndex, float value)
 float CalcAvg(unsigned int uiIndex)
 {
 	float Avg = 0;
-	for (unsigned int x = 0; x < RxData[uiIndex].size; x++)
+	for (unsigned int x = 0; x < RxData[uiIndex].size; x++) {
 		Avg += RxData[uiIndex].pData[x];
+		numCalc += 1;
+	}
 
 	Avg = Avg / RxData[uiIndex].size;
+	numCalc += 1;
 	return Avg;
+}
+
+void logCalcInfo()
+{
+#ifdef METRICS
+	logger.emptyLine("metrics");
+	logger.log("------------------------------ Start of metrics run -------------------------", "metrics");
+	logger.log("Total time used for calculation: " + to_string(calcTime) + "ms", "metrics");
+	logger.log("Total number of calculations done: " + to_string(numCalc) + "ms", "metrics");
+	logger.emptyLine("metrics");
+	logger.log("------------------------------ End of metrics run -------------------------", "metrics");
+
+#endif
 }

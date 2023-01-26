@@ -13,13 +13,14 @@
 * When in calculating metrics mode... Set above
 */
 #ifdef METRICS
-const string DPCltTimeMetrics = "ClientDataParsingMetrics";
+const string DPCltMetrics = "ClientDataParsingMetrics";
 int numDataParsesClient = 0;
 Metrics::Calculations calculations;
 Logger logger;
 Metrics::Timer timer;
 Metrics::Calculations lineCounter; // line counter used to determine total number of lines used in fileIO
 Metrics::Calculations dataParsingTimeCalc;
+Metrics::Calculations sizeOfDataParsedDataClientCalc;
 #endif
 void logSystemInfo();
 #include <filesystem>
@@ -31,10 +32,6 @@ unsigned int GetSize();
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
-
-#ifdef METRICS
-	logger.log("Client Started", DPCltTimeMetrics);
-#endif
 
 	//setup
 	WSADATA wsaData;
@@ -92,6 +89,7 @@ int main(int argc, char* argv[])
 				string strTx = strInput.substr(preOffset+1, offset - (preOffset+1)); 
 				//get timer for data parsing
 #ifdef METRICS
+				sizeOfDataParsedDataClientCalc.addPoint(strTx.length());
 				dataParsingTimeCalc.addPoint(timer.getTime());
 				numDataParsesClient++;
 #endif
@@ -133,13 +131,6 @@ int main(int argc, char* argv[])
 	logSystemInfo();
 	closesocket(ClientSocket); // cleanup
 	WSACleanup();
-
-#ifdef METRICS
-	//data parsing results
-	logger.log("Client - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()), DPCltTimeMetrics);
-	logger.log("Client - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()), DPCltTimeMetrics);
-	logger.log("Client - DataParsing - # of Conversions = " + to_string(numDataParsesClient), DPCltTimeMetrics);
-#endif
 
 	return 1;
 }
@@ -187,5 +178,15 @@ void logSystemInfo() {
 	logger.log("Total lines reading files ( not including get file length ) : " + to_string(lineCounter.getSum()), "metrics");
 	logger.emptyLine("metrics");
 	logger.log("------------------------------ End of metrics run -------------------------", "metrics");
+#endif
+#ifdef METRICS
+	//data parsing results
+	logger.log("Client Started", DPCltMetrics);
+	logger.log("Client - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()) + " ms", DPCltMetrics);
+	logger.log("Client - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()) + " ms", DPCltMetrics);
+	logger.log("Client - DataParsing - # of Conversions = " + to_string(numDataParsesClient), DPCltMetrics);
+	logger.log("Client - DataParsing - Input Size of Parsed Data = ----- Bytes", DPCltMetrics);
+	logger.log("Client - DataParsing - Total Size of Parsed Data = " + to_string((int)sizeOfDataParsedDataClientCalc.getSum()) + " Bytes", DPCltMetrics);
+	logger.emptyLine(DPCltMetrics);
 #endif
 }

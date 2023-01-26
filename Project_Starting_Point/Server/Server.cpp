@@ -10,11 +10,12 @@
 * When in calculating metrics mode... Set above
 */
 #ifdef METRICS
-const string DPSvrTimeMetrics = "ServerDataParsingMetrics";
+const string DPSvrMetrics = "ServerDataParsingMetrics";
 int numDataParsesServer = 0;
 Logger logger;
 Metrics::Timer timer;
 Metrics::Calculations dataParsingTimeCalc;
+Metrics::Calculations sizeOfDataParsedDataServerCalc;
 #endif
 
 using namespace std;
@@ -28,6 +29,7 @@ StorageTypes RxData[7];
 
 void UpdateData(unsigned int, float);
 float CalcAvg(unsigned int);
+void logMetrics();
 
 /// <summary>
 /// main loop that only accepts a single client
@@ -36,7 +38,7 @@ float CalcAvg(unsigned int);
 int main()
 {
 #ifdef METRICS
-	logger.log("Server Started", DPSvrTimeMetrics);
+	logger.log("Server Started", DPSvrMetrics);
 #endif
 
 	//setup
@@ -150,12 +152,7 @@ int main()
 	closesocket(ServerSocket);	    //closes server socket	
 	WSACleanup();					//frees Winsock resources
 
-#ifdef METRICS
-	//data parsing results
-	logger.log("Server - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()), DPSvrTimeMetrics);
-	logger.log("Server - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()), DPSvrTimeMetrics);
-	logger.log("Server - DataParsing - # of Conversions = " + to_string(numDataParsesServer), DPSvrTimeMetrics);
-#endif
+	logMetrics();
 
 	return 1;
 }
@@ -182,7 +179,9 @@ void UpdateData(unsigned int uiIndex, float value)
 		float* pNewData = new float[RxData[uiIndex].size + 1];
 		for (unsigned int x = 0; x < RxData[uiIndex].size; x++)
 			pNewData[x] = RxData[uiIndex].pData[x]; // set next pdata to data input
-
+#ifdef METRICS
+		sizeOfDataParsedDataServerCalc.addPoint(RxData[uiIndex].size);
+#endif
 		pNewData[RxData[uiIndex].size] = value;
 		delete[] RxData[uiIndex].pData; // delete old memory
 		RxData[uiIndex].pData = pNewData; // replace with new data added
@@ -207,4 +206,15 @@ float CalcAvg(unsigned int uiIndex)
 
 	Avg = Avg / RxData[uiIndex].size;
 	return Avg;
+}
+
+void logMetrics() {
+#ifdef METRICS
+	//data parsing results
+	logger.log("Server - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()) + " ms", DPSvrMetrics);
+	logger.log("Server - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()) + " ms", DPSvrMetrics);
+	logger.log("Server - DataParsing - # of Conversions = " + to_string(numDataParsesServer), DPSvrMetrics);
+	logger.log("Server - DataParsing - Total Size of Parsed Data = " + to_string((int)sizeOfDataParsedDataServerCalc.getSum()) + " Bytes", DPSvrMetrics);
+	logger.emptyLine(DPSvrMetrics);
+#endif
 }

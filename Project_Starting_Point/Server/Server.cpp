@@ -13,6 +13,7 @@
 Metrics::Timer timer;
 Logger logger;
 #endif
+void logCalcInfo();
 
 using namespace std;
 

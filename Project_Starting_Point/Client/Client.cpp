@@ -36,6 +36,13 @@ int main(int argc, char* argv[])
 	vector<string> ParamNames;
 	char Rx[128]; // Get from Config File later (Magic Number)
 
+#ifdef METRICS
+	int numTransmissions = 0;
+	int numHandshakes = 0;
+	vector<long long> handshakeTimes;
+#endif
+
+
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	SvrAddr.sin_family = AF_INET;
@@ -77,11 +84,33 @@ int main(int argc, char* argv[])
 				offset = strInput.find_first_of(',', preOffset+1); // Find comma, get size of everything after it
 				// Creates a substring for the param name. Uses the offset values to know where to start and end
 				string strTx = strInput.substr(preOffset+1, offset - (preOffset+1)); 
+				
+				std::chrono::time_point<std::chrono::system_clock> start, end;
+
+				start = std::chrono::system_clock::now();
+				
 				send(ClientSocket, ParamNames[iParamIndex].c_str(), (int)ParamNames[iParamIndex].length(), 0); // Send parameter name to server
+				numTransmissions++;
+
 				recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve Ack
+				numTransmissions++;
+
 				send(ClientSocket, strTx.c_str(), (int)strTx.length(), 0); // Send value to server
+				numTransmissions++;
+
 				recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve Average
-				cout << ParamNames[iParamIndex] << " Avg: " << Rx << endl; // Print param name and average
+				numTransmissions++;
+
+				numHandshakes++;
+
+				end = std::chrono::system_clock::now();
+				std::chrono::duration<double> elapsedTimeSeconds = end - start;
+				auto elapsedTimeMicSec = std::chrono::duration_cast<std::chrono::microseconds>(elapsedTimeSeconds).count();
+				handshakeTimes.push_back(elapsedTimeMicSec);
+
+				//cout << "HandshakeTime: " << elapsedTimeMicSec << endl;
+
+				//cout << ParamNames[iParamIndex] << " Avg: " << Rx << endl; // Print param name and average
 				preOffset = offset; // Update offset to next column
 				iParamIndex++; // Increment index of param to read from buffer
 
@@ -106,6 +135,19 @@ int main(int argc, char* argv[])
 	logSystemInfo();
 	closesocket(ClientSocket); // cleanup
 	WSACleanup();
+
+	int avgHandshake = 0;
+	for (int i = 0; i < handshakeTimes.size(); i++) {
+		avgHandshake += handshakeTimes.at(i);
+	}
+
+	avgHandshake = avgHandshake / handshakeTimes.size();
+	string strTransmissions = to_string(numTransmissions);
+	string strAvgHandshake = to_string(avgHandshake);
+
+	logger.log("Number of Transmissions: " + strTransmissions
+		+ "\nAverage Handshake Time: " + strAvgHandshake + " Microseconds\n",
+		"NetworkMetrics");
 
 	return 1;
 }

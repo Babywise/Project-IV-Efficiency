@@ -3,6 +3,22 @@
 #pragma comment(lib, "Ws2_32.lib")
 using namespace std;
 
+#define METRICS
+/*
+* When in calculating metrics mode... Set above
+*/
+#ifdef METRICS
+#include "../Shared/Metrics.h"
+#include "../Shared/Logger.h"
+Metrics::Calculations calculations;
+Logger logger;
+Metrics::Timer timer;
+
+int numConnections = 0;
+
+#endif
+
+
 struct StorageTypes 
 { 
 	unsigned int size = 0;
@@ -47,6 +63,12 @@ int main()
 
 	if (ConnectionSocket == SOCKET_ERROR)
 		return -1;
+
+	numConnections++;
+	std::chrono::time_point<std::chrono::system_clock> start, end;
+
+	start = std::chrono::system_clock::now();
+
 
 	cout << "Connection Established" << endl;
 
@@ -130,6 +152,13 @@ int main()
 
 	closesocket(ConnectionSocket);	//closes incoming socket
 	closesocket(ServerSocket);	    //closes server socket	
+
+	end = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsedTimeSeconds = end - start;
+	auto elapsedTimeMilSec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedTimeSeconds).count();
+	logger.log("Server Uptime: " + to_string(elapsedTimeMilSec) + "ms\n"
+		+ "Number of Connections: " + to_string(numConnections) + "\n", "NetworkMetrics");
+
 	WSACleanup();					//frees Winsock resources
 
 	return 1;

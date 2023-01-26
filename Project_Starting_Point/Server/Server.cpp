@@ -1,6 +1,20 @@
 #include <windows.networking.sockets.h>
 #include <iostream>
 #pragma comment(lib, "Ws2_32.lib")
+
+#include "../Shared/Metrics.h"
+#include "../Shared/Logger.h"
+
+#define METRICS
+/*
+* When in calculating metrics mode... Set above
+*/
+#ifdef METRICS
+Logger logger;
+Metrics::Timer timer;
+Metrics::Calculations dataParsingCalc;
+#endif
+
 using namespace std;
 
 struct StorageTypes 
@@ -19,7 +33,9 @@ float CalcAvg(unsigned int);
 /// <returns></returns>
 int main()
 {
-	
+#ifdef METRICS
+	logger.log("Server Started","ServerDataParsingMetrics");
+#endif
 
 	//setup
 	WSADATA wsaData;
@@ -132,6 +148,12 @@ int main()
 	closesocket(ServerSocket);	    //closes server socket	
 	WSACleanup();					//frees Winsock resources
 
+#ifdef METRICS
+	//data parsing results
+	logger.log("Server - DataParsing - Sum = " + to_string(dataParsingCalc.getSum()), "ServerDataParsingMetrics");
+	logger.log("Server - DataParsing - Average = " + to_string(dataParsingCalc.getAverage()), "ServerDataParsingMetrics");
+#endif
+
 	return 1;
 }
 
@@ -142,6 +164,10 @@ int main()
 /// <param name="value"></param>
 void UpdateData(unsigned int uiIndex, float value)
 {
+#ifdef METRICS
+	//start timer for data parsing
+	timer.start();
+#endif
 	if (RxData[uiIndex].size == 0) // if first value
 	{
 		RxData[uiIndex].pData = new float[1]; // init pdata
@@ -159,6 +185,9 @@ void UpdateData(unsigned int uiIndex, float value)
 		RxData[uiIndex].pData = pNewData; // replace with new data added
 		RxData[uiIndex].size++;
 	}
+#ifdef METRICS
+	dataParsingCalc.addPoint(timer.getTime());
+#endif
 }
 
 /// <summary>

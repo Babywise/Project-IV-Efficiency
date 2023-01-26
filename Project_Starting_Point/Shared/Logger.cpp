@@ -43,8 +43,10 @@ void Logger::log(std::string message, int severity, std::string logname)
 
 	std::ofstream outfile;
 	outfile.open((std::string)LOGSPATH + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
-
-	outfile << message << "\t\t Severity :" << severity << "\t\t" << std::ctime(&end_time);
+	char* ctimeBuf = std::ctime(&end_time);
+	if ( ctimeBuf[strlen(ctimeBuf) - 1] == '\n' ) ctimeBuf[strlen(ctimeBuf) - 1] = '\0';
+	// replace endl with \0
+	outfile << ctimeBuf << "\t Severity :" << severity << "\t" << message << std::endl;
 	outfile.close();
 }
 /// <summary>
@@ -61,14 +63,16 @@ void Logger::log(std::string message, std::string logname)
 
 	std::ofstream outfile;
 	outfile.open((std::string)LOGSPATH + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
-
-	outfile << message << "\t\t" << std::ctime(&end_time);
+	char* ctimeBuf = std::ctime(&end_time);
+	// replace endl with \0
+	if ( ctimeBuf[strlen(ctimeBuf) - 1] == '\n' ) ctimeBuf[strlen(ctimeBuf) - 1] = '\0';
+	outfile << ctimeBuf << "\t" << message << std::endl;
 	outfile.close();
 }
 void Logger::emptyLine(std::string logname) {
 	std::ofstream outfile;
 	outfile.open((std::string)LOGSPATH + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
 
-	outfile << "\n";
+	outfile << std::endl;
 	outfile.close();
 }

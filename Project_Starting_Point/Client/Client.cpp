@@ -14,6 +14,7 @@
 */
 #ifdef METRICS
 const string DPCltTimeMetrics = "ClientDataParsingMetrics";
+int numDataParsesClient = 0;
 Metrics::Calculations calculations;
 Logger logger;
 Metrics::Timer timer;
@@ -65,6 +66,7 @@ int main(int argc, char* argv[])
 		}
 		getline(ifs, strInput);
 #ifdef METRICS
+		//----should i add a data parse counter here?
 		calculations.addPoint(timer.getTime());
 		lineCounter.addPoint(3); // add 1 for the get line above, add one for close file at end of loop add one for file init
 		lineCounter.addPoint(2*l); // add 2 lines for every loop of the for loop above
@@ -91,6 +93,7 @@ int main(int argc, char* argv[])
 				//get timer for data parsing
 #ifdef METRICS
 				dataParsingTimeCalc.addPoint(timer.getTime());
+				numDataParsesClient++;
 #endif
 				send(ClientSocket, ParamNames[iParamIndex].c_str(), (int)ParamNames[iParamIndex].length(), 0); // Send parameter name to server
 				recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve Ack
@@ -122,6 +125,7 @@ int main(int argc, char* argv[])
 #ifdef METRICS
 			//get timer for data parsing
 			dataParsingTimeCalc.addPoint(timer.getTime());
+			numDataParsesClient++;
 #endif
 		}
 		ifs.close(); // close file
@@ -134,6 +138,7 @@ int main(int argc, char* argv[])
 	//data parsing results
 	logger.log("Client - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()), DPCltTimeMetrics);
 	logger.log("Client - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()), DPCltTimeMetrics);
+	logger.log("Client - DataParsing - Average = " + to_string(numDataParsesClient), DPCltTimeMetrics);
 #endif
 
 	return 1;

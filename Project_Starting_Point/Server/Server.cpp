@@ -97,7 +97,9 @@ int main()
 			timer.start();
 #endif
 			fValue = CalcAvg(1);
+#ifdef METRICS
 			calcTime += timer.getTime();
+#endif		
 		}
 		else if (strcmp(RxBuffer, "ACCELERATION BODY Z") == 0)
 		{
@@ -109,7 +111,9 @@ int main()
 			timer.start();
 #endif
 			fValue = CalcAvg(2);
+#ifdef METRICS
 			calcTime += timer.getTime();
+#endif		
 		}
 		else if (strcmp(RxBuffer, "TOTAL WEIGHT") == 0)
 		{
@@ -121,7 +125,9 @@ int main()
 			timer.start();
 #endif
 			fValue = CalcAvg(3);
+#ifdef METRICS
 			calcTime += timer.getTime();
+#endif		
 		}
 		else if (strcmp(RxBuffer, "PLANE ALTITUDE") == 0)
 		{
@@ -133,7 +139,9 @@ int main()
 			timer.start();
 #endif
 			fValue = CalcAvg(4);
+#ifdef METRICS
 			calcTime += timer.getTime();
+#endif		
 		}
 		else if (strcmp(RxBuffer, "ATTITUDE INDICATOR PICTH DEGREES") == 0)
 		{
@@ -145,7 +153,9 @@ int main()
 			timer.start();
 #endif
 			fValue = CalcAvg(5);
+#ifdef METRICS
 			calcTime += timer.getTime();
+#endif		
 		}
 		else if (strcmp(RxBuffer, "ATTITUDE INDICATOR BANK DEGREES") == 0)
 		{
@@ -157,8 +167,9 @@ int main()
 			timer.start();
 #endif
 			fValue = CalcAvg(6);
+#ifdef METRICS
 			calcTime += timer.getTime();
-
+#endif
 		}
 		else // if param not found, reset buffer (sends 0 back to client)
 		{

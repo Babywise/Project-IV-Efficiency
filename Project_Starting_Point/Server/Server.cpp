@@ -2,7 +2,6 @@
 #include <iostream>
 #pragma comment(lib, "Ws2_32.lib")
 
-#include "../Shared/Metrics.h"
 #include "../Shared/Logger.h"
 
 #define METRICS
@@ -10,7 +9,8 @@
 * When in calculating metrics mode... Set above
 */
 #ifdef METRICS
-const string DPSvrMetrics = "ServerDataParsingMetrics";
+#include "../Shared/Metrics.h"
+const string serverMetrics = "Metrics";
 int numDataParsesServer = 0;
 Logger logger;
 Metrics::Timer timer;
@@ -37,9 +37,6 @@ void logMetrics();
 /// <returns></returns>
 int main()
 {
-#ifdef METRICS
-	logger.log("Server Started", DPSvrMetrics);
-#endif
 
 	//setup
 	WSADATA wsaData;
@@ -211,10 +208,11 @@ float CalcAvg(unsigned int uiIndex)
 void logMetrics() {
 #ifdef METRICS
 	//data parsing results
-	logger.log("Server - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()) + " ms", DPSvrMetrics);
-	logger.log("Server - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()) + " ms", DPSvrMetrics);
-	logger.log("Server - DataParsing - # of Conversions = " + to_string(numDataParsesServer), DPSvrMetrics);
-	logger.log("Server - DataParsing - Total Size of Parsed Data = " + to_string((int)sizeOfDataParsedDataServerCalc.getSum()) + " Bytes", DPSvrMetrics);
-	logger.emptyLine(DPSvrMetrics);
+	logger.log("--- Server Started ---", serverMetrics);
+	logger.log("Server - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()) + " ms", serverMetrics);
+	logger.log("Server - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()) + " ms", serverMetrics);
+	logger.log("Server - DataParsing - # of Conversions = " + to_string(numDataParsesServer), serverMetrics);
+	logger.log("Server - DataParsing - Total Size of Parsed Data = " + to_string((int)sizeOfDataParsedDataServerCalc.getSum()) + " Bytes", serverMetrics);
+	logger.emptyLine(serverMetrics);
 #endif
 }

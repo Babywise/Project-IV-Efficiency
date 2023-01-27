@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "../Shared/Metrics.h"
 #include "../Shared/Logger.h"
 
 #define METRICS
@@ -13,7 +12,9 @@
 * When in calculating metrics mode... Set above
 */
 #ifdef METRICS
-const string DPCltMetrics = "ClientDataParsingMetrics";
+#include "../Shared/Metrics.h"
+#include <filesystem>
+const string clientMetrics = "Metrics";
 int numDataParsesClient = 0;
 Metrics::Calculations calculations;
 Logger logger;
@@ -23,7 +24,6 @@ Metrics::Calculations dataParsingTimeCalc;
 Metrics::Calculations sizeOfDataParsedDataClientCalc;
 #endif
 void logSystemInfo();
-#include <filesystem>
 using namespace std;
 unsigned int GetSize();
 /// <summary>
@@ -160,31 +160,31 @@ unsigned int GetSize()
 
 void logSystemInfo() {
 #ifdef METRICS
-	logger.emptyLine("metrics"); // write system information to lof before start of metrics logging
-	logger.log("------------------------------ Start of metrics run -------------------------", "metrics");
-	logger.emptyLine("metrics");
-	system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> \"%cd%/Logs/metrics.log\"");
-	logger.emptyLine("metrics");
-	system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> \"%cd%/Logs/metrics.log\"");
-	logger.emptyLine("metrics");
-	system("wmic diskdrive get manufacturer, size,name, model, description >> \"%cd%/Logs/metrics.log\"");
-	logger.emptyLine("metrics");
+	logger.emptyLine(clientMetrics); // write system information to lof before start of metrics logging
+	logger.log("------------------------------ Start of metrics run -------------------------", clientMetrics);
+	logger.emptyLine(clientMetrics);
+	system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> \"%cd%/Logs/Metrics.log\"");
+	logger.emptyLine(clientMetrics);
+	system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> \"%cd%/Logs/Metrics.log\"");
+	logger.emptyLine(clientMetrics);
+	system("wmic diskdrive get manufacturer, size,name, model, description >> \"%cd%/Logs/Metrics.log\"");
+	logger.emptyLine(clientMetrics);
 	timer.start();
 	GetSize();
-	logger.log("Get File Size :" + to_string((timer.getTime())) + "ms", "metrics");
-	logger.log("Average time to get line from file : " + to_string(calculations.getAverage()) + "ms", "metrics");
-	logger.log("TotalTime reading files to get specific lines : " + to_string(calculations.getSum()) + "ms", "metrics");
-	logger.log("Total lines reading files ( not including get file length ) : " + to_string(lineCounter.getSum()), "metrics");
-	logger.emptyLine("metrics");
-	logger.log("------------------------------ End of metrics run -------------------------", "metrics");
+	logger.log("Get File Size :" + to_string((timer.getTime())) + "ms", clientMetrics);
+	logger.log("Average time to get line from file : " + to_string(calculations.getAverage()) + "ms", clientMetrics);
+	logger.log("TotalTime reading files to get specific lines : " + to_string(calculations.getSum()) + "ms", clientMetrics);
+	logger.log("Total lines reading files ( not including get file length ) : " + to_string(lineCounter.getSum()), clientMetrics);
+	logger.emptyLine(clientMetrics);
+	logger.log("------------------------------ End of metrics run -------------------------", clientMetrics);
 
 	//data parsing results
-	logger.log("Client Started", DPCltMetrics);
-	logger.log("Client - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()) + " ms", DPCltMetrics);
-	logger.log("Client - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()) + " ms", DPCltMetrics);
-	logger.log("Client - DataParsing - # of Conversions = " + to_string(numDataParsesClient), DPCltMetrics);
-	logger.log("Client - DataParsing - Input Size of Parsed Data = " + to_string(std::filesystem::file_size("DataFile.txt")) + " Bytes", DPCltMetrics);
-	logger.log("Client - DataParsing - Total Size of Parsed Data = " + to_string((int)sizeOfDataParsedDataClientCalc.getSum()) + " Bytes", DPCltMetrics);
-	logger.emptyLine(DPCltMetrics);
+	logger.log("--- Client Started ---", clientMetrics);
+	logger.log("Client - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()) + " ms", clientMetrics);
+	logger.log("Client - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()) + " ms", clientMetrics);
+	logger.log("Client - DataParsing - # of Conversions = " + to_string(numDataParsesClient), clientMetrics);
+	logger.log("Client - DataParsing - Input Size of Parsed Data = " + to_string(std::filesystem::file_size("DataFile.txt")) + " Bytes", clientMetrics);
+	logger.log("Client - DataParsing - Total Size of Parsed Data = " + to_string((int)sizeOfDataParsedDataClientCalc.getSum()) + " Bytes", clientMetrics);
+	logger.emptyLine(clientMetrics);
 #endif
 }

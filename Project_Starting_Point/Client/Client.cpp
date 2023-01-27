@@ -5,10 +5,10 @@
 #include <string>
 #include <vector>
 
+
 #include "../Shared/Metrics.h"
 #include "../Shared/Logger.h"
 
-#define METRICS
 /*
 * When in calculating metrics mode... Set above
 */
@@ -18,9 +18,10 @@ Logger logger;
 Metrics::Timer timer;
 Metrics::Calculations lineCounter; // line counter used to determine total number of lines used in fileIO
 #endif
-void logSystemInfo();
-#include <filesystem>
+
+
 using namespace std;
+
 unsigned int GetSize();
 /// <summary>
 /// main loop 
@@ -28,6 +29,7 @@ unsigned int GetSize();
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
+
 	//setup
 	WSADATA wsaData;
 	SOCKET ClientSocket;
@@ -103,10 +105,13 @@ int main(int argc, char* argv[])
 		}
 		ifs.close(); // close file
 	}
-	logSystemInfo();
+#ifdef METRICS
+	timer.start();
+	GetSize();
+	Metrics::logIOMetrics(calculations, lineCounter, timer.getTime());
+#endif
 	closesocket(ClientSocket); // cleanup
 	WSACleanup();
-
 	return 1;
 }
 
@@ -134,24 +139,3 @@ unsigned int GetSize()
 	return uiSize;
 }
 
-void logSystemInfo() {
-#ifdef METRICS
-	logger.emptyLine("metrics"); // write system information to lof before start of metrics logging
-	logger.log("------------------------------ Start of metrics run -------------------------", "metrics");
-	logger.emptyLine("metrics");
-	system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> %cd%/Logs/metrics.log");
-	logger.emptyLine("metrics");
-	system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> %cd%/Logs/metrics.log");
-	logger.emptyLine("metrics");
-	system("wmic diskdrive get manufacturer, size,name, model, description >> %cd%/Logs/metrics.log");
-	logger.emptyLine("metrics");
-	timer.start();
-	GetSize();
-	logger.log("Get File Size :" + to_string((timer.getTime())) + "ms", "metrics");
-	logger.log("Average time to get line from file : " + to_string(calculations.getAverage()) + "ms", "metrics");
-	logger.log("TotalTime reading files to get specific lines : " + to_string(calculations.getSum()) + "ms", "metrics");
-	logger.log("Total lines reading files ( not including get file length ) : " + to_string(lineCounter.getSum()), "metrics");
-	logger.emptyLine("metrics");
-	logger.log("------------------------------ End of metrics run -------------------------", "metrics");
-#endif
-}

@@ -5,7 +5,7 @@
 #include "../Shared/Metrics.h"
 #include "../Shared/Logger.h"
 
-#define METRICS
+
 /*
 * When in calculating metrics mode... Set above
 */
@@ -228,11 +228,12 @@ void logCalcInfo()
 {
 #ifdef METRICS
 	logger.emptyLine("metrics");
-	logger.log("------------------------------ Start of metrics run -------------------------", "metrics");
+	logger.log("------------------------------ Start of Calculation Metrics run -------------------------", "metrics");
 	logger.log("Total time used for calculation: " + to_string(calcTime) + "ms", "metrics");
 	logger.log("Total number of calculations done: " + to_string(numCalc) + "ms", "metrics");
 	logger.emptyLine("metrics");
-	logger.log("------------------------------ End of metrics run -------------------------", "metrics");
+	logger.log("------------------------------ End of Calculation Metrics run -------------------------", "metrics");
+	logger.emptyLine("metrics");
 
 #endif
 }

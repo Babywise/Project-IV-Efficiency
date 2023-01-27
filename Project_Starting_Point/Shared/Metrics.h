@@ -107,14 +107,14 @@ namespace Metrics {
 
 		// log and archive system information
 	
-		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> \"%cd%/../Logs/Metrics.log\"");
-		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> \"%cd%/../Archive/Metrics.archive\"");
+		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType | more >> \"%cd%/../Logs/Metrics.log\"");
+		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType | more >> \"%cd%/../Archive/Metrics.archive\"");
 		logger.emptyLine(metricsLogFile);
-		system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> \"%cd%/../Logs/Metrics.log\"");
-		system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> \"%cd%/../Archive/Metrics.archive\"");
+		system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name | more >> \"%cd%/../Logs/Metrics.log\"");
+		system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name | more >> \"%cd%/../Archive/Metrics.archive\"");
 		logger.emptyLine(metricsLogFile);
-		system("wmic diskdrive get manufacturer, size,name, model, description >> \"%cd%/../Logs/Metrics.log\"");
-		system("wmic diskdrive get manufacturer, size,name, model, description >> \"%cd%/../Archive/Metrics.archive\"");
+		system("wmic diskdrive get manufacturer, size,name, model, description | more >> \"%cd%/../Logs/Metrics.log\"");
+		system("wmic diskdrive get manufacturer, size,name, model, description | more >> \"%cd%/../Archive/Metrics.archive\"");
 		logger.emptyLine(metricsLogFile);
 		// log information from counters and timers
 		logger.log("Client - IO - Get File Size :" + to_string(timeToGetSize) + "ms", metricsLogFile);

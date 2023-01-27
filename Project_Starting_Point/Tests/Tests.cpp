@@ -2,13 +2,13 @@
 #include "CppUnitTest.h"
 #include "Shared/Metrics.h"
 #ifdef _WIN32
-#include <Windows.h>
 #endif
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace Tests
 {
+
 	TEST_CLASS(Metrics_Tests)
 	{
 	public:

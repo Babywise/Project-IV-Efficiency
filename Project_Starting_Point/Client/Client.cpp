@@ -29,7 +29,6 @@ unsigned int GetSize();
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
-
 	//setup
 	WSADATA wsaData;
 	SOCKET ClientSocket;

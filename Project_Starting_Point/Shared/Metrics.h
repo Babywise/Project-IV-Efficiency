@@ -5,7 +5,7 @@
 *	- Calculation : used to get averages or other caluclations based on passed in data values
 */
 #pragma once
-
+#include <Windows.h>
 #include <chrono>
 #include <vector>
 #include "Logger.h"
@@ -104,6 +104,7 @@ namespace Metrics {
 		logger.emptyLine("metrics");
 
 		// log and archive system information
+	
 		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> \"%cd%/../Logs/metrics.log\"");
 		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> \"%cd%/../Archive/metrics.archive\"");
 		logger.emptyLine("metrics");
@@ -113,12 +114,12 @@ namespace Metrics {
 		system("wmic diskdrive get manufacturer, size,name, model, description >> \"%cd%/../Logs/metrics.log\"");
 		system("wmic diskdrive get manufacturer, size,name, model, description >> \"%cd%/../Archive/metrics.archive\"");
 		logger.emptyLine("metrics");
-
+		Sleep(3000);
 		// log information from counters and timers
 		logger.log("Get File Size :" + to_string(timeToGetSize) + "ms", "metrics");
 		logger.log("Average time to get line from file : " + to_string(calculations.getAverage()) + "ms", "metrics");
 		logger.log("TotalTime reading files to get specific lines : " + to_string(calculations.getSum()) + "ms", "metrics");
-		logger.log("Total lines reading files ( not including get file length ) : " + to_string(lineCounter.getSum()), "metrics");
+		logger.log("Total lines reading files ( not including get file length ) : " + to_string(int(lineCounter.getSum())), "metrics");
 
 		// get file counts, plus total bytes of data from all .txt files
 		int fileCounter = 0; // to count number of txt files

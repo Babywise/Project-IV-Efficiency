@@ -118,8 +118,9 @@ int main(int argc, char* argv[])
 				string newParam = strInput.substr(preOffset + 1, offset - (preOffset + 1));
 				ParamNames.push_back(newParam); // All param names
 				preOffset = offset;
-			}
 #ifdef METRICS
+				sizeOfDataParsedDataClientCalc.addPoint(newParam.length());
+			}
 			//get timer for data parsing
 			dataParsingTimeCalc.addPoint(timer.getTime());
 			numDataParsesClient++;
@@ -162,11 +163,11 @@ void logSystemInfo() {
 	logger.emptyLine("metrics"); // write system information to lof before start of metrics logging
 	logger.log("------------------------------ Start of metrics run -------------------------", "metrics");
 	logger.emptyLine("metrics");
-	system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> %cd%/Logs/metrics.log");
+	system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> \"%cd%/Logs/metrics.log\"");
 	logger.emptyLine("metrics");
-	system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> %cd%/Logs/metrics.log");
+	system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> \"%cd%/Logs/metrics.log\"");
 	logger.emptyLine("metrics");
-	system("wmic diskdrive get manufacturer, size,name, model, description >> %cd%/Logs/metrics.log");
+	system("wmic diskdrive get manufacturer, size,name, model, description >> \"%cd%/Logs/metrics.log\"");
 	logger.emptyLine("metrics");
 	timer.start();
 	GetSize();
@@ -182,7 +183,7 @@ void logSystemInfo() {
 	logger.log("Client - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()) + " ms", DPCltMetrics);
 	logger.log("Client - DataParsing - Average = " + to_string(dataParsingTimeCalc.getAverage()) + " ms", DPCltMetrics);
 	logger.log("Client - DataParsing - # of Conversions = " + to_string(numDataParsesClient), DPCltMetrics);
-	logger.log("Client - DataParsing - Input Size of Parsed Data = ----- Bytes", DPCltMetrics);
+	logger.log("Client - DataParsing - Input Size of Parsed Data = " + to_string(std::filesystem::file_size("DataFile.txt")) + " Bytes", DPCltMetrics);
 	logger.log("Client - DataParsing - Total Size of Parsed Data = " + to_string((int)sizeOfDataParsedDataClientCalc.getSum()) + " Bytes", DPCltMetrics);
 	logger.emptyLine(DPCltMetrics);
 #endif

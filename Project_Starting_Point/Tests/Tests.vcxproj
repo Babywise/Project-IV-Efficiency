@@ -102,13 +102,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-<<<<<<< HEAD
-      <AdditionalLibraryDirectories>$(SolutionDir)\Server\x64\Debug;$(SolutionDir)\Client\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Logger.obj;%(AdditionalDependencies)</AdditionalDependencies>
-=======
       <AdditionalLibraryDirectories>$(SolutionDir)Server\x64\Debug;$(SolutionDir)Client\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
->>>>>>> dataparsing_metrics
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

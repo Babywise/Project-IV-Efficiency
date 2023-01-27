@@ -63,7 +63,6 @@ int main(int argc, char* argv[])
 		}
 		getline(ifs, strInput);
 #ifdef METRICS
-		//----should i add a data parse counter here?
 		calculations.addPoint(timer.getTime());
 		lineCounter.addPoint(3); // add 1 for the get line above, add one for close file at end of loop add one for file init
 		lineCounter.addPoint(2*l); // add 2 lines for every loop of the for loop above
@@ -143,7 +142,6 @@ int main(int argc, char* argv[])
 unsigned int GetSize()
 
 {
-	//----potential overlap timer with fileio?
 	string strInput;
 	unsigned int uiSize = 0;
 	ifstream ifs("DataFile.txt");
@@ -178,8 +176,7 @@ void logSystemInfo() {
 	logger.log("Total lines reading files ( not including get file length ) : " + to_string(lineCounter.getSum()), "metrics");
 	logger.emptyLine("metrics");
 	logger.log("------------------------------ End of metrics run -------------------------", "metrics");
-#endif
-#ifdef METRICS
+
 	//data parsing results
 	logger.log("Client Started", DPCltMetrics);
 	logger.log("Client - DataParsing - Sum = " + to_string(dataParsingTimeCalc.getSum()) + " ms", DPCltMetrics);

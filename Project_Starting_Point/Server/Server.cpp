@@ -5,24 +5,26 @@
 #include "../Shared/Metrics.h"
 #include "../Shared/Logger.h"
 
-
-/*
-* When in calculating metrics mode... Set above
-*/
 #ifdef METRICS
-Metrics::Timer timer;
-Logger logger;
-#endif
 void logCalcInfo();
+void logMetrics();
+int numDataParsesServer = 0;
+float maxSizeRxData = 0;
+
+Metrics::Timer timer;
+Metrics::Calculations dataParsingTimeCalc;
+Metrics::Calculations sizeOfDataParsedDataServerCalc;
+Metrics::Calculations sizeOfMemoryServerCalc;
+#endif
 
 using namespace std;
-
+const int numColumns = 7;
 struct StorageTypes 
 { 
 	unsigned int size = 0;
 	float* pData;
 };
-StorageTypes RxData[7];
+StorageTypes RxData[numColumns];
 
 void UpdateData(unsigned int, float);
 float CalcAvg(unsigned int);
@@ -39,6 +41,9 @@ int main()
 	WSADATA wsaData;
 	SOCKET ServerSocket, ConnectionSocket;
 	char RxBuffer[128] = {}; // magic number
+#ifdef METRICS
+	sizeOfMemoryServerCalc.addPoint(128);
+#endif
 	sockaddr_in SvrAddr;
 
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -183,11 +188,16 @@ int main()
 		sprintf_s(Tx, "%f", fValue);
 		send(ConnectionSocket, Tx, sizeof(Tx), 0);//send average back 
 	}
-	logCalcInfo();
+#ifdef METRICS
+	Metrics::addLogEndOfFileSpacing();
+	Metrics::logCalcInfo(calcTime, numCalc);
+	Metrics::logDataParsingMetricsServer(dataParsingTimeCalc, sizeOfDataParsedDataServerCalc, numDataParsesServer);
+	sizeOfMemoryServerCalc.addPoint(maxSizeRxData);
+	Metrics::logMemoryMetricsServer(sizeOfMemoryServerCalc);
+#endif
 	closesocket(ConnectionSocket);	//closes incoming socket
 	closesocket(ServerSocket);	    //closes server socket	
 	WSACleanup();					//frees Winsock resources
-
 	return 1;
 }
 
@@ -198,6 +208,10 @@ int main()
 /// <param name="value"></param>
 void UpdateData(unsigned int uiIndex, float value)
 {
+#ifdef METRICS
+	//start timer for data parsing
+	timer.start();
+#endif
 	if (RxData[uiIndex].size == 0) // if first value
 	{
 		RxData[uiIndex].pData = new float[1]; // init pdata
@@ -209,12 +223,32 @@ void UpdateData(unsigned int uiIndex, float value)
 		float* pNewData = new float[RxData[uiIndex].size + 1];
 		for (unsigned int x = 0; x < RxData[uiIndex].size; x++)
 			pNewData[x] = RxData[uiIndex].pData[x]; // set next pdata to data input
-
+#ifdef METRICS
+		sizeOfDataParsedDataServerCalc.addPoint(RxData[uiIndex].size);
+#endif
 		pNewData[RxData[uiIndex].size] = value;
+
+		/*
+		int pDataSize = 0;
+		for(int i = 0; i < numColumns; i++){
+			if (RxData[i].pData != NULL)
+				pDataSize += RxData[i].size;
+		}
+
+		int tempSize = pDataSize + (sizeof(unsigned int) * uiIndex) + (sizeof(float) * (RxData[uiIndex].size + 1));
+
+		if(tempSize > maxSizeRxData){
+			maxSizeRxData = tempSize;
+		}
+		*/
 		delete[] RxData[uiIndex].pData; // delete old memory
 		RxData[uiIndex].pData = pNewData; // replace with new data added
 		RxData[uiIndex].size++;
 	}
+#ifdef METRICS
+	dataParsingTimeCalc.addPoint(timer.getTime());
+	numDataParsesServer++;
+#endif
 }
 
 /// <summary>
@@ -233,18 +267,4 @@ float CalcAvg(unsigned int uiIndex)
 	Avg = Avg / RxData[uiIndex].size;
 	numCalc += 1;
 	return Avg;
-}
-
-void logCalcInfo()
-{
-#ifdef METRICS
-	logger.emptyLine("metrics");
-	logger.log("------------------------------ Start of Calculation Metrics run -------------------------", "metrics");
-	logger.log("Total time used for calculation: " + to_string(calcTime) + "ms", "metrics");
-	logger.log("Total number of calculations done: " + to_string(numCalc) + "ms", "metrics");
-	logger.emptyLine("metrics");
-	logger.log("------------------------------ End of Calculation Metrics run -------------------------", "metrics");
-	logger.emptyLine("metrics");
-
-#endif
 }

@@ -20,6 +20,9 @@ using namespace std::chrono;
 /// Namespace is used for ease of use and quality of life calculations of code metrics
 /// </summary>
 namespace Metrics {
+	
+	const string metricsLogFile = "Metrics";
+	Logger logger;
 
 	/// <summary>
 	/// used to simplify the calculation of code timings using the std::chrono library
@@ -94,32 +97,30 @@ namespace Metrics {
 	/// <param name=""></param>
 	/// <param name=""></param>
 	void logIOMetrics(Metrics::Calculations calculations, Metrics::Calculations lineCounter, float timeToGetSize) {
-#ifdef METRICS
-		Logger logger;
+		
 		Timer timer;
 
 		//format log file
-		logger.emptyLine("metrics"); // write system information to lof before start of metrics logging
-		logger.log("------------------------------ Start of IO metrics run -------------------------", "metrics");
-		logger.emptyLine("metrics");
+		// write system information to lof before start of metrics logging
+		logger.log("--- Start of Client IO Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
 
 		// log and archive system information
 	
-		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> \"%cd%/../Logs/metrics.log\"");
-		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> \"%cd%/../Archive/metrics.archive\"");
-		logger.emptyLine("metrics");
-		system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> \"%cd%/../Logs/metrics.log\"");
-		system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> \"%cd%/../Archive/metrics.archive\"");
-		logger.emptyLine("metrics");
-		system("wmic diskdrive get manufacturer, size,name, model, description >> \"%cd%/../Logs/metrics.log\"");
-		system("wmic diskdrive get manufacturer, size,name, model, description >> \"%cd%/../Archive/metrics.archive\"");
-		logger.emptyLine("metrics");
-		Sleep(3000);
+		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> \"%cd%/../Logs/Metrics.log\"");
+		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType >> \"%cd%/../Archive/Metrics.archive\"");
+		logger.emptyLine(metricsLogFile);
+		system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> \"%cd%/../Logs/Metrics.log\"");
+		system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name >> \"%cd%/../Archive/Metrics.archive\"");
+		logger.emptyLine(metricsLogFile);
+		system("wmic diskdrive get manufacturer, size,name, model, description >> \"%cd%/../Logs/Metrics.log\"");
+		system("wmic diskdrive get manufacturer, size,name, model, description >> \"%cd%/../Archive/Metrics.archive\"");
+		logger.emptyLine(metricsLogFile);
 		// log information from counters and timers
-		logger.log("Get File Size :" + to_string(timeToGetSize) + "ms", "metrics");
-		logger.log("Average time to get line from file : " + to_string(calculations.getAverage()) + "ms", "metrics");
-		logger.log("TotalTime reading files to get specific lines : " + to_string(calculations.getSum()) + "ms", "metrics");
-		logger.log("Total lines reading files ( not including get file length ) : " + to_string(int(lineCounter.getSum())), "metrics");
+		logger.log("Client - IO - Get File Size :" + to_string(timeToGetSize) + "ms", metricsLogFile);
+		logger.log("Client - IO - Average time to get line from file : " + to_string(calculations.getAverage()) + "ms", metricsLogFile);
+		logger.log("Client - IO - TotalTime reading files to get specific lines : " + to_string(calculations.getSum()) + "ms", metricsLogFile);
+		logger.log("Client - IO - Total lines reading files ( not including get file length ) : " + to_string(int(lineCounter.getSum())), metricsLogFile);
 
 		// get file counts, plus total bytes of data from all .txt files
 		int fileCounter = 0; // to count number of txt files
@@ -131,13 +132,68 @@ namespace Metrics {
 			}
 		}
 		// log data about file counts and bytes
-		logger.log("Data File Count (.txt) is : " + to_string(fileCounter), "metrics");
-		logger.log("Total bytes in data files is : " + to_string(byteCounter), "metrics");
+		logger.log("Client - IO - Data File Count (.txt) is : " + to_string(fileCounter), metricsLogFile);
+		logger.log("Client - IO - Total bytes in data files is : " + to_string(byteCounter), metricsLogFile);
 
 		//log formatting
-		logger.emptyLine("metrics");
-		logger.log("------------------------------ End of IO metrics run -------------------------", "metrics");
-		logger.emptyLine("metrics");
-#endif
+		logger.emptyLine(metricsLogFile);
+		logger.log("--- End of Client IO Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
 	}
+
+	void logDataParsingMetricsClient(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataClientCalc, int numDataParsesClient){
+		//data parsing results
+		logger.log("--- Start of Client DataParsing Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("Client - DataParsing - Total Time = " + to_string(dataParsingTimeCalc.getSum()) + " ms", metricsLogFile);
+		logger.log("Client - DataParsing - Average (Single Parse) = " + to_string(dataParsingTimeCalc.getAverage()) + " ms", metricsLogFile);
+		logger.log("Client - DataParsing - # of Conversions = " + to_string(numDataParsesClient), metricsLogFile);
+		logger.log("Client - DataParsing - Input Size of Parsed Data = " + to_string(std::filesystem::file_size("DataFile.txt")) + " Bytes", metricsLogFile);
+		logger.log("Client - DataParsing - Total Size of Parsed Data = " + to_string((int)sizeOfDataParsedDataClientCalc.getSum()) + " Bytes", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("--- End of Client DataParsing Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+	}
+
+	void logDataParsingMetricsServer(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataServerCalc, int numDataParsesServer){
+		//data parsing results
+		logger.log("--- Start of Server DataParsing Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("Server - DataParsing - Total Time = " + to_string(dataParsingTimeCalc.getSum()) + " ms", metricsLogFile);
+		logger.log("Server - DataParsing - Average (Single Parse) = " + to_string(dataParsingTimeCalc.getAverage()) + " ms", metricsLogFile);
+		logger.log("Server - DataParsing - # of Conversions = " + to_string(numDataParsesServer), metricsLogFile);
+		logger.log("Server - DataParsing - Total Size of Parsed Data = " + to_string((int)sizeOfDataParsedDataServerCalc.getSum()) + " Bytes", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("--- End of Server DataParsing Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+	}
+
+	void logCalcInfo(float calcTime, int numCalc) {
+		//calculation results
+		logger.log("--- Start of Server Calculation Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("Server - Calculations - Average time used for a calculation: " + to_string((calcTime/numCalc)*1000) + " µs", metricsLogFile);
+		logger.log("Server - Calculations - Total time used for calculation: " + to_string(calcTime) + " ms", metricsLogFile);
+		logger.log("Server - Calculations - Total number of calculations done: " + to_string(numCalc) + " ms", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("--- End of Server Calculation Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+	}
+
+	void logMemoryMetricsServer(Calculations sizeOfMemoryServerCalc){
+		//memory results
+		logger.log("--- Start of Server Memory Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("Server - Memory - Total Memory Allocated: " + to_string(sizeOfMemoryServerCalc.getSum()) + " Bytes", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("--- End of Server Memory Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+	}
+
+	void addLogEndOfFileSpacing(){
+		for(int i = 0; i < 3; i++){
+			logger.emptyLine(metricsLogFile);
+		}
+	}
+
 }

@@ -9,16 +9,14 @@
 #include "../Shared/Metrics.h"
 #include "../Shared/Logger.h"
 
-/*
-* When in calculating metrics mode... Set above
-*/
 #ifdef METRICS
+int numDataParsesClient = 0;
 Metrics::Calculations calculations;
-Logger logger;
 Metrics::Timer timer;
 Metrics::Calculations lineCounter; // line counter used to determine total number of lines used in fileIO
+Metrics::Calculations dataParsingTimeCalc;
+Metrics::Calculations sizeOfDataParsedDataClientCalc;
 #endif
-
 
 using namespace std;
 
@@ -29,6 +27,7 @@ unsigned int GetSize();
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
+
 	//setup
 	WSADATA wsaData;
 	SOCKET ClientSocket;
@@ -75,9 +74,19 @@ int main(int argc, char* argv[])
 			// This loop gets the parameter names and values. These are sent to the server where we recieve an acknowledgement
 			while(iParamIndex != 8)
 			{
+#ifdef METRICS
+				//start timer for data parsing
+				timer.start();
+#endif
 				offset = strInput.find_first_of(',', preOffset+1); // Find comma, get size of everything after it
 				// Creates a substring for the param name. Uses the offset values to know where to start and end
 				string strTx = strInput.substr(preOffset+1, offset - (preOffset+1)); 
+				//get timer for data parsing
+#ifdef METRICS
+				sizeOfDataParsedDataClientCalc.addPoint(strTx.length());
+				dataParsingTimeCalc.addPoint(timer.getTime());
+				numDataParsesClient++;
+#endif
 				send(ClientSocket, ParamNames[iParamIndex].c_str(), (int)ParamNames[iParamIndex].length(), 0); // Send parameter name to server
 				recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve Ack
 				send(ClientSocket, strTx.c_str(), (int)strTx.length(), 0); // Send value to server
@@ -90,6 +99,10 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
+#ifdef METRICS
+			//start timer for data parsing
+			timer.start();
+#endif
 			ParamNames.push_back("TIME STAMP"); // if is index 0 write timestamp
 			size_t offset, preOffset;
 			offset = 0;
@@ -100,7 +113,13 @@ int main(int argc, char* argv[])
 				string newParam = strInput.substr(preOffset + 1, offset - (preOffset + 1));
 				ParamNames.push_back(newParam); // All param names
 				preOffset = offset;
+#ifdef METRICS
+				sizeOfDataParsedDataClientCalc.addPoint(newParam.length());
 			}
+			//get timer for data parsing
+			dataParsingTimeCalc.addPoint(timer.getTime());
+			numDataParsesClient++;
+#endif
 		}
 		ifs.close(); // close file
 	}
@@ -108,6 +127,7 @@ int main(int argc, char* argv[])
 	timer.start();
 	GetSize();
 	Metrics::logIOMetrics(calculations, lineCounter, timer.getTime());
+	Metrics::logDataParsingMetricsClient(dataParsingTimeCalc, sizeOfDataParsedDataClientCalc, numDataParsesClient);
 #endif
 	closesocket(ClientSocket); // cleanup
 	WSACleanup();
@@ -122,7 +142,6 @@ int main(int argc, char* argv[])
 unsigned int GetSize()
 
 {
-
 	string strInput;
 	unsigned int uiSize = 0;
 	ifstream ifs("DataFile.txt");
@@ -137,4 +156,3 @@ unsigned int GetSize()
 
 	return uiSize;
 }
-

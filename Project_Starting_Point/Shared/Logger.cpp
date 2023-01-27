@@ -44,15 +44,22 @@ void Logger::log(std::string message, int severity)
 /// <param name="logname"></param>
 void Logger::log(std::string message, int severity, std::string logname)
 {
+	if (!std::filesystem::exists(LOGSPATH)) {
+		std::filesystem::create_directory(LOGSPATH);
+	}
 
+	Logger archive;
+	archive.Archive(message, logname);
 	
 	auto now = std::chrono::system_clock::now();
 	std::time_t end_time = std::chrono::system_clock::to_time_t(now);
 
 	std::ofstream outfile;
 	outfile.open((std::string)LOGSPATH + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
-
-	outfile << message << "\t\t Severity :" << severity << "\t\t" << std::ctime(&end_time);
+	char* ctimeBuf = std::ctime(&end_time);
+	if ( ctimeBuf[strlen(ctimeBuf) - 1] == '\n' ) ctimeBuf[strlen(ctimeBuf) - 1] = '\0';
+	// replace endl with \0
+	outfile << ctimeBuf << "\t Severity :" << severity << "\t" << message << std::endl;
 	outfile.close();
 }
 /// <summary>
@@ -63,20 +70,21 @@ void Logger::log(std::string message, int severity, std::string logname)
 void Logger::log(std::string message, std::string logname)
 {
 
-
-
 	if (!std::filesystem::exists(LOGSPATH)) {
 		std::filesystem::create_directory(LOGSPATH);
 	}
 	Logger archive;
 	archive.Archive(message, logname);
+
 	auto now = std::chrono::system_clock::now();
 	std::time_t end_time = std::chrono::system_clock::to_time_t(now);
 
 	std::ofstream outfile;
 	outfile.open((std::string)LOGSPATH + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
-
-	outfile << message << "\t\t" << std::ctime(&end_time);
+	char* ctimeBuf = std::ctime(&end_time);
+	// replace endl with \0
+	if ( ctimeBuf[strlen(ctimeBuf) - 1] == '\n' ) ctimeBuf[strlen(ctimeBuf) - 1] = '\0';
+	outfile << ctimeBuf << "\t" << message << std::endl;
 	outfile.close();
 }
 
@@ -100,7 +108,10 @@ void Logger::Archive(std::string message, std::string logname)
 	std::ofstream outfile;
 	outfile.open((std::string)ARCHIVE + (std::string)logname + (std::string)ARCHIVE_EXT, std::ios::app);
 
-	outfile << message << "\t\t" << std::ctime(&end_time);
+	char* ctimeBuf = std::ctime(&end_time);
+	// replace endl with \0
+	if ( ctimeBuf[strlen(ctimeBuf) - 1] == '\n' ) ctimeBuf[strlen(ctimeBuf) - 1] = '\0';
+	outfile << ctimeBuf << "\t" << message << std::endl;
 	outfile.close();
 
 }
@@ -108,8 +119,10 @@ void Logger::Archive(std::string message, std::string logname)
 void Logger::emptyLine(std::string logname) {
 	std::ofstream outfile;
 	outfile.open((std::string)LOGSPATH + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
-	Logger c;
-	c.Archive("\n", logname);
-	outfile << "\n";
+	outfile << std::endl;
+	outfile.close();
+	
+	outfile.open((std::string)ARCHIVE + (std::string)logname + (std::string)ARCHIVE_EXT, std::ios::app);
+	outfile << std::endl;
 	outfile.close();
 }

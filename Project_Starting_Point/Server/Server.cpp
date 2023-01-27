@@ -227,20 +227,6 @@ void UpdateData(unsigned int uiIndex, float value)
 		sizeOfDataParsedDataServerCalc.addPoint(RxData[uiIndex].size);
 #endif
 		pNewData[RxData[uiIndex].size] = value;
-
-		/*
-		int pDataSize = 0;
-		for(int i = 0; i < numColumns; i++){
-			if (RxData[i].pData != NULL)
-				pDataSize += RxData[i].size;
-		}
-
-		int tempSize = pDataSize + (sizeof(unsigned int) * uiIndex) + (sizeof(float) * (RxData[uiIndex].size + 1));
-
-		if(tempSize > maxSizeRxData){
-			maxSizeRxData = tempSize;
-		}
-		*/
 		delete[] RxData[uiIndex].pData; // delete old memory
 		RxData[uiIndex].pData = pNewData; // replace with new data added
 		RxData[uiIndex].size++;

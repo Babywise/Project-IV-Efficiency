@@ -190,6 +190,33 @@ namespace Metrics {
 		logger.emptyLine(metricsLogFile);
 	}
 
+	void logNetworkMetricsClient(int numTransmissions, int avgHandshake, int handshakeTransmissionCount) {
+		// Client Network Results
+		logger.log("--- Start of Client Network Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("Client - Network - Number of Transmissions: " + to_string(numTransmissions), metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("Client - Network - Average Handshake Time: " + to_string(avgHandshake) +  " µs", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("Client - Network - Number of Transmissions in Handshake: " + to_string(handshakeTransmissionCount), metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("--- End of Client Network Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		
+	}
+
+	void logNetworkMetricsServer(int elapsedTimeMilSec, int numConnections) {
+		// Server Network Results
+		logger.log("--- Start of Server Network Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("Server - Network - Server Uptime: " + to_string(elapsedTimeMilSec) + " ms", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("Server - Network - Number of Connections: " + to_string(numConnections), metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("--- End of Server Network Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+	}
+
 	void addLogEndOfFileSpacing(){
 		for(int i = 0; i < 3; i++){
 			logger.emptyLine(metricsLogFile);

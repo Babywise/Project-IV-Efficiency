@@ -19,6 +19,7 @@ Metrics::Calculations sizeOfMemoryServerCalc;
 
 using namespace std;
 const int numColumns = 7;
+
 struct StorageTypes 
 { 
 	unsigned int size = 0;
@@ -60,12 +61,23 @@ int main()
 		return -1;
 	// accepts a single connection
 	listen(ServerSocket, 1);
+
+#ifdef METRICS
+
+	std::chrono::time_point<std::chrono::system_clock> start, end;
+
+	start = std::chrono::system_clock::now();
+
+#endif
+
 	cout << "Waiting for client connection\n" << endl;
 	ConnectionSocket = SOCKET_ERROR;
 	ConnectionSocket = accept(ServerSocket, NULL, NULL);
 
 	if (ConnectionSocket == SOCKET_ERROR)
 		return -1;
+
+	int numConnections = 1;
 
 	cout << "Connection Established" << endl;
 
@@ -197,6 +209,16 @@ int main()
 #endif
 	closesocket(ConnectionSocket);	//closes incoming socket
 	closesocket(ServerSocket);	    //closes server socket	
+
+#ifdef METRICS
+
+	end = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsedTimeSeconds = end - start;
+	auto elapsedTimeMilSec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedTimeSeconds).count();
+	Metrics::logNetworkMetricsServer(elapsedTimeMilSec, numConnections);
+
+#endif
+
 	WSACleanup();					//frees Winsock resources
 	return 1;
 }

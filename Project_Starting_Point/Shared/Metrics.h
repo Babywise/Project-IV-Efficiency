@@ -190,9 +190,11 @@ namespace Metrics {
 		logger.emptyLine(metricsLogFile);
 	}
 
-	void logNetworkMetricsClient(int numTransmissions, int avgHandshake, int handshakeTransmissionCount) {
+	void logNetworkMetricsClient(int numTransmissions, int avgHandshake, int handshakeTransmissionCount, string networkType) {
 		// Client Network Results
 		logger.log("--- Start of Client Network Metrics ---", metricsLogFile);
+		logger.emptyLine(metricsLogFile);
+		logger.log("Client - Network - Network Type: " + networkType, metricsLogFile);
 		logger.emptyLine(metricsLogFile);
 		logger.log("Client - Network - Number of Transmissions: " + to_string(numTransmissions), metricsLogFile);
 		logger.emptyLine(metricsLogFile);

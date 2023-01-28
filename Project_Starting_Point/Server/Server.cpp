@@ -215,7 +215,6 @@ int main()
 	end = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsedTimeSeconds = end - start;
 	auto elapsedTimeMilSec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedTimeSeconds).count();
-	Metrics::logNetworkMetricsServer(elapsedTimeMilSec, numConnections);
 
 #endif
 

@@ -9,12 +9,14 @@
 #include "../Shared/Metrics.h"
 #include "../Shared/Logger.h"
 
-#define LAN
-//#define WAN
+#define WAN
+//#define LAN
 
 const char* lanAddr = "127.0.0.1";
-const char* wanAddr = "127.0.0.1";
-const int port = 27001;
+const char* wanAddr = "x.x.x.x";
+const int port = 27000;
+const string wan = "WAN";
+const string lan = "LAN";
 
 #define METRICS
 
@@ -49,7 +51,7 @@ int main(int argc, char* argv[])
 	int numTransmissions = 0;
 	int numHandshakes = 0;
 	vector<long long> handshakeTimes;
-	int handshakeTransmissionCount;
+	int handshakeTransmissionCount = 0;
 #endif
 
 
@@ -201,7 +203,13 @@ int main(int argc, char* argv[])
 	}
 
 	avgHandshake = avgHandshake / handshakeTimes.size();
-	Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount);
+
+#ifdef WAN
+	Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, wan);
+#endif // WAN
+#ifdef LAN
+	Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, lan);
+#endif // LAN
 
 #endif
 

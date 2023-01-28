@@ -57,6 +57,16 @@ int main()
 		return -1;
 	// accepts a single connection
 	listen(ServerSocket, 1);
+
+#ifdef METRICS
+
+	numConnections++;
+	std::chrono::time_point<std::chrono::system_clock> start, end;
+
+	start = std::chrono::system_clock::now();
+
+#endif
+
 	cout << "Waiting for client connection\n" << endl;
 	ConnectionSocket = SOCKET_ERROR;
 	ConnectionSocket = accept(ServerSocket, NULL, NULL);
@@ -64,10 +74,7 @@ int main()
 	if (ConnectionSocket == SOCKET_ERROR)
 		return -1;
 
-	numConnections++;
-	std::chrono::time_point<std::chrono::system_clock> start, end;
-
-	start = std::chrono::system_clock::now();
+	
 
 
 	cout << "Connection Established" << endl;
@@ -153,11 +160,15 @@ int main()
 	closesocket(ConnectionSocket);	//closes incoming socket
 	closesocket(ServerSocket);	    //closes server socket	
 
+#ifdef METRICS
+
 	end = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsedTimeSeconds = end - start;
 	auto elapsedTimeMilSec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedTimeSeconds).count();
 	logger.log("Server Uptime: " + to_string(elapsedTimeMilSec) + "ms\n"
 		+ "Number of Connections: " + to_string(numConnections) + "\n", "NetworkMetrics");
+
+#endif
 
 	WSACleanup();					//frees Winsock resources
 

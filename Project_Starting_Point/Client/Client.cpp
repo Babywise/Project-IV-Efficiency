@@ -85,32 +85,41 @@ int main(int argc, char* argv[])
 				// Creates a substring for the param name. Uses the offset values to know where to start and end
 				string strTx = strInput.substr(preOffset+1, offset - (preOffset+1)); 
 				
+#ifdef METRICS
 				std::chrono::time_point<std::chrono::system_clock> start, end;
 
 				start = std::chrono::system_clock::now();
-				
+#endif
 				send(ClientSocket, ParamNames[iParamIndex].c_str(), (int)ParamNames[iParamIndex].length(), 0); // Send parameter name to server
+#ifdef METRICS
 				numTransmissions++;
+#endif
 
 				recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve Ack
+#ifdef METRICS
 				numTransmissions++;
+#endif
 
 				send(ClientSocket, strTx.c_str(), (int)strTx.length(), 0); // Send value to server
+#ifdef METRICS
 				numTransmissions++;
+#endif
 
 				recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve Average
+#ifdef METRICS
 				numTransmissions++;
-
 				numHandshakes++;
 
 				end = std::chrono::system_clock::now();
 				std::chrono::duration<double> elapsedTimeSeconds = end - start;
 				auto elapsedTimeMicSec = std::chrono::duration_cast<std::chrono::microseconds>(elapsedTimeSeconds).count();
 				handshakeTimes.push_back(elapsedTimeMicSec);
-
 				//cout << "HandshakeTime: " << elapsedTimeMicSec << endl;
+#endif
 
-				//cout << ParamNames[iParamIndex] << " Avg: " << Rx << endl; // Print param name and average
+				
+
+				cout << ParamNames[iParamIndex] << " Avg: " << Rx << endl; // Print param name and average
 				preOffset = offset; // Update offset to next column
 				iParamIndex++; // Increment index of param to read from buffer
 
@@ -140,7 +149,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < handshakeTimes.size(); i++) {
 		avgHandshake += handshakeTimes.at(i);
 	}
-
+#ifdef METRICS
 	avgHandshake = avgHandshake / handshakeTimes.size();
 	string strTransmissions = to_string(numTransmissions);
 	string strAvgHandshake = to_string(avgHandshake);
@@ -148,6 +157,7 @@ int main(int argc, char* argv[])
 	logger.log("Number of Transmissions: " + strTransmissions
 		+ "\nAverage Handshake Time: " + strAvgHandshake + " Microseconds\n",
 		"NetworkMetrics");
+#endif
 
 	return 1;
 }

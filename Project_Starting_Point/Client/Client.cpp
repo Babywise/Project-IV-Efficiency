@@ -9,12 +9,12 @@
 #include "../Shared/Metrics.h"
 #include "../Shared/Logger.h"
 
-#define WAN
-//#define LAN
+//#define WAN
+#define LAN
 
 const char* lanAddr = "127.0.0.1";
 const char* wanAddr = "x.x.x.x";
-const int port = 27000;
+const int port = 27001;
 const string wan = "WAN";
 const string lan = "LAN";
 

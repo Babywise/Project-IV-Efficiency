@@ -6,8 +6,6 @@
 #include "../Shared/Logger.h"
 
 #ifdef METRICS
-void logCalcInfo();
-void logMetrics();
 int numDataParsesServer = 0;
 float maxSizeRxData = 0;
 

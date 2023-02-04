@@ -1,15 +1,15 @@
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "Shared/Metrics.h"
+#include "../Shared/Metrics.h"
 #include "../Shared/configManager.h"
 #ifdef _WIN32
-#include <Windows.h>
 #endif
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace Unit_Tests
 {
+
 	TEST_CLASS(Metrics_Tests)
 	{
 	public:

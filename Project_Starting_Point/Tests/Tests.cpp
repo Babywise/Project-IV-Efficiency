@@ -1,13 +1,14 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "Shared/Metrics.h"
+#include "../Shared/configManager.h"
 #ifdef _WIN32
 #include <Windows.h>
 #endif
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-namespace Tests
+namespace Unit_Tests
 {
 	TEST_CLASS(Metrics_Tests)
 	{
@@ -130,6 +131,50 @@ namespace Tests
 		}
 		#endif
 	};
+	TEST_CLASS(config_Manager_Tests) {
 
+	public:
+		TEST_METHOD(getConfig) {
+			configuration::configManager manager("");
+			manager.getConfig("");
+		}
+		TEST_METHOD(getConfigList) {
+			std::vector<void*> expected;
+			expected.push_back((void*)"one");
+			expected.push_back((void*)"hello");
+			expected.push_back((void*)3);
+			std::vector<void*> answer;
+			configuration::configManager manager("");
+			manager.getConfigList("one","hello");
+		}
+	};
 	
+}
+
+namespace metrics_Testing
+{
+	TEST_CLASS(IO)
+	{
+	public:
+		TEST_METHOD(getFileSize)
+		{
+			string message = "Not implemented";
+			Assert::AreEqual(message,(string)"");
+		}
+		TEST_METHOD(averageTimeToGetLine)
+		{
+			string message = "Not implemented";
+			Assert::AreEqual(message, (string)"");
+		}
+		TEST_METHOD(totalLinesReadingFiles)
+		{
+			string message = "Not implemented";
+			Assert::AreEqual(message, (string)"");
+		}
+		TEST_METHOD(totalTimeReadingFiles)
+		{
+			string message = "Not implemented";
+			Assert::AreEqual(message, (string)"");
+		}
+	};
 }

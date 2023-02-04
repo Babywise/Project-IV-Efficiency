@@ -36,6 +36,7 @@ static float calcTime = 0;
 /// <returns></returns>
 int main()
 {
+
 	//setup
 	WSADATA wsaData;
 	SOCKET ServerSocket, ConnectionSocket;

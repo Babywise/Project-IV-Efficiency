@@ -34,5 +34,14 @@ namespace configuration {
 			}
 			return "";
 		}
+		char* getConfigChar(std::string name) {
+
+			for (int i = 0; i < params.size(); i++) {
+				if (strcmp(name.c_str(), params.at(i).c_str()) == 0) { //if param passed in is in list
+					return (char*)paramValues.at(i).c_str();
+				}
+			}
+			return (char*)"";
+		}
 	};
 }

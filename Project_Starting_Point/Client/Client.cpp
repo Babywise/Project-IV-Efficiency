@@ -8,15 +8,16 @@
 
 #include "../Shared/Metrics.h"
 #include "../Shared/Logger.h"
-
+#include "../Shared/configManager.h"
 //#define WAN
 #define LAN
 
-const char* lanAddr = "127.0.0.1";
-const char* wanAddr = "x.x.x.x";
-const int port = 27001;
-const string wan = "WAN";
-const string lan = "LAN";
+configuration::configManager configurations("../Shared/config.conf");
+const char* lanAddr = configurations.getConfigChar("lanAddr");
+const char* wanAddr = configurations.getConfigChar("wanAddr");
+const int port = atof(configurations.getConfig("port").c_str());
+const string wan = configurations.getConfigChar("wan");
+const string lan = configurations.getConfigChar("lan");
 
 #define METRICS
 
@@ -38,7 +39,7 @@ unsigned int GetSize();
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
-
+	
 	//setup
 	WSADATA wsaData;
 	SOCKET ClientSocket;
@@ -46,7 +47,6 @@ int main(int argc, char* argv[])
 	unsigned int uiSize = 0;
 	vector<string> ParamNames;
 	char Rx[128]; // Get from Config File later (Magic Number)
-
 #ifdef METRICS
 	int numTransmissions = 0;
 	int numHandshakes = 0;
@@ -59,14 +59,14 @@ int main(int argc, char* argv[])
 	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	SvrAddr.sin_family = AF_INET;
 	
-	SvrAddr.sin_port = htons(port); // Get from Config File later (Magic Number)
+	SvrAddr.sin_port = htons(port); 
 
 #ifdef LAN
-	SvrAddr.sin_addr.s_addr = inet_addr(lanAddr); // Get from Config File later (Magic Number)
+	SvrAddr.sin_addr.s_addr = inet_addr(lanAddr); 
 #endif
 
 #ifdef WAN
-	SvrAddr.sin_addr.s_addr = inet_addr(wanAddr); // Get from Config File later (Magic Number)
+	SvrAddr.sin_addr.s_addr = inet_addr(wanAddr); 
 #endif
 
 	connect(ClientSocket, (struct sockaddr*)&SvrAddr, sizeof(SvrAddr)); // connect
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 #ifdef METRICS
 		timer.start();
 #endif
-		ifstream ifs("DataFile.txt"); // open datafile.txt | file opens on every loop execution
+		ifstream ifs(configurations.getConfigChar("dataFile")); // open datafile.txt | file opens on every loop execution
 		for (unsigned int iStart = 0; iStart < l; iStart++) {// get next line which is L
 			getline(ifs, strInput);
 		}
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 
 
 			// This loop gets the parameter names and values. These are sent to the server where we recieve an acknowledgement
-			while(iParamIndex != 8)
+			while(iParamIndex != atoi(configurations.getConfigChar("paramCount")))
 			{
 #ifdef METRICS
 				//start timer for data parsing
@@ -227,7 +227,7 @@ unsigned int GetSize()
 {
 	string strInput;
 	unsigned int uiSize = 0;
-	ifstream ifs("DataFile.txt");
+	ifstream ifs(configurations.getConfigChar("dataFile"));
 	if (ifs.is_open())
 	{
 		while (!ifs.eof())

@@ -70,3 +70,86 @@ Sat Jan 28 18:48:10 2023	Client - Network - Number of Transmissions in Handshake
 
 Sat Jan 28 18:48:10 2023	--- End of Client Network Metrics ---
 
+
+
+
+Sat Feb  4 15:07:51 2023	--- Start of Server Calculation Metrics ---
+
+Sat Feb  4 15:07:51 2023	Server - Calculations - Average time used for a calculation: 0.004272 µs
+Sat Feb  4 15:07:51 2023	Server - Calculations - Total time used for calculation: 3.805713 ms
+Sat Feb  4 15:07:51 2023	Server - Calculations - Total number of calculations done: 890813 ms
+
+Sat Feb  4 15:07:51 2023	--- End of Server Calculation Metrics ---
+
+Sat Feb  4 15:07:51 2023	--- Start of Server DataParsing Metrics ---
+
+Sat Feb  4 15:07:51 2023	Server - DataParsing - Total Time = 24.338799 ms
+Sat Feb  4 15:07:51 2023	Server - DataParsing - Average (Single Parse) = 0.006912 ms
+Sat Feb  4 15:07:51 2023	Server - DataParsing - # of Conversions = 3521
+Sat Feb  4 15:07:51 2023	Server - DataParsing - Total Size of Parsed Data = 883771 Bytes
+
+Sat Feb  4 15:07:51 2023	--- End of Server DataParsing Metrics ---
+
+Sat Feb  4 15:07:51 2023	--- Start of Server Memory Metrics ---
+
+Sat Feb  4 15:07:51 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Sat Feb  4 15:07:51 2023	--- End of Server Memory Metrics ---
+
+Sat Feb  4 15:07:51 2023	--- Start of Server Network Metrics ---
+
+Sat Feb  4 15:07:51 2023	Server - Network - Server Uptime: 6615 ms
+
+Sat Feb  4 15:07:51 2023	Server - Network - Number of Connections: 1
+
+Sat Feb  4 15:07:51 2023	--- End of Server Network Metrics ---
+
+Sat Feb  4 15:07:51 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                       ProcessorType  
+2800               9               64         2801           Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         12          00940B160000  Physical Memory  2667   
+17179869184  64         12          00940B160000  Physical Memory  2667   
+
+
+
+Description  Manufacturer            Model            Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP  \\.\PHYSICALDRIVE0  2048407280640  
+
+
+
+Sat Feb  4 15:07:53 2023	Client - IO - Get File Size :13.762700ms
+Sat Feb  4 15:07:53 2023	Client - IO - Average time to get line from file : 3.734226ms
+Sat Feb  4 15:07:53 2023	Client - IO - TotalTime reading files to get specific lines : 1885.784180ms
+Sat Feb  4 15:07:53 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Sat Feb  4 15:07:53 2023	Client - IO - Data File Count (.txt) is : 1
+Sat Feb  4 15:07:53 2023	Client - IO - Total bytes in data files is : 49812
+
+Sat Feb  4 15:07:53 2023	--- End of Client IO Metrics ---
+
+Sat Feb  4 15:07:53 2023	--- Start of Client DataParsing Metrics ---
+
+Sat Feb  4 15:07:53 2023	Client - DataParsing - Total Time = 25.382690 ms
+Sat Feb  4 15:07:53 2023	Client - DataParsing - Average (Single Parse) = 0.006294 ms
+Sat Feb  4 15:07:53 2023	Client - DataParsing - # of Conversions = 4033
+Sat Feb  4 15:07:53 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Sat Feb  4 15:07:53 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Sat Feb  4 15:07:53 2023	--- End of Client DataParsing Metrics ---
+
+Sat Feb  4 15:07:53 2023	--- Start of Client Network Metrics ---
+
+Sat Feb  4 15:07:53 2023	Client - Network - Network Type: LAN
+
+Sat Feb  4 15:07:53 2023	Client - Network - Number of Transmissions: 16128
+
+Sat Feb  4 15:07:53 2023	Client - Network - Average Handshake Time: 199 µs
+
+Sat Feb  4 15:07:53 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Sat Feb  4 15:07:53 2023	--- End of Client Network Metrics ---
+

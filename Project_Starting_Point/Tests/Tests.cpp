@@ -134,19 +134,32 @@ namespace Unit_Tests
 	TEST_CLASS(config_Manager_Tests) {
 
 	public:
-		TEST_METHOD(getConfig) {
-			configuration::configManager manager("");
-			manager.getConfig("");
+		TEST_METHOD(getConfig_exists_int) {
+			
+			string expected = "5";
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+			Assert::AreEqual(atoi(expected.c_str()), atoi(manager.getConfig("test").c_str()));
 		}
-		TEST_METHOD(getConfigList) {
-			std::vector<void*> expected;
-			expected.push_back((void*)"one");
-			expected.push_back((void*)"hello");
-			expected.push_back((void*)3);
-			std::vector<void*> answer;
-			configuration::configManager manager("");
-			manager.getConfigList("one","hello");
+		TEST_METHOD(getConfig_exists_float) {
+
+			string expected = "5.22";
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+			Assert::AreEqual(atof(expected.c_str()), atof(manager.getConfig("testfloat").c_str()));
 		}
+		TEST_METHOD(getConfig_exists_string) {
+
+			string expected = "works";
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+			Assert::AreEqual(expected, manager.getConfig("filetest"));
+		}
+		TEST_METHOD(getConfig_not_exists_int) {
+			string answer;
+			
+			configuration::configManager manager("");
+			answer = manager.getConfig("not this one");
+			Assert::AreEqual(0, (int)answer.size());
+		}
+
 	};
 	
 }

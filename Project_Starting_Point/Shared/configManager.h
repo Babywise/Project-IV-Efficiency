@@ -2,33 +2,37 @@
 #include <vector>
 #include <string>
 #include <cstdarg>
+#include <iostream>
+#include <fstream>
 namespace configuration {
 	class configManager {
 		std::vector<std::string> params;
-		std::vector<void*> paramValues;
+		std::vector<std::string> paramValues;
 
 	public:
 		configManager(std::string file) {
-			// load params from file into memory
-		}
-		void* getConfig(std::string name) {
-			return (void*)3; // stand in stub
-		}
-		std::vector<void*> getConfigList(std::string params,...) {
-			va_list valist;
-			std::vector<void*> list;
-			va_start(valist, params); // initialize valist
-			for (int i = 0; i < params.size(); i++)
+			string strInput;
+			unsigned int uiSize = 0;
+			ifstream ifs(file);
+			if (ifs.is_open())
 			{
-				
-				list.push_back((void*)va_arg(valist, std::string).c_str());
+				while (!ifs.eof())
+				{
+					getline(ifs, strInput);
+					params.push_back(strInput.substr(0, strInput.find_first_of('=')-1)); // get param
+					paramValues.push_back(strInput.substr(strInput.find_first_of('=') + 2,(strInput.length()- strInput.find_first_of('=') + 1)));// get assosciated value
+				}
 			}
-			va_end(valist); // clean memory
-			list.push_back((void*)3);
-			// stand in stub
-			return list;
+			
 		}
-	
-
+		string getConfig(std::string name) {
+			
+			for (int i = 0; i < params.size(); i++) {
+				if (strcmp(name.c_str(), params.at(i).c_str()) == 0) { //if param passed in is in list
+					return paramValues.at(i);
+				}
+			}
+			return "";
+		}
 	};
 }

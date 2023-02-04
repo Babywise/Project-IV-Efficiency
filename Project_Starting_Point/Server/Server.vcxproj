@@ -23,6 +23,7 @@
     <ClCompile Include="Server.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Shared\configManager.h" />
     <ClInclude Include="..\Shared\Logger.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

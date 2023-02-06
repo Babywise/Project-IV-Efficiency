@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="..\Shared\Logger.cpp" />
     <ClCompile Include="Client.cpp" />
-    <ClCompile Include="IO.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="DataFile.txt" />
@@ -31,6 +30,9 @@
     <ClInclude Include="..\Shared\Logger.h" />
     <ClInclude Include="..\Shared\Metrics.h" />
     <ClInclude Include="IO.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

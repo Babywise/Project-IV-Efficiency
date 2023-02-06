@@ -3,7 +3,10 @@
 #include <stdlib.h>
 #include <future>
 #include "../Shared/configManager.h"
+#include "../Shared/Metrics.h"
+#include <queue>
 
+using namespace std;
 void GetSizePromise(std::promise<unsigned int> promise);
 
 /// <summary>
@@ -11,17 +14,18 @@ void GetSizePromise(std::promise<unsigned int> promise);
 /// the config manager should also be migrated to this namespace in the future.
 /// </summary>
 namespace fileIO {
-	enum statuses { not_started, started, done, error }; // used to determine the status of a block
+	enum statuses { not_started, started, done, error,waiting,reading }; // used to determine the status of a block
 	class block {
 	private:
-		std::queue<std::string> lines; // list of lines in order
-		void readChunk(std::promise<int> lineLength,char* data); 
-		bool preventLock = false; // used to block writing to the queue if a read is requested
+		statuses readWrite;// used to block writing to the queue if a read is requested
+		void readChunk(char* data); 
 		std::promise<int> lengthPromise;
 		std::future<int> length = lengthPromise.get_future(); // Promise and future set for size since it needs to wait for a thread to finish to get the line size.
 		std::mutex lock; // lock queue when writing.
-		statuses status;
+		statuses status = not_started;
+		std::queue<std::string> lines; // list of lines in order
 	public:
+		
 		block(char* data);
 		int getSize();
 		bool hasNext();
@@ -31,4 +35,141 @@ namespace fileIO {
 
 	};
 
+}
+
+
+/// <summary>
+/// gets the size of the file DataFile.txt
+/// Note. should run before looking for clients perhaps in a thread
+/// </summary>
+/// <returns>uiSize (number of lines in the file)</returns>
+void GetSizePromise(std::promise<unsigned int> promise)
+{
+	configuration::configManager configurations("../Shared/config.conf");
+	FILE* f;//FILE pointer
+	int counter = 0;
+	fopen_s(&f, configurations.getConfigChar("dataFile"), "rb"); // open the file in binary read
+	if (f != 0) {
+		fseek(f, 0, SEEK_END);// go to end
+		long fsize = ftell(f); // get size in bytes by telling the end pointer size
+		fseek(f, 0, SEEK_SET); // set pointer back to beginning of file  
+
+		char* data = (char*)malloc(fsize + 1);
+
+		fread(data, fsize, 1, f); // read the file into the buffer
+		fclose(f); // close
+
+		data[fsize] = 0;// 0 terminate file
+
+		for (int i = 0; i < fsize + 1; i++) {
+
+			if (data[i] == '\n') {
+				counter++; // add each new line character as a count
+			}
+		}
+		counter++; // incremement 1 since the last line wont have a new line character
+		promise.set_value(counter);
+		free(data); // delete residual data AFTER promise is set so program may continue during cleanup
+	}// if open
+	else {
+		promise.set_value(-1); // default -1
+	}
+}
+
+
+
+
+
+
+/// <summary>
+/// This function is to be used as a thread. The block initiates this thread then moves on to allow loading of the file in the background.
+/// </summary>
+/// <param name="data"></param>
+void fileIO::block::readChunk(char* data)
+{
+	std::cout << this->status;
+}
+
+/// <summary>
+/// this inits the block object. It takes the input block to be analyzed into lines.
+/// </summary>
+/// <param name="data"></param>
+fileIO::block::block(char* data)
+{
+	this->status = started;
+	std::function<void()> f = [this, data]() {this->readChunk(data); };
+	std::thread thread(f);
+	thread.detach();
+}
+
+/// <summary>
+/// This function gets the total number of lines in this chunk of data
+/// Note. Returns -1 if getSize is not ready
+/// </summary>
+/// <returns></returns>
+int fileIO::block::getSize()
+{
+	if (this->length._Is_ready()) {
+		return this->length._Get_value();
+	}
+	else {
+		return -1;
+	}
+}
+
+/// <summary>
+/// checks if there is another available line in queue. If there isnt it then checks if the block has been finished reading. If the block is done and all lines are pulled from the queue then this returns false. else returns true
+/// Since getNext is blocking
+/// </summary>
+/// <returns></returns>
+bool fileIO::block::hasNext()
+{
+	bool isEmpty = this->lines.empty();
+	if (this->status == fileIO::done && isEmpty == true) { // finished reading lines and no more lines.
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+/// <summary>
+/// WARNING BLOCKING
+/// This function gets the next line in the queue. It has priority over writing in the queue - NON-BLOCKING
+/// Note. Returns "" if timed out or no lines left
+/// </summary>
+/// <returns></returns>
+std::string fileIO::block::getNext()
+{
+	if (this->status == fileIO::done && this->lines.empty() == true) { // finished reading lines and no more lines.
+		return "";
+	}
+
+	std::string result;
+	if (this->lines.size() > 0) {
+		this->readWrite = fileIO::reading;
+		result = this->lines.front(); // read from front
+		this->lock.lock();
+		this->lines.pop(); // remove from front
+		this->lock.unlock();
+		return result; // return
+	}
+	else {
+		this->readWrite = fileIO::waiting; // inform processing thread this one is waiting for a line so it may add one. -- readChunk should set status to reading once it writes after a waiting status
+		Metrics::Timer timer; // used to reduce deadlock probability
+		timer.start();
+		while (this->status != reading && timer.getTime() <50) { // keep waiting until the writing thread has written to the queue or until 50ms has been reached.
+			this_thread::sleep_for(std::chrono::microseconds(100));
+		}
+	}
+	this->status = fileIO::error;
+	return "";
+}
+
+/// <summary>
+/// used to get the status of this block. Not started, Running, Finished, Error
+/// </summary>
+/// <returns></returns>
+fileIO::statuses fileIO::block::getStatus()
+{
+	return this->status;
 }

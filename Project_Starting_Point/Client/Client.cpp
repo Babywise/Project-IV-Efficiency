@@ -6,8 +6,6 @@
 #include <thread>
 
 //include local stuff
-#include "../Shared/Metrics.h"
-#include "../Shared/Logger.h"
 #include "IO.h"
 
 // defines
@@ -43,6 +41,11 @@ float logTime; // used to measure getSize since it has been refactored for futur
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
+	fileIO::block b((char*)"hello");
+	b.getNext();
+	std::cout << " " << b.getStatus();
+	system("pause");
+
 	//setup
 	WSADATA wsaData;
 	SOCKET ClientSocket;

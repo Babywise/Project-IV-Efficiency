@@ -1,10 +1,6 @@
-/*
-* This file is used for code metric subroutines to help calculate various metrics of source code
-* v1.0 
-*	- Timer : Use start to begin timing a function and getTime to get time elapsed in ms since the start function was called
-*	- Calculation : used to get averages or other caluclations based on passed in data values
-*/
 #pragma once
+
+
 #include <Windows.h>
 #include <chrono>
 #include <vector>
@@ -20,7 +16,7 @@ using namespace std::chrono;
 /// Namespace is used for ease of use and quality of life calculations of code metrics
 /// </summary>
 namespace Metrics {
-	
+
 	const std::string metricsLogFile = "Metrics";
 	Logger logger;
 
@@ -49,7 +45,7 @@ namespace Metrics {
 		float getTime() {
 			steady_clock::time_point endTime = high_resolution_clock::now();
 
-			return float((endTime - startTime).count())/1000000;
+			return float((endTime - startTime).count()) / 1000000;
 
 		}
 	};
@@ -97,7 +93,7 @@ namespace Metrics {
 	/// <param name=""></param>
 	/// <param name=""></param>
 	void logIOMetrics(Metrics::Calculations calculations, Metrics::Calculations lineCounter, float timeToGetSize) {
-		
+
 		Timer timer;
 
 		//format log file
@@ -106,7 +102,7 @@ namespace Metrics {
 		logger.emptyLine(metricsLogFile);
 
 		// log and archive system information
-	
+
 		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType | more >> \"%cd%/../Logs/Metrics.log\"");
 		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType | more >> \"%cd%/../Archive/Metrics.archive\"");
 		logger.emptyLine(metricsLogFile);
@@ -127,7 +123,7 @@ namespace Metrics {
 		int byteCounter = 0; // to get total number of bytes
 		for (const auto& entry : std::filesystem::directory_iterator("../Client/")) {
 			if (entry.path().extension().string() == ".txt") {
-				byteCounter+=std::filesystem::file_size(entry.path());
+				byteCounter += std::filesystem::file_size(entry.path());
 				fileCounter++;
 			}
 		}
@@ -141,7 +137,7 @@ namespace Metrics {
 		logger.emptyLine(metricsLogFile);
 	}
 
-	void logDataParsingMetricsClient(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataClientCalc, int numDataParsesClient){
+	void logDataParsingMetricsClient(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataClientCalc, int numDataParsesClient) {
 		//data parsing results
 		logger.log("--- Start of Client DataParsing Metrics ---", metricsLogFile);
 		logger.emptyLine(metricsLogFile);
@@ -155,7 +151,7 @@ namespace Metrics {
 		logger.emptyLine(metricsLogFile);
 	}
 
-	void logDataParsingMetricsServer(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataServerCalc, int numDataParsesServer){
+	void logDataParsingMetricsServer(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataServerCalc, int numDataParsesServer) {
 		//data parsing results
 		logger.log("--- Start of Server DataParsing Metrics ---", metricsLogFile);
 		logger.emptyLine(metricsLogFile);
@@ -172,7 +168,7 @@ namespace Metrics {
 		//calculation results
 		logger.log("--- Start of Server Calculation Metrics ---", metricsLogFile);
 		logger.emptyLine(metricsLogFile);
-		logger.log("Server - Calculations - Average time used for a calculation: " + std::to_string((calcTime/numCalc)*1000) + " Âµs", metricsLogFile);
+		logger.log("Server - Calculations - Average time used for a calculation: " + std::to_string((calcTime / numCalc) * 1000) + " µs", metricsLogFile);
 		logger.log("Server - Calculations - Total time used for calculation: " + std::to_string(calcTime) + " ms", metricsLogFile);
 		logger.log("Server - Calculations - Total number of calculations done: " + std::to_string(numCalc) + " ms", metricsLogFile);
 		logger.emptyLine(metricsLogFile);
@@ -180,7 +176,7 @@ namespace Metrics {
 		logger.emptyLine(metricsLogFile);
 	}
 
-	void logMemoryMetricsServer(Calculations sizeOfMemoryServerCalc){
+	void logMemoryMetricsServer(Calculations sizeOfMemoryServerCalc) {
 		//memory results
 		logger.log("--- Start of Server Memory Metrics ---", metricsLogFile);
 		logger.emptyLine(metricsLogFile);
@@ -198,13 +194,13 @@ namespace Metrics {
 		logger.emptyLine(metricsLogFile);
 		logger.log("Client - Network - Number of Transmissions: " + std::to_string(numTransmissions), metricsLogFile);
 		logger.emptyLine(metricsLogFile);
-		logger.log("Client - Network - Average Handshake Time: " + std::to_string(avgHandshake) +  " Âµs", metricsLogFile);
+		logger.log("Client - Network - Average Handshake Time: " + std::to_string(avgHandshake) + " µs", metricsLogFile);
 		logger.emptyLine(metricsLogFile);
 		logger.log("Client - Network - Number of Transmissions in Handshake: " + std::to_string(handshakeTransmissionCount), metricsLogFile);
 		logger.emptyLine(metricsLogFile);
 		logger.log("--- End of Client Network Metrics ---", metricsLogFile);
 		logger.emptyLine(metricsLogFile);
-		
+
 	}
 
 	void logNetworkMetricsServer(int elapsedTimeMilSec, int numConnections) {
@@ -219,8 +215,8 @@ namespace Metrics {
 		logger.emptyLine(metricsLogFile);
 	}
 
-	void addLogEndOfFileSpacing(){
-		for(int i = 0; i < 3; i++){
+	void addLogEndOfFileSpacing() {
+		for (int i = 0; i < 3; i++) {
 			logger.emptyLine(metricsLogFile);
 		}
 	}

@@ -27,6 +27,9 @@
     <ClCompile Include="..\Shared\Logger.cpp">
       <Filter>SharedCPP</Filter>
     </ClCompile>
+    <ClCompile Include="IO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="DataFile.txt">
@@ -42,6 +45,9 @@
     </ClInclude>
     <ClInclude Include="..\Shared\configManager.h">
       <Filter>Shared_H</Filter>
+    </ClInclude>
+    <ClInclude Include="IO.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -402,3 +402,833 @@ Sun Feb  5 22:36:16 2023	Client - Network - Number of Transmissions in Handshake
 
 Sun Feb  5 22:36:16 2023	--- End of Client Network Metrics ---
 
+
+
+
+Sun Feb  5 23:25:07 2023	--- Start of Server Calculation Metrics ---
+
+Sun Feb  5 23:25:07 2023	Server - Calculations - Average time used for a calculation: 0.004627 µs
+Sun Feb  5 23:25:07 2023	Server - Calculations - Total time used for calculation: 3.532999 ms
+Sun Feb  5 23:25:07 2023	Server - Calculations - Total number of calculations done: 763554 ms
+
+Sun Feb  5 23:25:07 2023	--- End of Server Calculation Metrics ---
+
+Sun Feb  5 23:25:07 2023	--- Start of Server DataParsing Metrics ---
+
+Sun Feb  5 23:25:07 2023	Server - DataParsing - Total Time = 14.618750 ms
+Sun Feb  5 23:25:07 2023	Server - DataParsing - Average (Single Parse) = 0.004844 ms
+Sun Feb  5 23:25:07 2023	Server - DataParsing - # of Conversions = 3018
+Sun Feb  5 23:25:07 2023	Server - DataParsing - Total Size of Parsed Data = 757518 Bytes
+
+Sun Feb  5 23:25:07 2023	--- End of Server DataParsing Metrics ---
+
+Sun Feb  5 23:25:07 2023	--- Start of Server Memory Metrics ---
+
+Sun Feb  5 23:25:07 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Sun Feb  5 23:25:07 2023	--- End of Server Memory Metrics ---
+
+Sun Feb  5 23:25:07 2023	--- Start of Server Network Metrics ---
+
+Sun Feb  5 23:25:07 2023	Server - Network - Server Uptime: 6001 ms
+
+Sun Feb  5 23:25:07 2023	Server - Network - Number of Connections: 1
+
+Sun Feb  5 23:25:07 2023	--- End of Server Network Metrics ---
+
+Sun Feb  5 23:25:07 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                       ProcessorType  
+2800               9               64         2801           Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         12          00940B160000  Physical Memory  2667   
+17179869184  64         12          00940B160000  Physical Memory  2667   
+
+
+
+Description  Manufacturer            Model            Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP  \\.\PHYSICALDRIVE0  2048407280640  
+
+
+
+Sun Feb  5 23:25:08 2023	Client - IO - Get File Size :0.410900ms
+Sun Feb  5 23:25:08 2023	Client - IO - Average time to get line from file : 4.132188ms
+Sun Feb  5 23:25:08 2023	Client - IO - TotalTime reading files to get specific lines : 2086.755127ms
+Sun Feb  5 23:25:08 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Sun Feb  5 23:25:08 2023	Client - IO - Data File Count (.txt) is : 1
+Sun Feb  5 23:25:08 2023	Client - IO - Total bytes in data files is : 49812
+
+Sun Feb  5 23:25:08 2023	--- End of Client IO Metrics ---
+
+Sun Feb  5 23:25:08 2023	--- Start of Client DataParsing Metrics ---
+
+Sun Feb  5 23:25:08 2023	Client - DataParsing - Total Time = 13.264235 ms
+Sun Feb  5 23:25:08 2023	Client - DataParsing - Average (Single Parse) = 0.003289 ms
+Sun Feb  5 23:25:08 2023	Client - DataParsing - # of Conversions = 4033
+Sun Feb  5 23:25:09 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Sun Feb  5 23:25:09 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Sun Feb  5 23:25:09 2023	--- End of Client DataParsing Metrics ---
+
+Sun Feb  5 23:25:09 2023	--- Start of Client Network Metrics ---
+
+Sun Feb  5 23:25:09 2023	Client - Network - Network Type: LAN
+
+Sun Feb  5 23:25:09 2023	Client - Network - Number of Transmissions: 16128
+
+Sun Feb  5 23:25:09 2023	Client - Network - Average Handshake Time: 174 µs
+
+Sun Feb  5 23:25:09 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Sun Feb  5 23:25:09 2023	--- End of Client Network Metrics ---
+
+
+
+
+Sun Feb  5 23:25:58 2023	--- Start of Server Calculation Metrics ---
+
+Sun Feb  5 23:25:58 2023	Server - Calculations - Average time used for a calculation: 0.004380 µs
+Sun Feb  5 23:25:58 2023	Server - Calculations - Total time used for calculation: 3.344009 ms
+Sun Feb  5 23:25:58 2023	Server - Calculations - Total number of calculations done: 763554 ms
+
+Sun Feb  5 23:25:58 2023	--- End of Server Calculation Metrics ---
+
+Sun Feb  5 23:25:58 2023	--- Start of Server DataParsing Metrics ---
+
+Sun Feb  5 23:25:58 2023	Server - DataParsing - Total Time = 14.273658 ms
+Sun Feb  5 23:25:58 2023	Server - DataParsing - Average (Single Parse) = 0.004730 ms
+Sun Feb  5 23:25:58 2023	Server - DataParsing - # of Conversions = 3018
+Sun Feb  5 23:25:58 2023	Server - DataParsing - Total Size of Parsed Data = 757518 Bytes
+
+Sun Feb  5 23:25:58 2023	--- End of Server DataParsing Metrics ---
+
+Sun Feb  5 23:25:58 2023	--- Start of Server Memory Metrics ---
+
+Sun Feb  5 23:25:58 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Sun Feb  5 23:25:58 2023	--- End of Server Memory Metrics ---
+
+Sun Feb  5 23:25:58 2023	--- Start of Server Network Metrics ---
+
+Sun Feb  5 23:25:58 2023	Server - Network - Server Uptime: 5868 ms
+
+Sun Feb  5 23:25:58 2023	Server - Network - Number of Connections: 1
+
+Sun Feb  5 23:25:58 2023	--- End of Server Network Metrics ---
+
+Sun Feb  5 23:25:58 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                       ProcessorType  
+2800               9               64         2801           Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         12          00940B160000  Physical Memory  2667   
+17179869184  64         12          00940B160000  Physical Memory  2667   
+
+
+
+Description  Manufacturer            Model            Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP  \\.\PHYSICALDRIVE0  2048407280640  
+
+
+
+Sun Feb  5 23:25:59 2023	Client - IO - Get File Size :0.334400ms
+Sun Feb  5 23:25:59 2023	Client - IO - Average time to get line from file : 3.873734ms
+Sun Feb  5 23:25:59 2023	Client - IO - TotalTime reading files to get specific lines : 1956.235596ms
+Sun Feb  5 23:25:59 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Sun Feb  5 23:25:59 2023	Client - IO - Data File Count (.txt) is : 1
+Sun Feb  5 23:25:59 2023	Client - IO - Total bytes in data files is : 49812
+
+Sun Feb  5 23:25:59 2023	--- End of Client IO Metrics ---
+
+Sun Feb  5 23:25:59 2023	--- Start of Client DataParsing Metrics ---
+
+Sun Feb  5 23:25:59 2023	Client - DataParsing - Total Time = 10.913722 ms
+Sun Feb  5 23:25:59 2023	Client - DataParsing - Average (Single Parse) = 0.002706 ms
+Sun Feb  5 23:25:59 2023	Client - DataParsing - # of Conversions = 4033
+Sun Feb  5 23:25:59 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Sun Feb  5 23:25:59 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Sun Feb  5 23:25:59 2023	--- End of Client DataParsing Metrics ---
+
+Sun Feb  5 23:25:59 2023	--- Start of Client Network Metrics ---
+
+Sun Feb  5 23:25:59 2023	Client - Network - Network Type: LAN
+
+Sun Feb  5 23:25:59 2023	Client - Network - Number of Transmissions: 16128
+
+Sun Feb  5 23:25:59 2023	Client - Network - Average Handshake Time: 173 µs
+
+Sun Feb  5 23:25:59 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Sun Feb  5 23:25:59 2023	--- End of Client Network Metrics ---
+
+
+
+
+Sun Feb  5 23:29:38 2023	--- Start of Server Calculation Metrics ---
+
+Sun Feb  5 23:29:38 2023	Server - Calculations - Average time used for a calculation: 0.004567 µs
+Sun Feb  5 23:29:38 2023	Server - Calculations - Total time used for calculation: 3.486907 ms
+Sun Feb  5 23:29:38 2023	Server - Calculations - Total number of calculations done: 763554 ms
+
+Sun Feb  5 23:29:38 2023	--- End of Server Calculation Metrics ---
+
+Sun Feb  5 23:29:38 2023	--- Start of Server DataParsing Metrics ---
+
+Sun Feb  5 23:29:38 2023	Server - DataParsing - Total Time = 14.538665 ms
+Sun Feb  5 23:29:38 2023	Server - DataParsing - Average (Single Parse) = 0.004817 ms
+Sun Feb  5 23:29:38 2023	Server - DataParsing - # of Conversions = 3018
+Sun Feb  5 23:29:38 2023	Server - DataParsing - Total Size of Parsed Data = 757518 Bytes
+
+Sun Feb  5 23:29:38 2023	--- End of Server DataParsing Metrics ---
+
+Sun Feb  5 23:29:38 2023	--- Start of Server Memory Metrics ---
+
+Sun Feb  5 23:29:38 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Sun Feb  5 23:29:38 2023	--- End of Server Memory Metrics ---
+
+Sun Feb  5 23:29:38 2023	--- Start of Server Network Metrics ---
+
+Sun Feb  5 23:29:38 2023	Server - Network - Server Uptime: 6356 ms
+
+Sun Feb  5 23:29:38 2023	Server - Network - Number of Connections: 1
+
+Sun Feb  5 23:29:38 2023	--- End of Server Network Metrics ---
+
+Sun Feb  5 23:29:38 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                       ProcessorType  
+2800               9               64         2801           Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         12          00940B160000  Physical Memory  2667   
+17179869184  64         12          00940B160000  Physical Memory  2667   
+
+
+
+Description  Manufacturer            Model            Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP  \\.\PHYSICALDRIVE0  2048407280640  
+
+
+
+Sun Feb  5 23:29:39 2023	Client - IO - Get File Size :0.000000ms
+Sun Feb  5 23:29:39 2023	Client - IO - Average time to get line from file : 4.242928ms
+Sun Feb  5 23:29:39 2023	Client - IO - TotalTime reading files to get specific lines : 2142.678467ms
+Sun Feb  5 23:29:39 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Sun Feb  5 23:29:39 2023	Client - IO - Data File Count (.txt) is : 1
+Sun Feb  5 23:29:39 2023	Client - IO - Total bytes in data files is : 49812
+
+Sun Feb  5 23:29:39 2023	--- End of Client IO Metrics ---
+
+Sun Feb  5 23:29:39 2023	--- Start of Client DataParsing Metrics ---
+
+Sun Feb  5 23:29:39 2023	Client - DataParsing - Total Time = 11.473314 ms
+Sun Feb  5 23:29:39 2023	Client - DataParsing - Average (Single Parse) = 0.002845 ms
+Sun Feb  5 23:29:39 2023	Client - DataParsing - # of Conversions = 4033
+Sun Feb  5 23:29:39 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Sun Feb  5 23:29:39 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Sun Feb  5 23:29:39 2023	--- End of Client DataParsing Metrics ---
+
+Sun Feb  5 23:29:39 2023	--- Start of Client Network Metrics ---
+
+Sun Feb  5 23:29:39 2023	Client - Network - Network Type: LAN
+
+Sun Feb  5 23:29:39 2023	Client - Network - Number of Transmissions: 16128
+
+Sun Feb  5 23:29:39 2023	Client - Network - Average Handshake Time: 168 µs
+
+Sun Feb  5 23:29:39 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Sun Feb  5 23:29:39 2023	--- End of Client Network Metrics ---
+
+
+
+
+Sun Feb  5 23:30:21 2023	--- Start of Server Calculation Metrics ---
+
+Sun Feb  5 23:30:21 2023	Server - Calculations - Average time used for a calculation: 0.004379 µs
+Sun Feb  5 23:30:21 2023	Server - Calculations - Total time used for calculation: 3.343510 ms
+Sun Feb  5 23:30:21 2023	Server - Calculations - Total number of calculations done: 763554 ms
+
+Sun Feb  5 23:30:21 2023	--- End of Server Calculation Metrics ---
+
+Sun Feb  5 23:30:21 2023	--- Start of Server DataParsing Metrics ---
+
+Sun Feb  5 23:30:21 2023	Server - DataParsing - Total Time = 14.426753 ms
+Sun Feb  5 23:30:21 2023	Server - DataParsing - Average (Single Parse) = 0.004780 ms
+Sun Feb  5 23:30:21 2023	Server - DataParsing - # of Conversions = 3018
+Sun Feb  5 23:30:21 2023	Server - DataParsing - Total Size of Parsed Data = 757518 Bytes
+
+Sun Feb  5 23:30:21 2023	--- End of Server DataParsing Metrics ---
+
+Sun Feb  5 23:30:21 2023	--- Start of Server Memory Metrics ---
+
+Sun Feb  5 23:30:21 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Sun Feb  5 23:30:21 2023	--- End of Server Memory Metrics ---
+
+Sun Feb  5 23:30:21 2023	--- Start of Server Network Metrics ---
+
+Sun Feb  5 23:30:21 2023	Server - Network - Server Uptime: 5997 ms
+
+Sun Feb  5 23:30:21 2023	Server - Network - Number of Connections: 1
+
+Sun Feb  5 23:30:21 2023	--- End of Server Network Metrics ---
+Sun Feb  5 23:30:21 2023	--- Start of Client IO Metrics ---
+
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                       ProcessorType  
+2800               9               64         2801           Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         12          00940B160000  Physical Memory  2667   
+17179869184  64         12          00940B160000  Physical Memory  2667   
+
+
+
+Description  Manufacturer            Model            Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP  \\.\PHYSICALDRIVE0  2048407280640  
+
+
+
+Sun Feb  5 23:30:23 2023	Client - IO - Get File Size :0.009700ms
+Sun Feb  5 23:30:23 2023	Client - IO - Average time to get line from file : 3.942216ms
+Sun Feb  5 23:30:23 2023	Client - IO - TotalTime reading files to get specific lines : 1990.819336ms
+Sun Feb  5 23:30:23 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Sun Feb  5 23:30:23 2023	Client - IO - Data File Count (.txt) is : 1
+Sun Feb  5 23:30:23 2023	Client - IO - Total bytes in data files is : 49812
+
+Sun Feb  5 23:30:23 2023	--- End of Client IO Metrics ---
+
+Sun Feb  5 23:30:23 2023	--- Start of Client DataParsing Metrics ---
+
+Sun Feb  5 23:30:23 2023	Client - DataParsing - Total Time = 10.952850 ms
+Sun Feb  5 23:30:23 2023	Client - DataParsing - Average (Single Parse) = 0.002716 ms
+Sun Feb  5 23:30:23 2023	Client - DataParsing - # of Conversions = 4033
+Sun Feb  5 23:30:23 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Sun Feb  5 23:30:23 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Sun Feb  5 23:30:23 2023	--- End of Client DataParsing Metrics ---
+
+Sun Feb  5 23:30:23 2023	--- Start of Client Network Metrics ---
+
+Sun Feb  5 23:30:23 2023	Client - Network - Network Type: LAN
+
+Sun Feb  5 23:30:23 2023	Client - Network - Number of Transmissions: 16128
+
+Sun Feb  5 23:30:23 2023	Client - Network - Average Handshake Time: 180 µs
+
+Sun Feb  5 23:30:23 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Sun Feb  5 23:30:23 2023	--- End of Client Network Metrics ---
+
+
+
+
+Sun Feb  5 23:31:41 2023	--- Start of Server Calculation Metrics ---
+
+Sun Feb  5 23:31:41 2023	Server - Calculations - Average time used for a calculation: 0.004295 µs
+Sun Feb  5 23:31:41 2023	Server - Calculations - Total time used for calculation: 3.279718 ms
+Sun Feb  5 23:31:41 2023	Server - Calculations - Total number of calculations done: 763554 ms
+
+Sun Feb  5 23:31:41 2023	--- End of Server Calculation Metrics ---
+
+Sun Feb  5 23:31:41 2023	--- Start of Server DataParsing Metrics ---
+
+Sun Feb  5 23:31:41 2023	Server - DataParsing - Total Time = 13.993380 ms
+Sun Feb  5 23:31:41 2023	Server - DataParsing - Average (Single Parse) = 0.004637 ms
+Sun Feb  5 23:31:41 2023	Server - DataParsing - # of Conversions = 3018
+Sun Feb  5 23:31:41 2023	Server - DataParsing - Total Size of Parsed Data = 757518 Bytes
+
+Sun Feb  5 23:31:41 2023	--- End of Server DataParsing Metrics ---
+
+Sun Feb  5 23:31:41 2023	--- Start of Server Memory Metrics ---
+
+Sun Feb  5 23:31:41 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Sun Feb  5 23:31:41 2023	--- End of Server Memory Metrics ---
+
+Sun Feb  5 23:31:41 2023	--- Start of Server Network Metrics ---
+
+Sun Feb  5 23:31:41 2023	Server - Network - Server Uptime: 5847 ms
+
+Sun Feb  5 23:31:41 2023	Server - Network - Number of Connections: 1
+
+Sun Feb  5 23:31:41 2023	--- End of Server Network Metrics ---
+
+Sun Feb  5 23:31:41 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                       ProcessorType  
+2800               9               64         2801           Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         12          00940B160000  Physical Memory  2667   
+17179869184  64         12          00940B160000  Physical Memory  2667   
+
+
+
+Description  Manufacturer            Model            Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP  \\.\PHYSICALDRIVE0  2048407280640  
+
+
+
+Sun Feb  5 23:31:42 2023	Client - IO - Get File Size :0.010000ms
+Sun Feb  5 23:31:42 2023	Client - IO - Average time to get line from file : 3.910484ms
+Sun Feb  5 23:31:42 2023	Client - IO - TotalTime reading files to get specific lines : 1974.794189ms
+Sun Feb  5 23:31:42 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Sun Feb  5 23:31:42 2023	Client - IO - Data File Count (.txt) is : 1
+Sun Feb  5 23:31:42 2023	Client - IO - Total bytes in data files is : 49812
+
+Sun Feb  5 23:31:42 2023	--- End of Client IO Metrics ---
+
+Sun Feb  5 23:31:42 2023	--- Start of Client DataParsing Metrics ---
+
+Sun Feb  5 23:31:42 2023	Client - DataParsing - Total Time = 11.080120 ms
+Sun Feb  5 23:31:42 2023	Client - DataParsing - Average (Single Parse) = 0.002747 ms
+Sun Feb  5 23:31:42 2023	Client - DataParsing - # of Conversions = 4033
+Sun Feb  5 23:31:42 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Sun Feb  5 23:31:42 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Sun Feb  5 23:31:42 2023	--- End of Client DataParsing Metrics ---
+
+Sun Feb  5 23:31:42 2023	--- Start of Client Network Metrics ---
+
+Sun Feb  5 23:31:42 2023	Client - Network - Network Type: LAN
+
+Sun Feb  5 23:31:42 2023	Client - Network - Number of Transmissions: 16128
+
+Sun Feb  5 23:31:42 2023	Client - Network - Average Handshake Time: 176 µs
+
+Sun Feb  5 23:31:42 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Sun Feb  5 23:31:42 2023	--- End of Client Network Metrics ---
+
+
+
+
+Sun Feb  5 23:31:53 2023	--- Start of Server Calculation Metrics ---
+
+Sun Feb  5 23:31:53 2023	Server - Calculations - Average time used for a calculation: 0.004379 µs
+Sun Feb  5 23:31:53 2023	Server - Calculations - Total time used for calculation: 3.343915 ms
+Sun Feb  5 23:31:53 2023	Server - Calculations - Total number of calculations done: 763554 ms
+
+Sun Feb  5 23:31:53 2023	--- End of Server Calculation Metrics ---
+
+Sun Feb  5 23:31:53 2023	--- Start of Server DataParsing Metrics ---
+
+Sun Feb  5 23:31:53 2023	Server - DataParsing - Total Time = 13.797759 ms
+Sun Feb  5 23:31:53 2023	Server - DataParsing - Average (Single Parse) = 0.004572 ms
+Sun Feb  5 23:31:53 2023	Server - DataParsing - # of Conversions = 3018
+Sun Feb  5 23:31:53 2023	Server - DataParsing - Total Size of Parsed Data = 757518 Bytes
+
+Sun Feb  5 23:31:53 2023	--- End of Server DataParsing Metrics ---
+
+Sun Feb  5 23:31:53 2023	--- Start of Server Memory Metrics ---
+
+Sun Feb  5 23:31:53 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Sun Feb  5 23:31:53 2023	--- End of Server Memory Metrics ---
+
+Sun Feb  5 23:31:53 2023	--- Start of Server Network Metrics ---
+
+Sun Feb  5 23:31:53 2023	Server - Network - Server Uptime: 5875 ms
+
+Sun Feb  5 23:31:53 2023	Server - Network - Number of Connections: 1
+
+Sun Feb  5 23:31:53 2023	--- End of Server Network Metrics ---
+
+Sun Feb  5 23:31:53 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                       ProcessorType  
+2800               9               64         2801           Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         12          00940B160000  Physical Memory  2667   
+17179869184  64         12          00940B160000  Physical Memory  2667   
+
+
+
+Description  Manufacturer            Model            Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP  \\.\PHYSICALDRIVE0  2048407280640  
+
+
+
+Sun Feb  5 23:31:55 2023	Client - IO - Get File Size :0.016700ms
+Sun Feb  5 23:31:55 2023	Client - IO - Average time to get line from file : 3.966152ms
+Sun Feb  5 23:31:55 2023	Client - IO - TotalTime reading files to get specific lines : 2002.906616ms
+Sun Feb  5 23:31:55 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Sun Feb  5 23:31:55 2023	Client - IO - Data File Count (.txt) is : 1
+Sun Feb  5 23:31:55 2023	Client - IO - Total bytes in data files is : 49812
+
+Sun Feb  5 23:31:55 2023	--- End of Client IO Metrics ---
+
+Sun Feb  5 23:31:55 2023	--- Start of Client DataParsing Metrics ---
+
+Sun Feb  5 23:31:55 2023	Client - DataParsing - Total Time = 11.010069 ms
+Sun Feb  5 23:31:55 2023	Client - DataParsing - Average (Single Parse) = 0.002730 ms
+Sun Feb  5 23:31:55 2023	Client - DataParsing - # of Conversions = 4033
+Sun Feb  5 23:31:55 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Sun Feb  5 23:31:55 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Sun Feb  5 23:31:55 2023	--- End of Client DataParsing Metrics ---
+
+Sun Feb  5 23:31:55 2023	--- Start of Client Network Metrics ---
+
+Sun Feb  5 23:31:55 2023	Client - Network - Network Type: LAN
+
+Sun Feb  5 23:31:55 2023	Client - Network - Number of Transmissions: 16128
+
+Sun Feb  5 23:31:55 2023	Client - Network - Average Handshake Time: 171 µs
+
+Sun Feb  5 23:31:55 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Sun Feb  5 23:31:55 2023	--- End of Client Network Metrics ---
+
+
+
+
+Sun Feb  5 23:37:37 2023	--- Start of Server Calculation Metrics ---
+
+Sun Feb  5 23:37:37 2023	Server - Calculations - Average time used for a calculation: 0.004022 µs
+Sun Feb  5 23:37:37 2023	Server - Calculations - Total time used for calculation: 3.582921 ms
+Sun Feb  5 23:37:37 2023	Server - Calculations - Total number of calculations done: 890813 ms
+
+Sun Feb  5 23:37:37 2023	--- End of Server Calculation Metrics ---
+
+Sun Feb  5 23:37:37 2023	--- Start of Server DataParsing Metrics ---
+
+Sun Feb  5 23:37:37 2023	Server - DataParsing - Total Time = 14.182437 ms
+Sun Feb  5 23:37:37 2023	Server - DataParsing - Average (Single Parse) = 0.004028 ms
+Sun Feb  5 23:37:37 2023	Server - DataParsing - # of Conversions = 3521
+Sun Feb  5 23:37:37 2023	Server - DataParsing - Total Size of Parsed Data = 883771 Bytes
+
+Sun Feb  5 23:37:37 2023	--- End of Server DataParsing Metrics ---
+
+Sun Feb  5 23:37:37 2023	--- Start of Server Memory Metrics ---
+
+Sun Feb  5 23:37:37 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Sun Feb  5 23:37:37 2023	--- End of Server Memory Metrics ---
+
+Sun Feb  5 23:37:37 2023	--- Start of Server Network Metrics ---
+
+Sun Feb  5 23:37:37 2023	Server - Network - Server Uptime: 10281 ms
+
+Sun Feb  5 23:37:37 2023	Server - Network - Number of Connections: 1
+
+Sun Feb  5 23:37:37 2023	--- End of Server Network Metrics ---
+
+Sun Feb  5 23:37:37 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                       ProcessorType  
+2800               9               64         2801           Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         12          00940B160000  Physical Memory  2667   
+17179869184  64         12          00940B160000  Physical Memory  2667   
+
+
+
+Description  Manufacturer            Model            Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP  \\.\PHYSICALDRIVE0  2048407280640  
+
+
+
+Sun Feb  5 23:37:39 2023	Client - IO - Get File Size :0.011200ms
+Sun Feb  5 23:37:39 2023	Client - IO - Average time to get line from file : 3.467759ms
+Sun Feb  5 23:37:39 2023	Client - IO - TotalTime reading files to get specific lines : 1751.218262ms
+Sun Feb  5 23:37:39 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Sun Feb  5 23:37:39 2023	Client - IO - Data File Count (.txt) is : 1
+Sun Feb  5 23:37:39 2023	Client - IO - Total bytes in data files is : 49812
+
+Sun Feb  5 23:37:39 2023	--- End of Client IO Metrics ---
+
+Sun Feb  5 23:37:39 2023	--- Start of Client DataParsing Metrics ---
+
+Sun Feb  5 23:37:39 2023	Client - DataParsing - Total Time = 8.084873 ms
+Sun Feb  5 23:37:39 2023	Client - DataParsing - Average (Single Parse) = 0.002005 ms
+Sun Feb  5 23:37:39 2023	Client - DataParsing - # of Conversions = 4033
+Sun Feb  5 23:37:39 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Sun Feb  5 23:37:39 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Sun Feb  5 23:37:39 2023	--- End of Client DataParsing Metrics ---
+
+Sun Feb  5 23:37:39 2023	--- Start of Client Network Metrics ---
+
+Sun Feb  5 23:37:39 2023	Client - Network - Network Type: LAN
+
+Sun Feb  5 23:37:39 2023	Client - Network - Number of Transmissions: 16128
+
+Sun Feb  5 23:37:39 2023	Client - Network - Average Handshake Time: 1426 µs
+
+Sun Feb  5 23:37:39 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Sun Feb  5 23:37:39 2023	--- End of Client Network Metrics ---
+
+
+
+
+Sun Feb  5 23:40:52 2023	--- Start of Server Calculation Metrics ---
+
+Sun Feb  5 23:40:52 2023	Server - Calculations - Average time used for a calculation: 0.004559 µs
+Sun Feb  5 23:40:52 2023	Server - Calculations - Total time used for calculation: 4.061496 ms
+Sun Feb  5 23:40:52 2023	Server - Calculations - Total number of calculations done: 890813 ms
+
+Sun Feb  5 23:40:52 2023	--- End of Server Calculation Metrics ---
+
+Sun Feb  5 23:40:52 2023	--- Start of Server DataParsing Metrics ---
+
+Sun Feb  5 23:40:52 2023	Server - DataParsing - Total Time = 17.234758 ms
+Sun Feb  5 23:40:52 2023	Server - DataParsing - Average (Single Parse) = 0.004895 ms
+Sun Feb  5 23:40:52 2023	Server - DataParsing - # of Conversions = 3521
+Sun Feb  5 23:40:52 2023	Server - DataParsing - Total Size of Parsed Data = 883771 Bytes
+
+Sun Feb  5 23:40:52 2023	--- End of Server DataParsing Metrics ---
+
+Sun Feb  5 23:40:52 2023	--- Start of Server Memory Metrics ---
+
+Sun Feb  5 23:40:52 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Sun Feb  5 23:40:52 2023	--- End of Server Memory Metrics ---
+
+Sun Feb  5 23:40:52 2023	--- Start of Server Network Metrics ---
+
+Sun Feb  5 23:40:52 2023	Server - Network - Server Uptime: 5994 ms
+
+Sun Feb  5 23:40:52 2023	Server - Network - Number of Connections: 1
+
+Sun Feb  5 23:40:52 2023	--- End of Server Network Metrics ---
+
+Sun Feb  5 23:40:52 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                       ProcessorType  
+2800               9               64         2801           Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         12          00940B160000  Physical Memory  2667   
+17179869184  64         12          00940B160000  Physical Memory  2667   
+
+
+
+Description  Manufacturer            Model            Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP  \\.\PHYSICALDRIVE0  2048407280640  
+
+
+
+Sun Feb  5 23:40:53 2023	Client - IO - Get File Size :0.011700ms
+Sun Feb  5 23:40:53 2023	Client - IO - Average time to get line from file : 3.878538ms
+Sun Feb  5 23:40:53 2023	Client - IO - TotalTime reading files to get specific lines : 1958.661499ms
+Sun Feb  5 23:40:53 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Sun Feb  5 23:40:53 2023	Client - IO - Data File Count (.txt) is : 1
+Sun Feb  5 23:40:53 2023	Client - IO - Total bytes in data files is : 49812
+
+Sun Feb  5 23:40:53 2023	--- End of Client IO Metrics ---
+
+Sun Feb  5 23:40:53 2023	--- Start of Client DataParsing Metrics ---
+
+Sun Feb  5 23:40:53 2023	Client - DataParsing - Total Time = 11.421762 ms
+Sun Feb  5 23:40:53 2023	Client - DataParsing - Average (Single Parse) = 0.002832 ms
+Sun Feb  5 23:40:53 2023	Client - DataParsing - # of Conversions = 4033
+Sun Feb  5 23:40:53 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Sun Feb  5 23:40:53 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Sun Feb  5 23:40:53 2023	--- End of Client DataParsing Metrics ---
+
+Sun Feb  5 23:40:53 2023	--- Start of Client Network Metrics ---
+
+Sun Feb  5 23:40:53 2023	Client - Network - Network Type: LAN
+
+Sun Feb  5 23:40:53 2023	Client - Network - Number of Transmissions: 16128
+
+Sun Feb  5 23:40:53 2023	Client - Network - Average Handshake Time: 180 µs
+
+Sun Feb  5 23:40:53 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Sun Feb  5 23:40:53 2023	--- End of Client Network Metrics ---
+
+
+
+
+Sun Feb  5 23:41:14 2023	--- Start of Server Calculation Metrics ---
+
+Sun Feb  5 23:41:14 2023	Server - Calculations - Average time used for a calculation: 0.004492 µs
+Sun Feb  5 23:41:14 2023	Server - Calculations - Total time used for calculation: 4.001108 ms
+Sun Feb  5 23:41:14 2023	Server - Calculations - Total number of calculations done: 890813 ms
+
+Sun Feb  5 23:41:14 2023	--- End of Server Calculation Metrics ---
+
+Sun Feb  5 23:41:14 2023	--- Start of Server DataParsing Metrics ---
+
+Sun Feb  5 23:41:14 2023	Server - DataParsing - Total Time = 16.807735 ms
+Sun Feb  5 23:41:14 2023	Server - DataParsing - Average (Single Parse) = 0.004774 ms
+Sun Feb  5 23:41:14 2023	Server - DataParsing - # of Conversions = 3521
+Sun Feb  5 23:41:14 2023	Server - DataParsing - Total Size of Parsed Data = 883771 Bytes
+
+Sun Feb  5 23:41:14 2023	--- End of Server DataParsing Metrics ---
+
+Sun Feb  5 23:41:14 2023	--- Start of Server Memory Metrics ---
+
+Sun Feb  5 23:41:14 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Sun Feb  5 23:41:14 2023	--- End of Server Memory Metrics ---
+
+Sun Feb  5 23:41:14 2023	--- Start of Server Network Metrics ---
+
+Sun Feb  5 23:41:14 2023	Server - Network - Server Uptime: 6127 ms
+
+Sun Feb  5 23:41:14 2023	Server - Network - Number of Connections: 1
+
+Sun Feb  5 23:41:14 2023	--- End of Server Network Metrics ---
+
+Sun Feb  5 23:41:14 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                       ProcessorType  
+2800               9               64         2801           Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         12          00940B160000  Physical Memory  2667   
+17179869184  64         12          00940B160000  Physical Memory  2667   
+
+
+
+Description  Manufacturer            Model            Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP  \\.\PHYSICALDRIVE0  2048407280640  
+
+
+
+Sun Feb  5 23:41:16 2023	Client - IO - Get File Size :0.022600ms
+Sun Feb  5 23:41:16 2023	Client - IO - Average time to get line from file : 3.939699ms
+Sun Feb  5 23:41:16 2023	Client - IO - TotalTime reading files to get specific lines : 1989.547852ms
+Sun Feb  5 23:41:16 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Sun Feb  5 23:41:16 2023	Client - IO - Data File Count (.txt) is : 1
+Sun Feb  5 23:41:16 2023	Client - IO - Total bytes in data files is : 49812
+
+Sun Feb  5 23:41:16 2023	--- End of Client IO Metrics ---
+
+Sun Feb  5 23:41:16 2023	--- Start of Client DataParsing Metrics ---
+
+Sun Feb  5 23:41:16 2023	Client - DataParsing - Total Time = 9.836024 ms
+Sun Feb  5 23:41:16 2023	Client - DataParsing - Average (Single Parse) = 0.002439 ms
+Sun Feb  5 23:41:16 2023	Client - DataParsing - # of Conversions = 4033
+Sun Feb  5 23:41:16 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Sun Feb  5 23:41:16 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Sun Feb  5 23:41:16 2023	--- End of Client DataParsing Metrics ---
+
+Sun Feb  5 23:41:16 2023	--- Start of Client Network Metrics ---
+
+Sun Feb  5 23:41:16 2023	Client - Network - Network Type: LAN
+
+Sun Feb  5 23:41:16 2023	Client - Network - Number of Transmissions: 16128
+
+Sun Feb  5 23:41:16 2023	Client - Network - Average Handshake Time: 178 µs
+
+Sun Feb  5 23:41:16 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Sun Feb  5 23:41:16 2023	--- End of Client Network Metrics ---
+
+
+
+
+Sun Feb  5 23:44:00 2023	--- Start of Server Calculation Metrics ---
+
+Sun Feb  5 23:44:00 2023	Server - Calculations - Average time used for a calculation: 0.004447 µs
+Sun Feb  5 23:44:00 2023	Server - Calculations - Total time used for calculation: 3.961211 ms
+Sun Feb  5 23:44:00 2023	Server - Calculations - Total number of calculations done: 890813 ms
+
+Sun Feb  5 23:44:00 2023	--- End of Server Calculation Metrics ---
+
+Sun Feb  5 23:44:00 2023	--- Start of Server DataParsing Metrics ---
+
+Sun Feb  5 23:44:00 2023	Server - DataParsing - Total Time = 16.618355 ms
+Sun Feb  5 23:44:00 2023	Server - DataParsing - Average (Single Parse) = 0.004720 ms
+Sun Feb  5 23:44:00 2023	Server - DataParsing - # of Conversions = 3521
+Sun Feb  5 23:44:00 2023	Server - DataParsing - Total Size of Parsed Data = 883771 Bytes
+
+Sun Feb  5 23:44:00 2023	--- End of Server DataParsing Metrics ---
+
+Sun Feb  5 23:44:00 2023	--- Start of Server Memory Metrics ---
+
+Sun Feb  5 23:44:00 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Sun Feb  5 23:44:00 2023	--- End of Server Memory Metrics ---
+
+Sun Feb  5 23:44:00 2023	--- Start of Server Network Metrics ---
+
+Sun Feb  5 23:44:00 2023	Server - Network - Server Uptime: 5874 ms
+
+Sun Feb  5 23:44:00 2023	Server - Network - Number of Connections: 1
+
+Sun Feb  5 23:44:00 2023	--- End of Server Network Metrics ---
+
+Sun Feb  5 23:44:00 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                       ProcessorType  
+2800               9               64         2801           Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         12          00940B160000  Physical Memory  2667   
+17179869184  64         12          00940B160000  Physical Memory  2667   
+
+
+
+Description  Manufacturer            Model            Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP  \\.\PHYSICALDRIVE0  2048407280640  
+
+
+
+Sun Feb  5 23:44:01 2023	Client - IO - Get File Size :0.010900ms
+Sun Feb  5 23:44:01 2023	Client - IO - Average time to get line from file : 3.726970ms
+Sun Feb  5 23:44:01 2023	Client - IO - TotalTime reading files to get specific lines : 1882.119873ms
+Sun Feb  5 23:44:01 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Sun Feb  5 23:44:01 2023	Client - IO - Data File Count (.txt) is : 1
+Sun Feb  5 23:44:01 2023	Client - IO - Total bytes in data files is : 49812
+
+Sun Feb  5 23:44:01 2023	--- End of Client IO Metrics ---
+
+Sun Feb  5 23:44:01 2023	--- Start of Client DataParsing Metrics ---
+
+Sun Feb  5 23:44:01 2023	Client - DataParsing - Total Time = 11.479293 ms
+Sun Feb  5 23:44:01 2023	Client - DataParsing - Average (Single Parse) = 0.002846 ms
+Sun Feb  5 23:44:01 2023	Client - DataParsing - # of Conversions = 4033
+Sun Feb  5 23:44:01 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Sun Feb  5 23:44:01 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Sun Feb  5 23:44:01 2023	--- End of Client DataParsing Metrics ---
+
+Sun Feb  5 23:44:01 2023	--- Start of Client Network Metrics ---
+
+Sun Feb  5 23:44:01 2023	Client - Network - Network Type: LAN
+
+Sun Feb  5 23:44:01 2023	Client - Network - Number of Transmissions: 16128
+
+Sun Feb  5 23:44:01 2023	Client - Network - Average Handshake Time: 184 µs
+
+Sun Feb  5 23:44:01 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Sun Feb  5 23:44:01 2023	--- End of Client Network Metrics ---
+

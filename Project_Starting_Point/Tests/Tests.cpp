@@ -137,24 +137,24 @@ namespace Unit_Tests
 	public:
 		TEST_METHOD(getConfig_exists_int) {
 			
-			string expected = "5";
+			std::string expected = "5";
 			configuration::configManager manager("../../Tests/TestConfig.conf");
 			Assert::AreEqual(atoi(expected.c_str()), atoi(manager.getConfig("test").c_str()));
 		}
 		TEST_METHOD(getConfig_exists_float) {
 
-			string expected = "5.22";
+			std::string expected = "5.22";
 			configuration::configManager manager("../../Tests/TestConfig.conf");
 			Assert::AreEqual(atof(expected.c_str()), atof(manager.getConfig("testfloat").c_str()));
 		}
 		TEST_METHOD(getConfig_exists_string) {
 
-			string expected = "works";
+			std::string expected = "works";
 			configuration::configManager manager("../../Tests/TestConfig.conf");
 			Assert::AreEqual(expected, manager.getConfig("filetest"));
 		}
 		TEST_METHOD(getConfig_not_exists_int) {
-			string answer;
+			std::string answer;
 			
 			configuration::configManager manager("");
 			answer = manager.getConfig("not this one");
@@ -170,12 +170,15 @@ namespace metrics_Testing
 	TEST_CLASS(IO)
 	{
 	public:
+		/// <summary>
+		/// This test method is used to ensure PERF_REQ_IO_001 is met
+		/// </summary>
 		TEST_METHOD(getFileSize)
 		{
 			//setup
 			configuration::configManager manager("../../Tests/TestConfig.conf");
 		
-			int maxTime = 2000; // 2 seconds as milliseconds
+			int maxTime = 2; //2 milliseconds
 			int time;
 			Metrics::Timer timer;
 
@@ -208,26 +211,12 @@ namespace metrics_Testing
 
 			//assert
 			if (time < maxTime) {
-				Assert::AreEqual(1, 1, (const wchar_t*)"This passed since it was under the max time");
+				Assert::AreEqual(1, 1);
 			}
 			else {
-				Assert::Fail((const wchar_t*)"This failed since the time was over the max allotted");
+				Assert::Fail();
 			}
 		}
-		TEST_METHOD(averageTimeToGetLine)
-		{
-			string message = "Not implemented";
-			Assert::AreEqual(message, (string)"");
-		}
-		TEST_METHOD(totalLinesReadingFiles)
-		{
-			string message = "Not implemented";
-			Assert::AreEqual(message, (string)"");
-		}
-		TEST_METHOD(totalTimeReadingFiles)
-		{
-			string message = "Not implemented";
-			Assert::AreEqual(message, (string)"");
-		}
+		
 	};
 }

@@ -4,13 +4,15 @@
 #include <fstream>
 #include <string>
 #include <vector>
-
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "../Shared/Metrics.h"
 #include "../Shared/Logger.h"
 #include "../Shared/configManager.h"
 //#define WAN
 #define LAN
+#define METRICS
 
 configuration::configManager configurations("../Shared/config.conf");
 const char* lanAddr = configurations.getConfigChar("lanAddr");
@@ -19,7 +21,7 @@ const int port = atof(configurations.getConfig("port").c_str());
 const string wan = configurations.getConfigChar("wan");
 const string lan = configurations.getConfigChar("lan");
 
-#define METRICS
+
 
 #ifdef METRICS
 int numDataParsesClient = 0;
@@ -39,7 +41,8 @@ unsigned int GetSize();
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
-	
+
+
 	//setup
 	WSADATA wsaData;
 	SOCKET ClientSocket;
@@ -223,19 +226,28 @@ int main(int argc, char* argv[])
 /// </summary>
 /// <returns>uiSize (number of lines in the file)</returns>
 unsigned int GetSize()
-
 {
-	string strInput;
-	unsigned int uiSize = 0;
-	ifstream ifs(configurations.getConfigChar("dataFile"));
-	if (ifs.is_open())
-	{
-		while (!ifs.eof())
-		{
-			getline(ifs, strInput);
-			uiSize++;
+	FILE* f;//FILE pointer
+	int counter = 0;
+	fopen_s(&f, configurations.getConfigChar("dataFile"), "rb"); // open the file in binary read
+
+	fseek(f, 0, SEEK_END);// go to end
+	long fsize = ftell(f); // get size in bytes by telling the end pointer size
+	fseek(f, 0, SEEK_SET); // set pointer back to beginning of file  
+
+	char* data = (char*)malloc(fsize + 1);
+
+	fread(data, fsize, 1, f); // read the file into the buffer
+	fclose(f); // close
+
+	data[fsize] = 0;// 0 terminate file
+
+	for (int i = 0; i < fsize + 1; i++) {
+
+		if (data[i] == '\n') {
+			counter++; // add each new line character as a count
 		}
 	}
-
-	return uiSize;
+	counter++; // incremement 1 since the last line wont have a new line character
+	return counter;
 }

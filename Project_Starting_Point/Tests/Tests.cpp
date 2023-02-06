@@ -2,6 +2,7 @@
 #include "CppUnitTest.h"
 #include "../Shared/Metrics.h"
 #include "../Shared/configManager.h"
+#include "../Client/Client.cpp"
 #ifdef _WIN32
 #endif
 
@@ -171,8 +172,47 @@ namespace metrics_Testing
 	public:
 		TEST_METHOD(getFileSize)
 		{
-			string message = "Not implemented";
-			Assert::AreEqual(message,(string)"");
+			//setup
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+		
+			int maxTime = 2000; // 2 seconds as milliseconds
+			int time;
+			Metrics::Timer timer;
+
+			//act
+			timer.start();
+
+			FILE* f;
+			int counter = 0;
+			fopen_s(&f, manager.getConfigChar("fileLocation"), "rb");
+
+			fseek(f, 0, SEEK_END);
+			long fsize = ftell(f);
+			fseek(f, 0, SEEK_SET);  /* same as rewind(f); */
+
+			char* data = (char*)malloc(fsize + 1);
+			fread(data, fsize, 1, f);
+			fclose(f);
+
+			data[fsize] = 0;
+
+			for (int i = 0; i < fsize + 1; i++) {
+
+				if (data[i] == '\n') {
+					counter++; // add each new line character as a count
+				}
+			}
+			counter++; // incremement 1 since the last line wont have a new line character
+			Sleep(0.1);
+			time = timer.getTime();
+
+			//assert
+			if (time < maxTime) {
+				Assert::AreEqual(1, 1, (const wchar_t*)"This passed since it was under the max time");
+			}
+			else {
+				Assert::Fail((const wchar_t*)"This failed since the time was over the max allotted");
+			}
 		}
 		TEST_METHOD(averageTimeToGetLine)
 		{

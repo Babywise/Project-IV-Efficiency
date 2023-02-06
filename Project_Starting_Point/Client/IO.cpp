@@ -1,4 +1,5 @@
 #include "IO.h"
+#include <queue>
 
 
 
@@ -38,4 +39,57 @@ void GetSizePromise(std::promise<unsigned int> promise)
 	else {
 		promise.set_value(-1); // default -1
 	}
+}
+/// <summary>
+/// This function is to be used as a thread. The block initiates this thread then moves on to allow loading of the file in the background.
+/// </summary>
+/// <param name="lineLength"></param>
+void fileIO::block::readChunk(std::promise<int> lineLength, char* data)
+{
+}
+/// <summary>
+/// this inits the block object. It takes the input block to be analyzed into lines.
+/// </summary>
+/// <param name="data"></param>
+fileIO::block::block(char* data)
+{
+}
+
+/// <summary>
+/// WARNING : BLOCKING
+/// This function gets the total number of lines in this chunk of data
+/// </summary>
+/// <returns></returns>
+int fileIO::block::getSize()
+{
+	return 0;
+}
+
+/// <summary>
+/// WARNING : BLOCKING
+/// checks if there is another available line in queue. If there isnt it then checks if the block has been finished reading. If the block is done and all lines are pulled from the queue then this returns false. otherwise it waits
+/// for a  new line to be added to the queue
+/// </summary>
+/// <returns></returns>
+bool fileIO::block::hasNext()
+{
+	return false;
+}
+/// <summary>
+/// This function gets the next line in the queue. It has priority over writing in the queue - NON-BLOCKING
+/// Note. Returns null if hasNext returns false.
+/// </summary>
+/// <returns></returns>
+std::string fileIO::block::getNext()
+{
+	return std::string();
+}
+
+/// <summary>
+/// used to get the status of this block. Not started, Running, Finished, Error
+/// </summary>
+/// <returns></returns>
+fileIO::statuses fileIO::block::getStatus()
+{
+	return statuses();
 }

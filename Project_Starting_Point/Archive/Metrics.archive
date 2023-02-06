@@ -1232,3 +1232,264 @@ Sun Feb  5 23:44:01 2023	Client - Network - Number of Transmissions in Handshake
 
 Sun Feb  5 23:44:01 2023	--- End of Client Network Metrics ---
 
+
+
+
+Mon Feb  6 00:17:03 2023	--- Start of Server Calculation Metrics ---
+
+Mon Feb  6 00:17:03 2023	Server - Calculations - Average time used for a calculation: 0.003105 µs
+Mon Feb  6 00:17:03 2023	Server - Calculations - Total time used for calculation: 2.766001 ms
+Mon Feb  6 00:17:03 2023	Server - Calculations - Total number of calculations done: 890813 ms
+
+Mon Feb  6 00:17:03 2023	--- End of Server Calculation Metrics ---
+
+Mon Feb  6 00:17:03 2023	--- Start of Server DataParsing Metrics ---
+
+Mon Feb  6 00:17:03 2023	Server - DataParsing - Total Time = 9.031159 ms
+Mon Feb  6 00:17:03 2023	Server - DataParsing - Average (Single Parse) = 0.002565 ms
+Mon Feb  6 00:17:03 2023	Server - DataParsing - # of Conversions = 3521
+Mon Feb  6 00:17:03 2023	Server - DataParsing - Total Size of Parsed Data = 883771 Bytes
+
+Mon Feb  6 00:17:03 2023	--- End of Server DataParsing Metrics ---
+
+Mon Feb  6 00:17:03 2023	--- Start of Server Memory Metrics ---
+
+Mon Feb  6 00:17:03 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Mon Feb  6 00:17:03 2023	--- End of Server Memory Metrics ---
+
+Mon Feb  6 00:17:03 2023	--- Start of Server Network Metrics ---
+
+Mon Feb  6 00:17:03 2023	Server - Network - Server Uptime: 3318 ms
+
+Mon Feb  6 00:17:03 2023	Server - Network - Number of Connections: 1
+
+Mon Feb  6 00:17:03 2023	--- End of Server Network Metrics ---
+
+Mon Feb  6 00:17:03 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                 ProcessorType  
+4100               11              64         4100           AMD Ryzen 9 3900X 12-Core Processor  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+
+
+
+Description  Manufacturer            Model                  Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP        \\.\PHYSICALDRIVE1  2048407280640  
+Disk drive   (Standard disk drives)  ADATA SX8200PNP        \\.\PHYSICALDRIVE0  2048407280640  
+Disk drive   (Standard disk drives)  Samsung SSD 980 250GB  \\.\PHYSICALDRIVE2  250056737280   
+
+
+
+Mon Feb  6 00:17:03 2023	Client - IO - Get File Size :4.381000ms
+Mon Feb  6 00:17:03 2023	Client - IO - Average time to get line from file : 3.201132ms
+Mon Feb  6 00:17:03 2023	Client - IO - TotalTime reading files to get specific lines : 1616.571533ms
+Mon Feb  6 00:17:03 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Mon Feb  6 00:17:03 2023	Client - IO - Data File Count (.txt) is : 1
+Mon Feb  6 00:17:03 2023	Client - IO - Total bytes in data files is : 49812
+
+Mon Feb  6 00:17:03 2023	--- End of Client IO Metrics ---
+
+Mon Feb  6 00:17:03 2023	--- Start of Client DataParsing Metrics ---
+
+Mon Feb  6 00:17:03 2023	Client - DataParsing - Total Time = 4.965466 ms
+Mon Feb  6 00:17:03 2023	Client - DataParsing - Average (Single Parse) = 0.001231 ms
+Mon Feb  6 00:17:03 2023	Client - DataParsing - # of Conversions = 4033
+Mon Feb  6 00:17:03 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Mon Feb  6 00:17:03 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Mon Feb  6 00:17:03 2023	--- End of Client DataParsing Metrics ---
+
+Mon Feb  6 00:17:03 2023	--- Start of Client Network Metrics ---
+
+Mon Feb  6 00:17:03 2023	Client - Network - Network Type: LAN
+
+Mon Feb  6 00:17:03 2023	Client - Network - Number of Transmissions: 16128
+
+Mon Feb  6 00:17:03 2023	Client - Network - Average Handshake Time: 69 µs
+
+Mon Feb  6 00:17:03 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Mon Feb  6 00:17:03 2023	--- End of Client Network Metrics ---
+
+
+
+
+Mon Feb  6 00:18:05 2023	--- Start of Server Calculation Metrics ---
+
+Mon Feb  6 00:18:05 2023	Server - Calculations - Average time used for a calculation: 0.003145 µs
+Mon Feb  6 00:18:05 2023	Server - Calculations - Total time used for calculation: 2.801204 ms
+Mon Feb  6 00:18:05 2023	Server - Calculations - Total number of calculations done: 890813 ms
+
+Mon Feb  6 00:18:05 2023	--- End of Server Calculation Metrics ---
+
+Mon Feb  6 00:18:05 2023	--- Start of Server DataParsing Metrics ---
+
+Mon Feb  6 00:18:05 2023	Server - DataParsing - Total Time = 10.057252 ms
+Mon Feb  6 00:18:05 2023	Server - DataParsing - Average (Single Parse) = 0.002856 ms
+Mon Feb  6 00:18:05 2023	Server - DataParsing - # of Conversions = 3521
+Mon Feb  6 00:18:05 2023	Server - DataParsing - Total Size of Parsed Data = 883771 Bytes
+
+Mon Feb  6 00:18:05 2023	--- End of Server DataParsing Metrics ---
+
+Mon Feb  6 00:18:05 2023	--- Start of Server Memory Metrics ---
+
+Mon Feb  6 00:18:05 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Mon Feb  6 00:18:05 2023	--- End of Server Memory Metrics ---
+
+Mon Feb  6 00:18:05 2023	--- Start of Server Network Metrics ---
+
+Mon Feb  6 00:18:05 2023	Server - Network - Server Uptime: 4692 ms
+
+Mon Feb  6 00:18:05 2023	Server - Network - Number of Connections: 1
+
+Mon Feb  6 00:18:05 2023	--- End of Server Network Metrics ---
+
+Mon Feb  6 00:18:05 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                 ProcessorType  
+4100               11              64         4100           AMD Ryzen 9 3900X 12-Core Processor  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+
+
+
+Description  Manufacturer            Model                  Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP        \\.\PHYSICALDRIVE1  2048407280640  
+Disk drive   (Standard disk drives)  ADATA SX8200PNP        \\.\PHYSICALDRIVE0  2048407280640  
+Disk drive   (Standard disk drives)  Samsung SSD 980 250GB  \\.\PHYSICALDRIVE2  250056737280   
+
+
+
+Mon Feb  6 00:18:05 2023	Client - IO - Get File Size :0.109900ms
+Mon Feb  6 00:18:05 2023	Client - IO - Average time to get line from file : 3.222857ms
+Mon Feb  6 00:18:05 2023	Client - IO - TotalTime reading files to get specific lines : 1627.542847ms
+Mon Feb  6 00:18:05 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Mon Feb  6 00:18:05 2023	Client - IO - Data File Count (.txt) is : 1
+Mon Feb  6 00:18:05 2023	Client - IO - Total bytes in data files is : 49812
+
+Mon Feb  6 00:18:05 2023	--- End of Client IO Metrics ---
+
+Mon Feb  6 00:18:05 2023	--- Start of Client DataParsing Metrics ---
+
+Mon Feb  6 00:18:05 2023	Client - DataParsing - Total Time = 5.512472 ms
+Mon Feb  6 00:18:05 2023	Client - DataParsing - Average (Single Parse) = 0.001367 ms
+Mon Feb  6 00:18:05 2023	Client - DataParsing - # of Conversions = 4033
+Mon Feb  6 00:18:05 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Mon Feb  6 00:18:05 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Mon Feb  6 00:18:05 2023	--- End of Client DataParsing Metrics ---
+
+Mon Feb  6 00:18:05 2023	--- Start of Client Network Metrics ---
+
+Mon Feb  6 00:18:05 2023	Client - Network - Network Type: LAN
+
+Mon Feb  6 00:18:05 2023	Client - Network - Number of Transmissions: 16128
+
+Mon Feb  6 00:18:05 2023	Client - Network - Average Handshake Time: 79 µs
+
+Mon Feb  6 00:18:05 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Mon Feb  6 00:18:05 2023	--- End of Client Network Metrics ---
+
+
+
+
+Mon Feb  6 00:18:46 2023	--- Start of Server Calculation Metrics ---
+
+Mon Feb  6 00:18:46 2023	Server - Calculations - Average time used for a calculation: 0.003121 µs
+Mon Feb  6 00:18:46 2023	Server - Calculations - Total time used for calculation: 2.780209 ms
+Mon Feb  6 00:18:46 2023	Server - Calculations - Total number of calculations done: 890813 ms
+
+Mon Feb  6 00:18:46 2023	--- End of Server Calculation Metrics ---
+
+Mon Feb  6 00:18:46 2023	--- Start of Server DataParsing Metrics ---
+
+Mon Feb  6 00:18:46 2023	Server - DataParsing - Total Time = 8.846766 ms
+Mon Feb  6 00:18:46 2023	Server - DataParsing - Average (Single Parse) = 0.002513 ms
+Mon Feb  6 00:18:46 2023	Server - DataParsing - # of Conversions = 3521
+Mon Feb  6 00:18:46 2023	Server - DataParsing - Total Size of Parsed Data = 883771 Bytes
+
+Mon Feb  6 00:18:46 2023	--- End of Server DataParsing Metrics ---
+
+Mon Feb  6 00:18:46 2023	--- Start of Server Memory Metrics ---
+
+Mon Feb  6 00:18:46 2023	Server - Memory - Total Memory Allocated: 128.000000 Bytes
+
+Mon Feb  6 00:18:46 2023	--- End of Server Memory Metrics ---
+
+Mon Feb  6 00:18:46 2023	--- Start of Server Network Metrics ---
+
+Mon Feb  6 00:18:46 2023	Server - Network - Server Uptime: 3775 ms
+
+Mon Feb  6 00:18:46 2023	Server - Network - Number of Connections: 1
+
+Mon Feb  6 00:18:46 2023	--- End of Server Network Metrics ---
+
+Mon Feb  6 00:18:46 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                 ProcessorType  
+4100               11              64         4100           AMD Ryzen 9 3900X 12-Core Processor  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+
+
+
+Description  Manufacturer            Model                  Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP        \\.\PHYSICALDRIVE1  2048407280640  
+Disk drive   (Standard disk drives)  ADATA SX8200PNP        \\.\PHYSICALDRIVE0  2048407280640  
+Disk drive   (Standard disk drives)  Samsung SSD 980 250GB  \\.\PHYSICALDRIVE2  250056737280   
+
+
+
+Mon Feb  6 00:18:46 2023	Client - IO - Get File Size :0.040500ms
+Mon Feb  6 00:18:46 2023	Client - IO - Average time to get line from file : 3.201408ms
+Mon Feb  6 00:18:46 2023	Client - IO - TotalTime reading files to get specific lines : 1616.710938ms
+Mon Feb  6 00:18:46 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Mon Feb  6 00:18:46 2023	Client - IO - Data File Count (.txt) is : 1
+Mon Feb  6 00:18:46 2023	Client - IO - Total bytes in data files is : 49812
+
+Mon Feb  6 00:18:46 2023	--- End of Client IO Metrics ---
+
+Mon Feb  6 00:18:46 2023	--- Start of Client DataParsing Metrics ---
+
+Mon Feb  6 00:18:46 2023	Client - DataParsing - Total Time = 5.317468 ms
+Mon Feb  6 00:18:46 2023	Client - DataParsing - Average (Single Parse) = 0.001318 ms
+Mon Feb  6 00:18:46 2023	Client - DataParsing - # of Conversions = 4033
+Mon Feb  6 00:18:46 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Mon Feb  6 00:18:46 2023	Client - DataParsing - Total Size of Parsed Data = 43781 Bytes
+
+Mon Feb  6 00:18:46 2023	--- End of Client DataParsing Metrics ---
+
+Mon Feb  6 00:18:46 2023	--- Start of Client Network Metrics ---
+
+Mon Feb  6 00:18:46 2023	Client - Network - Network Type: LAN
+
+Mon Feb  6 00:18:46 2023	Client - Network - Number of Transmissions: 16128
+
+Mon Feb  6 00:18:46 2023	Client - Network - Average Handshake Time: 70 µs
+
+Mon Feb  6 00:18:46 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Mon Feb  6 00:18:46 2023	--- End of Client Network Metrics ---
+

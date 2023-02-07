@@ -206,6 +206,15 @@ namespace Unit_Tests
 			Assert::AreEqual(false, b.hasNext());
 		}
 	};
+
+	TEST_CLASS(fileBuffer_Tests)
+	{
+	public:
+		TEST_METHOD(has_next_false) {
+			fileIO::block b((char*)"");
+			Assert::AreEqual(false, b.hasNext());
+		}
+	};
 	
 }
 

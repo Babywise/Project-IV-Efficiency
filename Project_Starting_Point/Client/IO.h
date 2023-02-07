@@ -42,7 +42,7 @@ namespace fileIO {
 	private : 
 		int length = -1;
 		std::vector<block*> chunks;
-		int threadCount = 8;
+		int threadCount = 2;
 		void splitFile(std::string input);
 		statuses status = not_started;
 		int currentBlock = 0;
@@ -162,6 +162,7 @@ bool fileIO::fileBuffer::hasNext() {
 	}
 	else {
 		while (currentBlock < this->chunks.size()-1) { // go to next block and check if that one has a next and repeat until the end or a next is found.
+			delete(this->chunks.at(currentBlock)); // free memory
 			currentBlock++;
 			if (this->chunks.at(currentBlock)->hasNext()) {
 				return true;

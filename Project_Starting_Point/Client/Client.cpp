@@ -99,8 +99,7 @@ int main(int argc, char* argv[])
 		strInput =buffer.next();
 #ifdef METRICS
 		calculations.addPoint(timer.getTime());
-		lineCounter.addPoint(3); // add 1 for the get line above, add one for close file at end of loop add one for file init
-		lineCounter.addPoint(2*l); // add 2 lines for every loop of the for loop above
+		lineCounter.addPoint(1); // add 1 for the get line above, add one for close file at end of loop add one for file init
 #endif
 // l != column headers it l is data values
 

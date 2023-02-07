@@ -210,9 +210,27 @@ namespace Unit_Tests
 	TEST_CLASS(fileBuffer_Tests)
 	{
 	public:
+		TEST_METHOD(has_next_true) {
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			Assert::AreEqual(true, buffer.hasNext());
+		}
 		TEST_METHOD(has_next_false) {
-			fileIO::block b((char*)"");
-			Assert::AreEqual(false, b.hasNext());
+			fileIO::fileBuffer buffer("testData.txt");
+			Assert::AreEqual(false, buffer.hasNext());
+		}
+		TEST_METHOD(nextLine_test) {
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			string answer = buffer.next();
+			string expected = "ACCELERATION BODY X,ACCELERATION BODY Y,ACCELERATION BODY Z,TOTAL WEIGHT,PLANE ALTITUDE,ATTITUDE INDICATOR PICTH DEGREES,ATTITUDE INDICATOR BANK DEGREES\r\n";
+
+			Assert::AreEqual(expected, answer);
+		}
+		TEST_METHOD(getLength) {
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			Assert::AreEqual(505, buffer.getLineCount());
 		}
 	};
 	

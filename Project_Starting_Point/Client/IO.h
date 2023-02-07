@@ -83,7 +83,9 @@ fileIO::fileBuffer::fileBuffer(std::string path) {
 		thread.detach();
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
 	}
-	
+	else {
+		this->status = done;
+	}
 	
 }
 
@@ -92,6 +94,10 @@ fileIO::fileBuffer::fileBuffer(std::string path) {
 /// </summary>
 /// <param name="input"></param>
 void fileIO::fileBuffer::splitFile(std::string input) {
+	if (input.length() <= 0) {
+		this->status = done;
+		return;
+	}
 	this->status = started;
 	int chunk = input.length()/this->threadCount;
 	int offset = 0;
@@ -157,19 +163,22 @@ bool fileIO::fileBuffer::hasNext() {
 	while (this->status != done && this->chunks.size() >= currentBlock) { // if all blocks are added to the vector this can be started, or at least one chunk is added to the vector
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
 	}
-	if (this->chunks.at(currentBlock)->hasNext()) { // current block has another
-		return true;
-	}
-	else {
-		while (currentBlock < this->chunks.size()-1) { // go to next block and check if that one has a next and repeat until the end or a next is found.
-			delete(this->chunks.at(currentBlock)); // free memory
-			currentBlock++;
-			if (this->chunks.at(currentBlock)->hasNext()) {
-				return true;
-			}
+	if (this->chunks.size() > currentBlock) {
+		if (this->chunks.at(currentBlock)->hasNext()) { // current block has another
+			return true;
 		}
-		return false;
+		else {
+			while (currentBlock < this->chunks.size() - 1) { // go to next block and check if that one has a next and repeat until the end or a next is found.
+				delete(this->chunks.at(currentBlock)); // free memory
+				currentBlock++;
+				if (this->chunks.at(currentBlock)->hasNext()) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
+	return false;
 }
 
 

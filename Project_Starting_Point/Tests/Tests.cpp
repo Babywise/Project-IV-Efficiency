@@ -5,6 +5,7 @@
 #include "../Client/Client.cpp"
 #ifdef _WIN32
 #endif
+using namespace std;
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -172,7 +173,7 @@ namespace Unit_Tests
 			int i = 0;
 			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
 			while (b.hasNext()) {
-				string check = b.getNext();
+				std::string check = b.getNext();
 				string help = expected.at(i);
 				Assert::AreEqual(help, check);
 				i++;

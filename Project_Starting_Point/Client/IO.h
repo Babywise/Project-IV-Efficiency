@@ -41,43 +41,144 @@ namespace fileIO {
 	class fileBuffer {
 	private : 
 		int length = -1;
-		std::vector<block> chunks;
-		void splitFile(std::string input);
+		std::vector<block*> chunks;
 		int threadCount = 8;
+		void splitFile(std::string input);
+		statuses status = not_started;
+		int currentBlock = 0;
 	public:
 		fileBuffer(std::string path);
 		std::string next();
 		bool hasNext();
 		int getLineCount();
+		
 	};
 
 }
 
 
-
+/// <summary>
+/// initialize the fileBuffer with the path provided uses as many threads as indicated in the config file
+/// </summary>
+/// <param name="path"></param>
 fileIO::fileBuffer::fileBuffer(std::string path) {
+	FILE* f;//FILE pointer
+	int counter = 0;
+	fopen_s(&f, path.c_str(), "rb"); // open the file in binary read
+	if (f != 0) {
+		fseek(f, 0, SEEK_END);// go to end
+		long fsize = ftell(f); // get size in bytes by telling the end pointer size
+		fseek(f, 0, SEEK_SET); // set pointer back to beginning of file  
 
+		char* data = (char*)malloc(fsize + 1);
+
+		fread(data, fsize, 1, f); // read the file into the buffer
+		fclose(f); // close
+
+		data[fsize] = 0;// 0 terminate file
+		std::string output = data;
+		free(data);
+		std::function<void()> f = [this, output]() {this->splitFile(output); };
+		std::thread thread(f);
+		thread.detach();
+		std::this_thread::sleep_for(std::chrono::microseconds(10));
+	}
+	
+	
 }
 
-
+/// <summary>
+/// splits the data passed in into a preset number of threads
+/// </summary>
+/// <param name="input"></param>
 void fileIO::fileBuffer::splitFile(std::string input) {
+	this->status = started;
+	int chunk = input.length()/this->threadCount;
+	int offset = 0;
+	for (int b = 0; b < this->threadCount-1; b++) { // for all threads except last since it picks up the remainder
+		for (int i = (chunk*b)+chunk; i < input.length(); i++) { // chunk *b + offset ---- 8000bytes / 8 threads ---- 1000 + offset ------ offset += char count to next \n
+			if (input[i] == '\n') {
+				std::string blockString;
+				if(offset==0)
+					 blockString = input.substr(offset, i-offset+1);
+				else
+					 blockString = input.substr(offset+1, i - offset);
+				std::this_thread::sleep_for(std::chrono::microseconds(10));
+				block* b = new block((char*)blockString.c_str());
+				std::this_thread::sleep_for(std::chrono::microseconds(10));
+				this->chunks.push_back(b);
+				offset = i;
+				i = input.length() + 1;
+			}
 
+		}
+	}
+	std::string blockStringTwo = input.substr(offset, input.length() - offset); // do last thread with its part plus remainder
+	std::this_thread::sleep_for(std::chrono::microseconds(10));
+	block* d = new block((char*)blockStringTwo.c_str());
+	std::this_thread::sleep_for(std::chrono::microseconds(10));
+	this->chunks.push_back(d);
+	this->status = done;
 }
 
-
+/// <summary>
+/// Gets the next line in the file
+/// </summary>
+/// <returns></returns>
 std::string fileIO::fileBuffer::next() {
+	if (this->hasNext()) {
+		while (this->status != done && this->chunks.size() >= currentBlock) { // if all blocks are added to the vector this can be started, or at least one chunk is added to the vector
+			std::this_thread::sleep_for(std::chrono::microseconds(10));
+		}
+		if (this->chunks.at(currentBlock)->hasNext()) { // if current block has next return it
+			return this->chunks.at(currentBlock)->getNext();
+		}
+		else { // current block is done and empty
+			if (currentBlock != this->chunks.size()) {
+				delete(this->chunks.at(currentBlock)); // free memory
+				currentBlock++;
+				
+				return this->next(); // ------------------------------------------------------------------------------------------------------------------------------------------------- Recursive function ----------------------------
+			}
+			else {
+				return std::string();
+			}
+		}
+	}
 	return std::string();
 }
 
-
+/// <summary>
+/// Checks if there is another available line in the file.
+/// </summary>
+/// <returns></returns>
 bool fileIO::fileBuffer::hasNext() {
-
-	return false;
+	while (this->status != done && this->chunks.size() >= currentBlock) { // if all blocks are added to the vector this can be started, or at least one chunk is added to the vector
+		std::this_thread::sleep_for(std::chrono::microseconds(10));
+	}
+	if (this->chunks.at(currentBlock)->hasNext()) { // current block has another
+		return true;
+	}
+	else {
+		while (currentBlock < this->chunks.size()-1) { // go to next block and check if that one has a next and repeat until the end or a next is found.
+			currentBlock++;
+			if (this->chunks.at(currentBlock)->hasNext()) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
 
 
-
+/// <summary>
+/// Gets the total line count of the file provided in the initializer waits until all blocks have provided a size
+/// </summary>
+/// <returns></returns>
 int fileIO::fileBuffer::getLineCount() {
+	//while (!this->status == done) {
+
+	//}
 	return 0;
 }
 

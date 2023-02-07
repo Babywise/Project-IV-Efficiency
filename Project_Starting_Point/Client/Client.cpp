@@ -41,6 +41,14 @@ float logTime; // used to measure getSize since it has been refactored for futur
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
+
+	fileIO::fileBuffer buffer("DataFile.txt");
+	while (buffer.hasNext()) {
+		std::cout << buffer.next();
+}
+	system("pause");
+
+
 	//setup
 	WSADATA wsaData;
 	SOCKET ClientSocket;

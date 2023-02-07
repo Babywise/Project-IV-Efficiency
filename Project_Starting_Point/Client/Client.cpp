@@ -21,6 +21,11 @@ const char* wanAddr = configurations.getConfigChar("wanAddr");
 const int port = atof(configurations.getConfig("port").c_str());
 const std::string wan = configurations.getConfigChar("wan");
 const std::string lan = configurations.getConfigChar("lan");
+const char* lanAddr = "127.0.0.1";
+const char* wanAddr = "x.x.x.x";
+const int port = 27001;
+const string wan = "WAN";
+const string lan = "LAN";
 
 
 //metrics variables

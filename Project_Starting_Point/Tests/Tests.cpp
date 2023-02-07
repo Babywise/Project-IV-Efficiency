@@ -288,6 +288,46 @@ namespace metrics_Testing
 				Assert::Fail();
 			}
 		}
+
+		TEST_METHOD(totalTimeToGetLine)
+		{
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			int countTo = buffer.getLineCount();
+			timer.start();
+			for (int i = 0; i < countTo; i++) {
+				std::string strInput = buffer.next();
+			}
+			float result = timer.getTime();
+			float maxTime = 2000;
+
+			if (result <= maxTime) {
+				Assert::AreEqual(1, 1);
+			}
+			else {
+				Assert::Fail();
+			}
+		}
+		TEST_METHOD(averageTimeToGetLine)
+		{
+			Metrics::Calculations calculations;
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			int countTo = buffer.getLineCount();
+			
+			for (int i = 0; i < countTo; i++) {
+				timer.start();
+				std::string strInput = buffer.next();
+				calculations.addPoint(timer.getTime());
+			}
+
+			float maxTime = 2;
+
+			if (calculations.getAverage() <= maxTime) {
+				Assert::AreEqual(1, 1);
+			}
+			else {
+				Assert::Fail();
+			}
+		}
 		
 	};
 }

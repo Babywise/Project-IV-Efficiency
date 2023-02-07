@@ -5,6 +5,7 @@
 #include "../Shared/configManager.h"
 #include "../Shared/Metrics.h"
 #include <queue>
+#include <filesystem>
 
 using namespace std;
 void GetSizePromise(std::promise<unsigned int> promise);
@@ -24,6 +25,7 @@ namespace fileIO {
 		std::mutex lock; // lock queue when writing.
 		statuses status = not_started;
 		std::queue<std::string> lines; // list of lines in order
+		int size=-1;
 	public:
 		
 		block(char* data);
@@ -87,7 +89,83 @@ void GetSizePromise(std::promise<unsigned int> promise)
 /// <param name="data"></param>
 void fileIO::block::readChunk(char* data)
 {
-	std::cout << this->status;
+	// move data into string to use substr
+	string strData;
+	strData = data;
+	int lineCounter = 0;
+
+	int offset = -1; // used to offset starting point
+
+	for (int i = 0; i < strData.length(); i++) {
+		if (strData[i] == '\n') {
+			lineCounter++;
+			string tmp = strData.substr(offset+1, i-offset);
+			
+
+			//insert tmp into list
+			if (this->readWrite == waiting) { // if waiting for a line add a line then set status to reading so the reader knows its ready
+				this->lock.lock();
+				this->lines.push(tmp);
+				this->lock.unlock();
+				this->readWrite = reading;
+			}
+			else if (this->readWrite == reading) { // if reading dont write until its done reading
+				while (this->readWrite == reading) {
+					this_thread::sleep_for(std::chrono::microseconds(100));
+				}
+				this->lock.lock();
+				this->lines.push(tmp);
+				this->lock.unlock();
+				this->readWrite = started;
+			}
+			else if (this->readWrite == started) {// if started and not reading just write new line
+				this->lock.lock();
+				this->lines.push(tmp);
+				this->lock.unlock();
+			}
+			else { // error
+				Logger log;
+				log.log(("Block has errored out"), 4, "Errors.log");
+			}
+
+
+			offset = i;
+		}
+
+		if (i == strData.length() - 1) { // last line doesnt have new line
+			string tmp = strData.substr(offset + 1, i - offset);
+			lineCounter++;
+			//insert tmp into list
+			if (this->readWrite == waiting) { // if waiting for a line add a line then set status to reading so the reader knows its ready
+				this->lock.lock();
+				this->lines.push(tmp);
+				this->lock.unlock();
+				this->readWrite = reading;
+			}
+			else if (this->readWrite == reading) { // if reading dont write until its done reading
+				while (this->readWrite == reading) {
+					this_thread::sleep_for(std::chrono::microseconds(100));
+				}
+				this->lock.lock();
+				this->lines.push(tmp);
+				this->lock.unlock();
+				this->readWrite = started;
+			}
+			else if (this->readWrite == started) {// if started and not reading just write new line
+				this->lock.lock();
+				this->lines.push(tmp);
+				this->lock.unlock();
+			}
+			else { // error
+				Logger log;
+				log.log(("Block has errored out"), 4, "Errors.log");
+			}
+			offset = i;
+		}
+	}
+
+	this->status = done;
+	this->lengthPromise.set_value(lineCounter);
 }
 
 /// <summary>
@@ -109,8 +187,12 @@ fileIO::block::block(char* data)
 /// <returns></returns>
 int fileIO::block::getSize()
 {
-	if (this->length._Is_ready()) {
-		return this->length._Get_value();
+	if (this->size != -1){
+		return this->size;
+	}
+	else if (this->length._Is_ready()) {
+		this->size = this->length._Get_value();
+		return this->size;
 	}
 	else {
 		return -1;
@@ -151,17 +233,31 @@ std::string fileIO::block::getNext()
 		this->lock.lock();
 		this->lines.pop(); // remove from front
 		this->lock.unlock();
+		this->readWrite = started;
 		return result; // return
 	}
 	else {
 		this->readWrite = fileIO::waiting; // inform processing thread this one is waiting for a line so it may add one. -- readChunk should set status to reading once it writes after a waiting status
-		Metrics::Timer timer; // used to reduce deadlock probability
-		timer.start();
-		while (this->status != reading && timer.getTime() <50) { // keep waiting until the writing thread has written to the queue or until 50ms has been reached.
+
+		while (this->readWrite != reading && this->status != done) { // keep waiting until the writing thread has written to the queue or until 50ms has been reached. -------------------------------------------   IF DEADLOCK CHECK THIS ------------------------------------
 			this_thread::sleep_for(std::chrono::microseconds(100));
 		}
+
+		if (this->readWrite == reading || this->readWrite == done) { // can read now since the thread is either done writing or the next one is in the queue
+			if (this->lines.size() > 0) {
+				this->readWrite = fileIO::reading;
+				result = this->lines.front(); // read from front
+				this->lock.lock();
+				this->lines.pop(); // remove from front
+				this->lock.unlock();
+				this->readWrite = started;
+				return result; // return
+			}
+		}
 	}
-	this->status = fileIO::error;
+	if (this->status != done) {
+		this->status = error;
+	}
 	return "";
 }
 

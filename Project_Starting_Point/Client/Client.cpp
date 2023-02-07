@@ -41,9 +41,15 @@ float logTime; // used to measure getSize since it has been refactored for futur
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
-	fileIO::block b((char*)"hello");
-	b.getNext();
-	std::cout << " " << b.getStatus();
+	for (int i = 0; i < 10; i++) {
+		fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
+		while (b.hasNext()) {
+			std::cout << b.getNext();
+			std::cout << endl << "Size : " << b.getSize() << endl;
+		}
+		
+	}
+
 	system("pause");
 
 	//setup

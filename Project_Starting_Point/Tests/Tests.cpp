@@ -298,9 +298,9 @@ namespace metrics_Testing
 				std::string strInput = buffer.next();
 			}
 			float result = timer.getTime();
-			float maxTime = 2000;
+			float maxTime = 1000;
 
-			if (result <= maxTime) {
+			if (result < maxTime) {
 				Assert::AreEqual(1, 1);
 			}
 			else {
@@ -319,7 +319,7 @@ namespace metrics_Testing
 				calculations.addPoint(timer.getTime());
 			}
 
-			float maxTime = 2;
+			float maxTime = 1;
 
 			if (calculations.getAverage() <= maxTime) {
 				Assert::AreEqual(1, 1);

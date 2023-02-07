@@ -42,7 +42,7 @@ namespace fileIO {
 	private : 
 		int length = -1;
 		std::vector<block*> chunks;
-		int threadCount = 4;
+		int threadCount = 1;
 		void splitFile(std::string input);
 		statuses status = not_started;
 		int currentBlock = 0;

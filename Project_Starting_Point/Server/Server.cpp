@@ -24,8 +24,7 @@ const int numColumns = 7;
 struct StorageTypes 
 { 
 	unsigned int size = 0;
-	int sum;
-	int counter;
+	float* pData;
 };
 StorageTypes RxData[numColumns];
 
@@ -83,15 +82,17 @@ int main()
 	int numConnections = 1;
 
 	std::cout << "Connection Established" << std::endl;
-
+	bool exit = false;
 	// if first byte of buffer is an asterisk close connection
-	while (RxBuffer[0] != configurations.getConfigChar("terminator")[0])
+	while (!exit)
 	{
-		float fValue = 0;
+			float fValue = 0;
 		memset(RxBuffer, 0, sizeof(RxBuffer));
 		recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0); // get param name
 		send(ConnectionSocket, "ACK", sizeof("ACK"), 0); // send ack
-
+		if (RxBuffer[0] == configurations.getConfigChar("terminator")[0])
+			exit = true;
+														 
 		// find param name recieved
 		if (strcmp(RxBuffer, configurations.getConfigChar("columnOne")) == 0)
 		{
@@ -233,8 +234,23 @@ int main()
 /// <param name="value"></param>
 void UpdateData(unsigned int uiIndex, float value)
 {
-	RxData[uiIndex].sum += value;
-	RxData[uiIndex].counter++;
+	if (RxData[uiIndex].size == 0) // if first value
+	{
+		RxData[uiIndex].pData = new float[1]; // init pdata
+		RxData[uiIndex].pData[0] = value;
+		RxData[uiIndex].size = 1; // size is 1
+	}
+	else // not first value
+	{
+		float* pNewData = new float[RxData[uiIndex].size + 1];
+		for (unsigned int x = 0; x < RxData[uiIndex].size; x++)
+			pNewData[x] = RxData[uiIndex].pData[x]; // set next pdata to data input
+
+		pNewData[RxData[uiIndex].size] = value;
+		delete[] RxData[uiIndex].pData; // delete old memory
+		RxData[uiIndex].pData = pNewData; // replace with new data added
+		RxData[uiIndex].size++;
+	}
 }
 
 /// <summary>
@@ -244,11 +260,10 @@ void UpdateData(unsigned int uiIndex, float value)
 /// <returns></returns>
 float CalcAvg(unsigned int uiIndex)
 {
-	if (RxData[uiIndex].counter != 0) {
-		float Avg = RxData[uiIndex].sum / RxData[uiIndex].counter;
-		RxData[uiIndex].counter++;
-		return Avg;
-	}
-	
-	return 0;
+	float Avg = 0;
+	for (unsigned int x = 0; x < RxData[uiIndex].size; x++)
+		Avg += RxData[uiIndex].pData[x];
+
+	Avg = Avg / RxData[uiIndex].size;
+	return Avg;
 }

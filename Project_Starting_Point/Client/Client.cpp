@@ -203,6 +203,7 @@ int main(int argc, char* argv[])
 	Metrics::logIOMetrics(calculations, lineCounter, logTime);
 	Metrics::logDataParsingMetricsClient(dataParsingTimeCalc, sizeOfDataParsedDataClientCalc, numDataParsesClient);
 #endif
+	send(ClientSocket, "***", 3,0);
 	closesocket(ClientSocket); // cleanup
 	WSACleanup();
 

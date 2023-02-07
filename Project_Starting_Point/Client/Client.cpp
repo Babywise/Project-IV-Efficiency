@@ -41,7 +41,6 @@ float logTime; // used to measure getSize since it has been refactored for futur
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
-
 	fileIO::fileBuffer buffer(configurations.getConfigChar("dataFile"));
 
 

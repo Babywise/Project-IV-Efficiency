@@ -120,7 +120,7 @@ void fileIO::fileBuffer::splitFile(std::string input) {
 			}
 		}
 	}
-	std::string blockStringTwo = input.substr(offset+1, input.length() - offset); // do last thread with its part plus remainder
+	std::string blockStringTwo = input.substr(offset, input.length() - offset); // do last thread with its part plus remainder
 	std::this_thread::sleep_for(std::chrono::microseconds(10));
 	block* d = new block((char*)blockStringTwo.c_str());
 	std::this_thread::sleep_for(std::chrono::microseconds(10));
@@ -256,7 +256,7 @@ void fileIO::block::readChunk(char* data)
 	for (int i = 0; i < strData.length(); i++) {
 		if (strData[i] == '\n') {
 			lineCounter++;
-			std::string tmp = strData.substr(offset+1, i-offset);
+			std::string tmp = strData.substr(offset+1, i-offset-2);
 			
 
 			//insert tmp into list

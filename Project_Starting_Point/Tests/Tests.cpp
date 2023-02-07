@@ -162,6 +162,49 @@ namespace Unit_Tests
 		}
 
 	};
+
+	TEST_CLASS(block_tests)
+	{
+	public:
+		TEST_METHOD(Proper_order) {
+			std::vector<std::string> expected = { "hello\n","my\n","name\n","is\n","danny" };
+
+			int i = 0;
+			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
+			while (b.hasNext()) {
+				string check = b.getNext();
+				string help = expected.at(i);
+				Assert::AreEqual(help, check);
+				i++;
+			}
+			Assert::AreEqual(1, 1);
+		}
+
+		TEST_METHOD(properLineCount) {
+			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
+			this_thread::sleep_for(std::chrono::milliseconds(500));
+			Assert::AreEqual(5, b.getSize());
+		}
+		TEST_METHOD(status_Done) {
+			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
+			this_thread::sleep_for(std::chrono::milliseconds(50));
+			Assert::AreEqual(2, (int)b.getStatus());
+		}
+		TEST_METHOD(status_Started) {
+			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
+			this_thread::sleep_for(std::chrono::milliseconds(5));
+			Assert::AreEqual(2, (int)b.getStatus());
+		}
+		TEST_METHOD(has_next_true) {
+			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
+			this_thread::sleep_for(std::chrono::milliseconds(2000));
+			Assert::AreEqual(true, b.hasNext());
+		}
+		TEST_METHOD(has_next_false) {
+			fileIO::block b((char*)"");
+			Assert::AreEqual(false, b.hasNext());
+		}
+	};
 	
 }
 

@@ -175,9 +175,11 @@ void fileIO::block::readChunk(char* data)
 fileIO::block::block(char* data)
 {
 	this->status = started;
+	this->readWrite = started;
 	std::function<void()> f = [this, data]() {this->readChunk(data); };
 	std::thread thread(f);
 	thread.detach();
+	this_thread::sleep_for(std::chrono::microseconds(10));
 }
 
 /// <summary>

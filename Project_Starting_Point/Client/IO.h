@@ -42,7 +42,7 @@ namespace fileIO {
 	private : 
 		int length = -1;
 		std::vector<block*> chunks;
-		int threadCount = 2;
+		int threadCount = 4;
 		void splitFile(std::string input);
 		statuses status = not_started;
 		int currentBlock = 0;
@@ -62,6 +62,7 @@ namespace fileIO {
 /// </summary>
 /// <param name="path"></param>
 fileIO::fileBuffer::fileBuffer(std::string path) {
+	// do everything below in a new thread and return
 	FILE* f;//FILE pointer
 	int counter = 0;
 	fopen_s(&f, path.c_str(), "rb"); // open the file in binary read
@@ -70,8 +71,10 @@ fileIO::fileBuffer::fileBuffer(std::string path) {
 		long fsize = ftell(f); // get size in bytes by telling the end pointer size
 		fseek(f, 0, SEEK_SET); // set pointer back to beginning of file  
 
+		// if greater then 8MB then only malloc 8MB
 		char* data = (char*)malloc(fsize + 1);
 
+		//alter fsize to 8MB if bigger 
 		fread(data, fsize, 1, f); // read the file into the buffer
 		fclose(f); // close
 
@@ -82,6 +85,7 @@ fileIO::fileBuffer::fileBuffer(std::string path) {
 		std::thread thread(f);
 		thread.detach();
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
+		//if greater then 8MB join thread and redo for next chunk
 	}
 	else {
 		this->status = done;
@@ -218,6 +222,7 @@ void GetSizePromise(std::promise<unsigned int> promise)
 		long fsize = ftell(f); // get size in bytes by telling the end pointer size
 		fseek(f, 0, SEEK_SET); // set pointer back to beginning of file  
 
+		//if greater then 8 MB only malloc 8MB
 		char* data = (char*)malloc(fsize + 1);
 
 		fread(data, fsize, 1, f); // read the file into the buffer
@@ -232,6 +237,7 @@ void GetSizePromise(std::promise<unsigned int> promise)
 			}
 		}
 		counter++; // incremement 1 since the last line wont have a new line character
+		// if it was greater then 8MB free data and do the next part
 		promise.set_value(counter);
 		free(data); // delete residual data AFTER promise is set so program may continue during cleanup
 	}// if open

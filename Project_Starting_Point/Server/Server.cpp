@@ -24,7 +24,8 @@ const int numColumns = 7;
 struct StorageTypes 
 { 
 	unsigned int size = 0;
-	float* pData;
+	int sum;
+	int counter;
 };
 StorageTypes RxData[numColumns];
 
@@ -232,33 +233,8 @@ int main()
 /// <param name="value"></param>
 void UpdateData(unsigned int uiIndex, float value)
 {
-#ifdef METRICS
-	//start timer for data parsing
-	timer.start();
-#endif
-	if (RxData[uiIndex].size == 0) // if first value
-	{
-		RxData[uiIndex].pData = new float[1]; // init pdata
-		RxData[uiIndex].pData[0] = value;
-		RxData[uiIndex].size = 1; // size is 1
-	}
-	else // not first value
-	{
-		float* pNewData = new float[RxData[uiIndex].size + 1];
-		for (unsigned int x = 0; x < RxData[uiIndex].size; x++)
-			pNewData[x] = RxData[uiIndex].pData[x]; // set next pdata to data input
-#ifdef METRICS
-		sizeOfDataParsedDataServerCalc.addPoint(RxData[uiIndex].size);
-#endif
-		pNewData[RxData[uiIndex].size] = value;
-		delete[] RxData[uiIndex].pData; // delete old memory
-		RxData[uiIndex].pData = pNewData; // replace with new data added
-		RxData[uiIndex].size++;
-	}
-#ifdef METRICS
-	dataParsingTimeCalc.addPoint(timer.getTime());
-	numDataParsesServer++;
-#endif
+	RxData[uiIndex].sum += value;
+	RxData[uiIndex].counter++;
 }
 
 /// <summary>
@@ -268,13 +244,11 @@ void UpdateData(unsigned int uiIndex, float value)
 /// <returns></returns>
 float CalcAvg(unsigned int uiIndex)
 {
-	float Avg = 0;
-	for (unsigned int x = 0; x < RxData[uiIndex].size; x++) {
-		Avg += RxData[uiIndex].pData[x];
-		numCalc += 1;
+	if (RxData[uiIndex].counter != 0) {
+		float Avg = RxData[uiIndex].sum / RxData[uiIndex].counter;
+		RxData[uiIndex].counter++;
+		return Avg;
 	}
-
-	Avg = Avg / RxData[uiIndex].size;
-	numCalc += 1;
-	return Avg;
+	
+	return 0;
 }

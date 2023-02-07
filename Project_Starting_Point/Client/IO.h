@@ -7,7 +7,7 @@
 #include <queue>
 #include <filesystem>
 
-using namespace std;
+
 void GetSizePromise(std::promise<unsigned int> promise);
 
 /// <summary>
@@ -37,7 +37,53 @@ namespace fileIO {
 
 	};
 
+
+	class fileBuffer {
+	private : 
+		int length = -1;
+		std::vector<block> chunks;
+		void splitFile(std::string input);
+		int threadCount = 8;
+	public:
+		fileBuffer(std::string path);
+		std::string next();
+		bool hasNext();
+		int getLineCount();
+	};
+
 }
+
+
+
+fileIO::fileBuffer::fileBuffer(std::string path) {
+
+}
+
+
+void fileIO::fileBuffer::splitFile(std::string input) {
+
+}
+
+
+std::string fileIO::fileBuffer::next() {
+	return std::string();
+}
+
+
+bool fileIO::fileBuffer::hasNext() {
+
+	return false;
+}
+
+
+
+int fileIO::fileBuffer::getLineCount() {
+	return 0;
+}
+
+
+
+
 
 
 /// <summary>
@@ -78,11 +124,6 @@ void GetSizePromise(std::promise<unsigned int> promise)
 	}
 }
 
-
-
-
-
-
 /// <summary>
 /// This function is to be used as a thread. The block initiates this thread then moves on to allow loading of the file in the background.
 /// </summary>
@@ -90,7 +131,7 @@ void GetSizePromise(std::promise<unsigned int> promise)
 void fileIO::block::readChunk(char* data)
 {
 	// move data into string to use substr
-	string strData;
+	std::string strData;
 	strData = data;
 	int lineCounter = 0;
 
@@ -99,7 +140,7 @@ void fileIO::block::readChunk(char* data)
 	for (int i = 0; i < strData.length(); i++) {
 		if (strData[i] == '\n') {
 			lineCounter++;
-			string tmp = strData.substr(offset+1, i-offset);
+			std::string tmp = strData.substr(offset+1, i-offset);
 			
 
 			//insert tmp into list
@@ -111,7 +152,7 @@ void fileIO::block::readChunk(char* data)
 			}
 			else if (this->readWrite == reading) { // if reading dont write until its done reading
 				while (this->readWrite == reading) {
-					this_thread::sleep_for(std::chrono::microseconds(100));
+					std::this_thread::sleep_for(std::chrono::microseconds(100));
 				}
 				this->lock.lock();
 				this->lines.push(tmp);
@@ -133,7 +174,7 @@ void fileIO::block::readChunk(char* data)
 		}
 
 		if (i == strData.length() - 1) { // last line doesnt have new line
-			string tmp = strData.substr(offset + 1, i - offset);
+			std::string tmp = strData.substr(offset + 1, i - offset);
 			lineCounter++;
 			//insert tmp into list
 			if (this->readWrite == waiting) { // if waiting for a line add a line then set status to reading so the reader knows its ready
@@ -144,7 +185,7 @@ void fileIO::block::readChunk(char* data)
 			}
 			else if (this->readWrite == reading) { // if reading dont write until its done reading
 				while (this->readWrite == reading) {
-					this_thread::sleep_for(std::chrono::microseconds(100));
+					std::this_thread::sleep_for(std::chrono::microseconds(100));
 				}
 				this->lock.lock();
 				this->lines.push(tmp);
@@ -179,7 +220,7 @@ fileIO::block::block(char* data)
 	std::function<void()> f = [this, data]() {this->readChunk(data); };
 	std::thread thread(f);
 	thread.detach();
-	this_thread::sleep_for(std::chrono::microseconds(10));
+	std::this_thread::sleep_for(std::chrono::microseconds(10));
 }
 
 /// <summary>
@@ -242,7 +283,7 @@ std::string fileIO::block::getNext()
 		this->readWrite = fileIO::waiting; // inform processing thread this one is waiting for a line so it may add one. -- readChunk should set status to reading once it writes after a waiting status
 
 		while (this->readWrite != reading && this->status != done) { // keep waiting until the writing thread has written to the queue or until 50ms has been reached. -------------------------------------------   IF DEADLOCK CHECK THIS ------------------------------------
-			this_thread::sleep_for(std::chrono::microseconds(100));
+			std::this_thread::sleep_for(std::chrono::microseconds(100));
 		}
 
 		if (this->readWrite == reading || this->readWrite == done) { // can read now since the thread is either done writing or the next one is in the queue

@@ -42,11 +42,7 @@ float logTime; // used to measure getSize since it has been refactored for futur
 int main(int argc, char* argv[])
 {
 
-	fileIO::fileBuffer buffer("DataFile.txt");
-	while (buffer.hasNext()) {
-		std::cout << buffer.next();
-}
-	system("pause");
+	fileIO::fileBuffer buffer(configurations.getConfigChar("dataFile"));
 
 
 	//setup
@@ -100,11 +96,7 @@ int main(int argc, char* argv[])
 #ifdef METRICS
 		timer.start();
 #endif
-		std::ifstream ifs(configurations.getConfigChar("dataFile")); // open datafile.txt | file opens on every loop execution
-		for (unsigned int iStart = 0; iStart < l; iStart++) {// get next line which is L
-			getline(ifs, strInput);
-		}
-		getline(ifs, strInput);
+		strInput =buffer.next();
 #ifdef METRICS
 		calculations.addPoint(timer.getTime());
 		lineCounter.addPoint(3); // add 1 for the get line above, add one for close file at end of loop add one for file init
@@ -204,7 +196,7 @@ int main(int argc, char* argv[])
 			numDataParsesClient++;
 #endif
 		}
-		ifs.close(); // close file
+	
 	}
 #ifdef METRICS
 	

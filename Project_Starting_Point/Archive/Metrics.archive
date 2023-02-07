@@ -1599,3 +1599,109 @@ Mon Feb  6 23:50:25 2023	Client - Network - Number of Transmissions in Handshake
 
 Mon Feb  6 23:50:25 2023	--- End of Client Network Metrics ---
 
+Tue Feb  7 01:51:42 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                 ProcessorType  
+4100               11              64         4100           AMD Ryzen 9 3900X 12-Core Processor  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+
+
+
+Description  Manufacturer            Model                  Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP        \\.\PHYSICALDRIVE1  2048407280640  
+Disk drive   (Standard disk drives)  ADATA SX8200PNP        \\.\PHYSICALDRIVE0  2048407280640  
+Disk drive   (Standard disk drives)  Samsung SSD 980 250GB  \\.\PHYSICALDRIVE2  250056737280   
+
+
+
+Tue Feb  7 01:51:43 2023	Client - IO - Get File Size :0.048000ms
+Tue Feb  7 01:51:43 2023	Client - IO - Average time to get line from file : 0.673216ms
+Tue Feb  7 01:51:43 2023	Client - IO - TotalTime reading files to get specific lines : 339.974213ms
+Tue Feb  7 01:51:43 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Tue Feb  7 01:51:43 2023	Client - IO - Data File Count (.txt) is : 1
+Tue Feb  7 01:51:43 2023	Client - IO - Total bytes in data files is : 49812
+
+Tue Feb  7 01:51:43 2023	--- End of Client IO Metrics ---
+
+Tue Feb  7 01:51:43 2023	--- Start of Client DataParsing Metrics ---
+
+Tue Feb  7 01:51:43 2023	Client - DataParsing - Total Time = 4.597779 ms
+Tue Feb  7 01:51:43 2023	Client - DataParsing - Average (Single Parse) = 0.001140 ms
+Tue Feb  7 01:51:43 2023	Client - DataParsing - # of Conversions = 4033
+Tue Feb  7 01:51:43 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Tue Feb  7 01:51:43 2023	Client - DataParsing - Total Size of Parsed Data = 43783 Bytes
+
+Tue Feb  7 01:51:43 2023	--- End of Client DataParsing Metrics ---
+
+Tue Feb  7 01:51:43 2023	--- Start of Client Network Metrics ---
+
+Tue Feb  7 01:51:43 2023	Client - Network - Network Type: LAN
+
+Tue Feb  7 01:51:43 2023	Client - Network - Number of Transmissions: 16128
+
+Tue Feb  7 01:51:43 2023	Client - Network - Average Handshake Time: 80 µs
+
+Tue Feb  7 01:51:43 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Tue Feb  7 01:51:43 2023	--- End of Client Network Metrics ---
+
+Tue Feb  7 01:52:47 2023	--- Start of Client IO Metrics ---
+
+CurrentClockSpeed  CurrentVoltage  DataWidth  MaxClockSpeed  Name                                 ProcessorType  
+4100               11              64         4100           AMD Ryzen 9 3900X 12-Core Processor  3              
+
+
+
+Capacity     DataWidth  FormFactor  Manufacturer  Name             Speed  
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+17179869184  64         8           Corsair       Physical Memory  2866   
+
+
+
+Description  Manufacturer            Model                  Name                Size           
+Disk drive   (Standard disk drives)  ADATA SX8200PNP        \\.\PHYSICALDRIVE1  2048407280640  
+Disk drive   (Standard disk drives)  ADATA SX8200PNP        \\.\PHYSICALDRIVE0  2048407280640  
+Disk drive   (Standard disk drives)  Samsung SSD 980 250GB  \\.\PHYSICALDRIVE2  250056737280   
+
+
+
+Tue Feb  7 01:52:48 2023	Client - IO - Get File Size :0.273300ms
+Tue Feb  7 01:52:48 2023	Client - IO - Average time to get line from file : 0.679415ms
+Tue Feb  7 01:52:48 2023	Client - IO - TotalTime reading files to get specific lines : 343.104614ms
+Tue Feb  7 01:52:48 2023	Client - IO - Total lines reading files ( not including get file length ) : 256035
+Tue Feb  7 01:52:48 2023	Client - IO - Data File Count (.txt) is : 1
+Tue Feb  7 01:52:48 2023	Client - IO - Total bytes in data files is : 49812
+
+Tue Feb  7 01:52:48 2023	--- End of Client IO Metrics ---
+
+Tue Feb  7 01:52:48 2023	--- Start of Client DataParsing Metrics ---
+
+Tue Feb  7 01:52:48 2023	Client - DataParsing - Total Time = 4.873038 ms
+Tue Feb  7 01:52:48 2023	Client - DataParsing - Average (Single Parse) = 0.001208 ms
+Tue Feb  7 01:52:48 2023	Client - DataParsing - # of Conversions = 4033
+Tue Feb  7 01:52:48 2023	Client - DataParsing - Input Size of Parsed Data = 49812 Bytes
+Tue Feb  7 01:52:48 2023	Client - DataParsing - Total Size of Parsed Data = 43783 Bytes
+
+Tue Feb  7 01:52:48 2023	--- End of Client DataParsing Metrics ---
+
+Tue Feb  7 01:52:48 2023	--- Start of Client Network Metrics ---
+
+Tue Feb  7 01:52:48 2023	Client - Network - Network Type: LAN
+
+Tue Feb  7 01:52:48 2023	Client - Network - Number of Transmissions: 16128
+
+Tue Feb  7 01:52:48 2023	Client - Network - Average Handshake Time: 64 µs
+
+Tue Feb  7 01:52:48 2023	Client - Network - Number of Transmissions in Handshake: 4
+
+Tue Feb  7 01:52:48 2023	--- End of Client Network Metrics ---
+

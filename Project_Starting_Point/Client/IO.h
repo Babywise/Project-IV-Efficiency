@@ -99,10 +99,12 @@ void fileIO::fileBuffer::splitFile(std::string input) {
 		for (int i = (chunk*b)+chunk; i < input.length(); i++) { // chunk *b + offset ---- 8000bytes / 8 threads ---- 1000 + offset ------ offset += char count to next \n
 			if (input[i] == '\n') {
 				std::string blockString;
-				if(offset==0)
-					 blockString = input.substr(offset, i-offset+1);
-				else
-					 blockString = input.substr(offset+1, i - offset);
+				if (offset == 0) {
+					blockString = input.substr(offset, i );
+				}
+				else {
+					blockString = input.substr(offset + 1, i - offset-1);
+				}
 				std::this_thread::sleep_for(std::chrono::microseconds(10));
 				block* b = new block((char*)blockString.c_str());
 				std::this_thread::sleep_for(std::chrono::microseconds(10));
@@ -110,10 +112,9 @@ void fileIO::fileBuffer::splitFile(std::string input) {
 				offset = i;
 				i = input.length() + 1;
 			}
-
 		}
 	}
-	std::string blockStringTwo = input.substr(offset, input.length() - offset); // do last thread with its part plus remainder
+	std::string blockStringTwo = input.substr(offset+1, input.length() - offset); // do last thread with its part plus remainder
 	std::this_thread::sleep_for(std::chrono::microseconds(10));
 	block* d = new block((char*)blockStringTwo.c_str());
 	std::this_thread::sleep_for(std::chrono::microseconds(10));
@@ -176,10 +177,14 @@ bool fileIO::fileBuffer::hasNext() {
 /// </summary>
 /// <returns></returns>
 int fileIO::fileBuffer::getLineCount() {
-	//while (!this->status == done) {
-
-	//}
-	return 0;
+	int totalSize = 0;
+	while (this->status != done) {
+	}
+		for (int i = 0; i < this->chunks.size(); i++) {
+			totalSize+=this->chunks.at(i)->getSize();
+		}
+	
+	return totalSize;
 }
 
 
@@ -267,7 +272,7 @@ void fileIO::block::readChunk(char* data)
 			}
 			else { // error
 				Logger log;
-				log.log(("Block has errored out"), 4, "Errors.log");
+				log.log(("Block has errored out"), 4, "Errors");
 			}
 
 
@@ -300,7 +305,7 @@ void fileIO::block::readChunk(char* data)
 			}
 			else { // error
 				Logger log;
-				log.log(("Block has errored out"), 4, "Errors.log");
+				log.log(("Block has errored out"), 4, "Errors");
 			}
 			offset = i;
 		}

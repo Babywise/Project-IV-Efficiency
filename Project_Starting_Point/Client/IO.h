@@ -74,7 +74,7 @@ fileIO::fileBuffer::fileBuffer(std::string path) {
 		// if greater then 8MB then only malloc 8MB
 		char* data = (char*)malloc(fsize + 1);
 
-		//alter fsize to 8MB if bigger 
+		//alter fsize to 4MB if bigger 
 		fread(data, fsize, 1, f); // read the file into the buffer
 		fclose(f); // close
 
@@ -85,7 +85,7 @@ fileIO::fileBuffer::fileBuffer(std::string path) {
 		std::thread thread(f);
 		thread.detach();
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
-		//if greater then 8MB join thread and redo for next chunk
+		//if greater then 4MB join thread and redo for next chunk
 	}
 	else {
 		this->status = done;
@@ -217,14 +217,15 @@ void GetSizePromise(std::promise<unsigned int> promise)
 	FILE* f;//FILE pointer
 	int counter = 0;
 	fopen_s(&f, configurations.getConfigChar("dataFile"), "rb"); // open the file in binary read
+	
 	if (f != 0) {
 		fseek(f, 0, SEEK_END);// go to end
 		long fsize = ftell(f); // get size in bytes by telling the end pointer size
 		fseek(f, 0, SEEK_SET); // set pointer back to beginning of file  
 
-		//if greater then 8 MB only malloc 8MB
+		//if greater then 4 MB only malloc 8MB
+		if(fsize< atoi(configurations.getConfigChar("maxBufferFile"))) { // if file size is greater then max bytes allowed on memory
 		char* data = (char*)malloc(fsize + 1);
-
 		fread(data, fsize, 1, f); // read the file into the buffer
 		fclose(f); // close
 
@@ -237,9 +238,35 @@ void GetSizePromise(std::promise<unsigned int> promise)
 			}
 		}
 		counter++; // incremement 1 since the last line wont have a new line character
-		// if it was greater then 8MB free data and do the next part
+		// if it was greater then 4MB free data and do the next part
 		promise.set_value(counter);
 		free(data); // delete residual data AFTER promise is set so program may continue during cleanup
+	}//if
+		else {
+			int current = 0;
+			while (current < fsize) {
+				int max = atoi(configurations.getConfigChar("maxBufferFile")); // max bytes that can be read at once
+				char* data = (char*)malloc(max + 1); // only allocate max+1 byte each time.
+				
+				if (current+max > fsize) { // if next block of bytes goes over the total size only read up to the total size
+					max = fsize - current;
+				}
+				current += max; // increment current by the next block size
+				fread(data, max, 1, f); // read the file into the buffer
+				data[max] = 0;// 0 terminate file
+
+				for (int i = 0; i < max + 1; i++) {
+
+					if (data[i] == '\n') {
+						counter++; // add each new line character as a count
+					}
+				}
+				free(data);
+			}
+			std::cout << counter;
+			promise.set_value(counter); // default -1
+			fclose(f); // close
+		}
 	}// if open
 	else {
 		promise.set_value(-1); // default -1

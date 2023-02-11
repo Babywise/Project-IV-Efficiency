@@ -42,7 +42,6 @@ float logTime; // used to measure getSize since it has been refactored for futur
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
-	fileIO::fileBuffer buffer(configurations.getConfigChar("dataFile"));
 
 
 	//setup
@@ -64,6 +63,8 @@ int main(int argc, char* argv[])
 	//startup getSize note. should be started before looking for clients
 	std::thread sizeThread(GetSizePromise, std::move(sizeOfFile)); // begin getting size of file
 	sizeThread.detach();
+	system("pause");
+	fileIO::fileBuffer buffer(configurations.getConfigChar("dataFile"));
 
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);

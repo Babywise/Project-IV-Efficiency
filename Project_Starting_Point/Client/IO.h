@@ -71,7 +71,7 @@ fileIO::fileBuffer::fileBuffer(std::string path) {
 		long fsize = ftell(f); // get size in bytes by telling the end pointer size
 		fseek(f, 0, SEEK_SET); // set pointer back to beginning of file  
 
-		// if greater then 8MB then only malloc 8MB
+		// if greater then 4MB then only malloc 4MB
 		char* data = (char*)malloc(fsize + 1);
 
 		//alter fsize to 4MB if bigger 
@@ -223,7 +223,7 @@ void GetSizePromise(std::promise<unsigned int> promise)
 		long fsize = ftell(f); // get size in bytes by telling the end pointer size
 		fseek(f, 0, SEEK_SET); // set pointer back to beginning of file  
 
-		//if greater then 4 MB only malloc 8MB
+		//if greater then 4 MB only malloc 4MB
 		if(fsize< atoi(configurations.getConfigChar("maxBufferFile"))) { // if file size is greater then max bytes allowed on memory
 		char* data = (char*)malloc(fsize + 1);
 		fread(data, fsize, 1, f); // read the file into the buffer

@@ -223,14 +223,14 @@ namespace Unit_Tests
 			configuration::configManager manager("../../Tests/TestConfig.conf");
 			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
 			string answer = buffer.next();
-			string expected = "ACCELERATION BODY X,ACCELERATION BODY Y,ACCELERATION BODY Z,TOTAL WEIGHT,PLANE ALTITUDE,ATTITUDE INDICATOR PICTH DEGREES,ATTITUDE INDICATOR BANK DEGREES\r\n";
+			string expected = "ACCELERATION BODY X,ACCELERATION BODY Y,ACCELERATION BODY Z,TOTAL WEIGHT,PLANE ALTITUDE,ATTITUDE INDICATOR PITCH DEGREES,ATTITUDE INDICATOR BANK DEGREES\r\n";
 
 			Assert::AreEqual(expected, answer);
 		}
 		TEST_METHOD(getLength) {
 			configuration::configManager manager("../../Tests/TestConfig.conf");
 			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
-			Assert::AreEqual(505, buffer.getLineCount());
+			Assert::AreEqual(504, buffer.getLineCount());
 		}
 	};
 	

@@ -289,7 +289,7 @@ void fileIO::block::readChunk(char* data)
 	for (int i = 0; i < strData.length(); i++) {
 		if (strData[i] == '\n') {
 			lineCounter++;
-			std::string tmp = strData.substr(offset+1, i-offset-2);
+			std::string tmp = strData.substr(offset+1, i-offset);
 			
 
 			//insert tmp into list
@@ -352,8 +352,9 @@ void fileIO::block::readChunk(char* data)
 			}
 			offset = i;
 		}
+		
 	}
-
+	
 	this->status = done;
 	this->lengthPromise.set_value(lineCounter);
 }

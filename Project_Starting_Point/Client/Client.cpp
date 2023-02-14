@@ -61,11 +61,11 @@ int main(int argc, char* argv[])
 #endif
 
 	//startup getSize note. should be started before looking for clients
-	std::thread sizeThread(GetSizePromise, std::move(sizeOfFile)); // begin getting size of file
-	sizeThread.detach();
-	system("pause");
+	//std::thread sizeThread(GetSizePromise, std::move(sizeOfFile)); // begin getting size of file
+	//sizeThread.detach();
+	
 	fileIO::fileBuffer buffer(configurations.getConfigChar("dataFile"));
-
+	system("pause");
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	SvrAddr.sin_family = AF_INET;

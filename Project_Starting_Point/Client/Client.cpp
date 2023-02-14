@@ -189,7 +189,8 @@ int main(int argc, char* argv[])
 #ifdef METRICS
 	timer.start();
 	GetSize();
-	Metrics::logIOMetrics(calculations, lineCounter, timer.getTime());
+	Metrics::logSystemStatsMetrics(true);
+	Metrics::logClientIOMetrics(calculations, lineCounter, timer.getTime());
 	Metrics::logDataParsingMetricsClient(dataParsingTimeCalc, sizeOfDataParsedDataClientCalc, numDataParsesClient);
 #endif
 	closesocket(ClientSocket); // cleanup
@@ -204,15 +205,14 @@ int main(int argc, char* argv[])
 
 	avgHandshake = avgHandshake / handshakeTimes.size();
 
-#ifdef WAN
-	Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, wan);
-#endif // WAN
-#ifdef LAN
-	Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, lan);
-#endif // LAN
-
+	#ifdef WAN
+		Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, wan);
+	#endif // WAN
+	#ifdef LAN
+		Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, lan);
+	#endif // LAN
+	Metrics::addLogEndOfFileSpacing(true);
 #endif
-
 
 	return 1;
 }

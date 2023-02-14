@@ -21,7 +21,8 @@ using namespace std::chrono;
 /// </summary>
 namespace Metrics {
 	
-	const string metricsLogFile = "Metrics";
+	const string clientMetricsLogFileName = "Client - Metrics";
+	const string serverMetricsLogFileName = "Server - Metrics";
 	Logger logger;
 
 	/// <summary>
@@ -87,6 +88,38 @@ namespace Metrics {
 			return sum;
 		}
 	};
+	/// <summary>
+	/// prints system statistics using wmic
+	/// </summary>
+	/// <param name="clientOrServer">Client = True, Server = False</param>
+	void logSystemStatsMetrics(bool clientOrServer) {
+		// log and archive system information
+		string logFilePath;
+		string archiveFilePath;
+
+		if ( clientOrServer ) {
+			logger.log("Client - Metrics", clientMetricsLogFileName);
+			logger.log("-------------------------------------------------------------------------------", clientMetricsLogFileName);
+			logFilePath = "\"%cd%/../Logs/" + logger.getFileTimeName() + clientMetricsLogFileName + ".log\"";
+			archiveFilePath = "\"%cd%/../Archive/" + clientMetricsLogFileName + ".archive\"";
+		} else {
+			logger.log("Server - Metrics", serverMetricsLogFileName);
+			logger.log("-------------------------------------------------------------------------------", serverMetricsLogFileName);
+			logFilePath = "\"%cd%/../Logs/" + logger.getFileTimeName() + serverMetricsLogFileName + ".log\"";
+			archiveFilePath = "\"%cd%/../Archive/" + serverMetricsLogFileName + ".archive\"";
+		}
+
+		// log and archive system information
+		system((std::string("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType | findstr /r /v \"^$\" | more >> " + logFilePath)).c_str());
+		system((std::string("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType | findstr /r /v \"^$\" | more >> " + archiveFilePath)).c_str());
+
+		system((std::string("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name | findstr /r /v \"^$\" | more >> " + logFilePath)).c_str());
+		system((std::string("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name | findstr /r /v \"^$\" | more >> " + archiveFilePath)).c_str());
+
+		system((std::string("wmic diskdrive get manufacturer, size,name, model, description | findstr /r /v \"^$\" | more >> " + logFilePath)).c_str());
+		system((std::string("wmic diskdrive get manufacturer, size,name, model, description | findstr /r /v \"^$\" | more >> " + archiveFilePath)).c_str());
+
+	}
 
 
 	/// <summary>
@@ -96,31 +129,15 @@ namespace Metrics {
 	/// <param name="lineCounter"></param>
 	/// <param name=""></param>
 	/// <param name=""></param>
-	void logIOMetrics(Metrics::Calculations calculations, Metrics::Calculations lineCounter, float timeToGetSize) {
+	void logClientIOMetrics(Metrics::Calculations calculations, Metrics::Calculations lineCounter, float timeToGetSize) {
 		
 		Timer timer;
 
-		//format log file
-		// write system information to lof before start of metrics logging
-		logger.log("--- Start of Client IO Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-
-		// log and archive system information
-	
-		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType | more >> \"%cd%/../Logs/Metrics.log\"");
-		system("wmic cpu get CurrentClockSpeed, MaxClockSpeed, Name, CurrentVoltage, DataWidth, ProcessorType | more >> \"%cd%/../Archive/Metrics.archive\"");
-		logger.emptyLine(metricsLogFile);
-		system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name | more >> \"%cd%/../Logs/Metrics.log\"");
-		system("wmic memorychip get FormFactor, Speed, Capacity, DataWidth, Manufacturer, name | more >> \"%cd%/../Archive/Metrics.archive\"");
-		logger.emptyLine(metricsLogFile);
-		system("wmic diskdrive get manufacturer, size,name, model, description | more >> \"%cd%/../Logs/Metrics.log\"");
-		system("wmic diskdrive get manufacturer, size,name, model, description | more >> \"%cd%/../Archive/Metrics.archive\"");
-		logger.emptyLine(metricsLogFile);
 		// log information from counters and timers
-		logger.log("Client - IO - Get File Size :" + to_string(timeToGetSize) + "ms", metricsLogFile);
-		logger.log("Client - IO - Average time to get line from file : " + to_string(calculations.getAverage()) + "ms", metricsLogFile);
-		logger.log("Client - IO - TotalTime reading files to get specific lines : " + to_string(calculations.getSum()) + "ms", metricsLogFile);
-		logger.log("Client - IO - Total lines reading files ( not including get file length ) : " + to_string(int(lineCounter.getSum())), metricsLogFile);
+		logger.log("Client - IO - Get File Size :" + to_string(timeToGetSize) + "ms", clientMetricsLogFileName);
+		logger.log("Client - IO - Average time to get line from file : " + to_string(calculations.getAverage()) + "ms", clientMetricsLogFileName);
+		logger.log("Client - IO - TotalTime reading files to get specific lines : " + to_string(calculations.getSum()) + "ms", clientMetricsLogFileName);
+		logger.log("Client - IO - Total lines reading files ( not including get file length ) : " + to_string(int(lineCounter.getSum())), clientMetricsLogFileName);
 
 		// get file counts, plus total bytes of data from all .txt files
 		int fileCounter = 0; // to count number of txt files
@@ -132,96 +149,71 @@ namespace Metrics {
 			}
 		}
 		// log data about file counts and bytes
-		logger.log("Client - IO - Data File Count (.txt) is : " + to_string(fileCounter), metricsLogFile);
-		logger.log("Client - IO - Total bytes in data files is : " + to_string(byteCounter), metricsLogFile);
-
-		//log formatting
-		logger.emptyLine(metricsLogFile);
-		logger.log("--- End of Client IO Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
+		logger.log("Client - IO - Data File Count (.txt) is : " + to_string(fileCounter), clientMetricsLogFileName);
+		logger.log("Client - IO - Total bytes in data files is : " + to_string(byteCounter), clientMetricsLogFileName);
+		logger.emptyLine(clientMetricsLogFileName);
 	}
 
 	void logDataParsingMetricsClient(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataClientCalc, int numDataParsesClient){
 		//data parsing results
-		logger.log("--- Start of Client DataParsing Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("Client - DataParsing - Total Time = " + to_string(dataParsingTimeCalc.getSum()) + " ms", metricsLogFile);
-		logger.log("Client - DataParsing - Average (Single Parse) = " + to_string(dataParsingTimeCalc.getAverage()) + " ms", metricsLogFile);
-		logger.log("Client - DataParsing - # of Conversions = " + to_string(numDataParsesClient), metricsLogFile);
-		logger.log("Client - DataParsing - Input Size of Parsed Data = " + to_string(std::filesystem::file_size("DataFile.txt")) + " Bytes", metricsLogFile);
-		logger.log("Client - DataParsing - Total Size of Parsed Data = " + to_string((int)sizeOfDataParsedDataClientCalc.getSum()) + " Bytes", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("--- End of Client DataParsing Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
+		logger.log("Client - DataParsing - Total Time = " + to_string(dataParsingTimeCalc.getSum()) + " ms", clientMetricsLogFileName);
+		logger.log("Client - DataParsing - Average (Single Parse) = " + to_string(dataParsingTimeCalc.getAverage()) + " ms", clientMetricsLogFileName);
+		logger.log("Client - DataParsing - # of Conversions = " + to_string(numDataParsesClient), clientMetricsLogFileName);
+		logger.log("Client - DataParsing - Input Size of Parsed Data = " + to_string(std::filesystem::file_size("DataFile.txt")) + " Bytes", clientMetricsLogFileName);
+		logger.log("Client - DataParsing - Total Size of Parsed Data = " + to_string((int)sizeOfDataParsedDataClientCalc.getSum()) + " Bytes", clientMetricsLogFileName);
+		logger.emptyLine(clientMetricsLogFileName);
 	}
 
 	void logDataParsingMetricsServer(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataServerCalc, int numDataParsesServer){
 		//data parsing results
-		logger.log("--- Start of Server DataParsing Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("Server - DataParsing - Total Time = " + to_string(dataParsingTimeCalc.getSum()) + " ms", metricsLogFile);
-		logger.log("Server - DataParsing - Average (Single Parse) = " + to_string(dataParsingTimeCalc.getAverage()) + " ms", metricsLogFile);
-		logger.log("Server - DataParsing - # of Conversions = " + to_string(numDataParsesServer), metricsLogFile);
-		logger.log("Server - DataParsing - Total Size of Parsed Data = " + to_string((int)sizeOfDataParsedDataServerCalc.getSum()) + " Bytes", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("--- End of Server DataParsing Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
+		logger.log("Server - DataParsing - Total Time = " + to_string(dataParsingTimeCalc.getSum()) + " ms", serverMetricsLogFileName);
+		logger.log("Server - DataParsing - Average (Single Parse) = " + to_string(dataParsingTimeCalc.getAverage()) + " ms", serverMetricsLogFileName);
+		logger.log("Server - DataParsing - # of Conversions = " + to_string(numDataParsesServer), serverMetricsLogFileName);
+		logger.log("Server - DataParsing - Total Size of Parsed Data = " + to_string((int)sizeOfDataParsedDataServerCalc.getSum()) + " Bytes", serverMetricsLogFileName);
+		logger.emptyLine(serverMetricsLogFileName);
 	}
 
 	void logCalcInfo(float calcTime, int numCalc) {
 		//calculation results
-		logger.log("--- Start of Server Calculation Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("Server - Calculations - Average time used for a calculation: " + to_string((calcTime/numCalc)*1000) + " µs", metricsLogFile);
-		logger.log("Server - Calculations - Total time used for calculation: " + to_string(calcTime) + " ms", metricsLogFile);
-		logger.log("Server - Calculations - Total number of calculations done: " + to_string(numCalc) + " ms", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("--- End of Server Calculation Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
+		logger.log("Server - Calculations - Average time used for a calculation: " + to_string((calcTime/numCalc)*1000) + " µs", serverMetricsLogFileName);
+		logger.log("Server - Calculations - Total time used for calculation: " + to_string(calcTime) + " ms", serverMetricsLogFileName);
+		logger.log("Server - Calculations - Total number of calculations done: " + to_string(numCalc) + " ms", serverMetricsLogFileName);
+		logger.emptyLine(serverMetricsLogFileName);
 	}
 
 	void logMemoryMetricsServer(Calculations sizeOfMemoryServerCalc){
 		//memory results
-		logger.log("--- Start of Server Memory Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("Server - Memory - Total Memory Allocated: " + to_string(sizeOfMemoryServerCalc.getSum()) + " Bytes", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("--- End of Server Memory Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
+		logger.log("Server - Memory - Total Memory Allocated: " + to_string(sizeOfMemoryServerCalc.getSum()) + " Bytes", serverMetricsLogFileName);
+		logger.emptyLine(serverMetricsLogFileName);
 	}
 
 	void logNetworkMetricsClient(int numTransmissions, int avgHandshake, int handshakeTransmissionCount, string networkType) {
 		// Client Network Results
-		logger.log("--- Start of Client Network Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("Client - Network - Network Type: " + networkType, metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("Client - Network - Number of Transmissions: " + to_string(numTransmissions), metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("Client - Network - Average Handshake Time: " + to_string(avgHandshake) +  " µs", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("Client - Network - Number of Transmissions in Handshake: " + to_string(handshakeTransmissionCount), metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("--- End of Client Network Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
+		logger.log("Client - Network - Network Type: " + networkType, clientMetricsLogFileName);
+		logger.log("Client - Network - Number of Transmissions: " + to_string(numTransmissions), clientMetricsLogFileName);
+		logger.log("Client - Network - Average Handshake Time: " + to_string(avgHandshake) +  " µs", clientMetricsLogFileName);
+		logger.log("Client - Network - Number of Transmissions in Handshake: " + to_string(handshakeTransmissionCount), clientMetricsLogFileName);
+		logger.emptyLine(clientMetricsLogFileName);
 		
 	}
 
 	void logNetworkMetricsServer(int elapsedTimeMilSec, int numConnections) {
 		// Server Network Results
-		logger.log("--- Start of Server Network Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("Server - Network - Server Uptime: " + to_string(elapsedTimeMilSec) + " ms", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("Server - Network - Number of Connections: " + to_string(numConnections), metricsLogFile);
-		logger.emptyLine(metricsLogFile);
-		logger.log("--- End of Server Network Metrics ---", metricsLogFile);
-		logger.emptyLine(metricsLogFile);
+		logger.log("Server - Network - Server Uptime: " + to_string(elapsedTimeMilSec) + " ms", serverMetricsLogFileName);
+		logger.log("Server - Network - Number of Connections: " + to_string(numConnections), serverMetricsLogFileName);
+		logger.emptyLine(serverMetricsLogFileName);
 	}
-
-	void addLogEndOfFileSpacing(){
+	/// <summary>
+	/// calls logger function on appropriate target
+	/// </summary>
+	/// <param name="clientOrServer">Client = True, Server = False</param>
+	void addLogEndOfFileSpacing(bool clientOrServer){
 		for(int i = 0; i < 3; i++){
-			logger.emptyLine(metricsLogFile);
+			if ( clientOrServer ) {
+				logger.addLogEndOfFileSpacingArchive(clientMetricsLogFileName);
+			} else {
+				logger.addLogEndOfFileSpacingArchive(serverMetricsLogFileName);
+			}
 		}
 	}
 

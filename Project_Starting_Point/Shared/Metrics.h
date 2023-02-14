@@ -208,12 +208,10 @@ namespace Metrics {
 	/// </summary>
 	/// <param name="clientOrServer">Client = True, Server = False</param>
 	void addLogEndOfFileSpacing(bool clientOrServer){
-		for(int i = 0; i < 3; i++){
-			if ( clientOrServer ) {
-				logger.addLogEndOfFileSpacingArchive(clientMetricsLogFileName);
-			} else {
-				logger.addLogEndOfFileSpacingArchive(serverMetricsLogFileName);
-			}
+		if ( clientOrServer ) {
+			logger.addLogEndOfFileSpacingArchive(clientMetricsLogFileName);
+		} else {
+			logger.addLogEndOfFileSpacingArchive(serverMetricsLogFileName);
 		}
 	}
 

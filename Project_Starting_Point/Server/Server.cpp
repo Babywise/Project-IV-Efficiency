@@ -199,7 +199,7 @@ int main()
 		send(ConnectionSocket, Tx, sizeof(Tx), 0);//send average back 
 	}
 #ifdef METRICS
-	Metrics::addLogEndOfFileSpacing();
+	Metrics::logSystemStatsMetrics(false);
 	Metrics::logCalcInfo(calcTime, numCalc);
 	Metrics::logDataParsingMetricsServer(dataParsingTimeCalc, sizeOfDataParsedDataServerCalc, numDataParsesServer);
 	sizeOfMemoryServerCalc.addPoint(maxSizeRxData);
@@ -214,7 +214,7 @@ int main()
 	std::chrono::duration<double> elapsedTimeSeconds = end - start;
 	auto elapsedTimeMilSec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedTimeSeconds).count();
 	Metrics::logNetworkMetricsServer(elapsedTimeMilSec, numConnections);
-
+	Metrics::addLogEndOfFileSpacing(false);
 #endif
 
 	WSACleanup();					//frees Winsock resources

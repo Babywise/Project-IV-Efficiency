@@ -4,7 +4,9 @@
 
 #include "../Shared/Metrics.h"
 #include "../Shared/Logger.h"
+#include "../Shared/configManager.h"
 
+configuration::configManager configurations("../Shared/config.conf");
 #ifdef METRICS
 int numDataParsesServer = 0;
 float maxSizeRxData = 0;
@@ -16,6 +18,7 @@ Metrics::Calculations sizeOfMemoryServerCalc;
 #endif
 
 using namespace std;
+
 const int numColumns = 7;
 
 struct StorageTypes 
@@ -36,6 +39,7 @@ static float calcTime = 0;
 /// <returns></returns>
 int main()
 {
+
 	//setup
 	WSADATA wsaData;
 	SOCKET ServerSocket, ConnectionSocket;
@@ -52,7 +56,7 @@ int main()
 
 	SvrAddr.sin_family = AF_INET;
 	SvrAddr.sin_addr.s_addr = INADDR_ANY;
-	SvrAddr.sin_port = htons(27001); // Magic Number
+	SvrAddr.sin_port = htons(atoi(configurations.getConfigChar("port"))); // Magic Number
 	bind(ServerSocket, (struct sockaddr*)&SvrAddr, sizeof(SvrAddr));
 
 	if (ServerSocket == SOCKET_ERROR)
@@ -80,7 +84,7 @@ int main()
 	cout << "Connection Established" << endl;
 
 	// if first byte of buffer is an asterisk close connection
-	while (RxBuffer[0] != '*')
+	while (RxBuffer[0] != configurations.getConfigChar("terminator")[0])
 	{
 		float fValue = 0;
 		memset(RxBuffer, 0, sizeof(RxBuffer));
@@ -88,7 +92,7 @@ int main()
 		send(ConnectionSocket, "ACK", sizeof("ACK"), 0); // send ack
 
 		// find param name recieved
-		if (strcmp(RxBuffer, "ACCELERATION BODY X") == 0)
+		if (strcmp(RxBuffer, configurations.getConfigChar("columnOne")) == 0)
 		{
 			memset(RxBuffer, 0, sizeof(RxBuffer));
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0); // get current value for variable
@@ -102,7 +106,7 @@ int main()
 			calcTime += timer.getTime();
 #endif
 		}
-		else if (strcmp(RxBuffer, "ACCELERATION BODY Y") == 0)
+		else if (strcmp(RxBuffer, configurations.getConfigChar("columnTwo")) == 0)
 		{
 			memset(RxBuffer, 0, sizeof(RxBuffer));
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
@@ -116,7 +120,7 @@ int main()
 			calcTime += timer.getTime();
 #endif		
 		}
-		else if (strcmp(RxBuffer, "ACCELERATION BODY Z") == 0)
+		else if (strcmp(RxBuffer, configurations.getConfigChar("columnThree")) == 0)
 		{
 			memset(RxBuffer, 0, sizeof(RxBuffer));
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
@@ -130,7 +134,7 @@ int main()
 			calcTime += timer.getTime();
 #endif		
 		}
-		else if (strcmp(RxBuffer, "TOTAL WEIGHT") == 0)
+		else if (strcmp(RxBuffer, configurations.getConfigChar("columnFour")) == 0)
 		{
 			memset(RxBuffer, 0, sizeof(RxBuffer));
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
@@ -144,7 +148,7 @@ int main()
 			calcTime += timer.getTime();
 #endif		
 		}
-		else if (strcmp(RxBuffer, "PLANE ALTITUDE") == 0)
+		else if (strcmp(RxBuffer, configurations.getConfigChar("columnFive")) == 0)
 		{
 			memset(RxBuffer, 0, sizeof(RxBuffer));
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
@@ -158,7 +162,7 @@ int main()
 			calcTime += timer.getTime();
 #endif		
 		}
-		else if (strcmp(RxBuffer, "ATTITUDE INDICATOR PICTH DEGREES") == 0)
+		else if (strcmp(RxBuffer, configurations.getConfigChar("columnSix")) == 0)
 		{
 			memset(RxBuffer, 0, sizeof(RxBuffer));
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);
@@ -172,7 +176,7 @@ int main()
 			calcTime += timer.getTime();
 #endif		
 		}
-		else if (strcmp(RxBuffer, "ATTITUDE INDICATOR BANK DEGREES") == 0)
+		else if (strcmp(RxBuffer, configurations.getConfigChar("columnSeven")) == 0)
 		{
 			memset(RxBuffer, 0, sizeof(RxBuffer));
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0);

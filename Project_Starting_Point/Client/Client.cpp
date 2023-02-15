@@ -189,6 +189,7 @@ int main(int argc, char* argv[])
 #ifdef METRICS
 	timer.start();
 	GetSize();
+	Metrics::logStartOfClient(configurations.getConfigChar("dataFile"));
 	Metrics::logSystemStatsMetrics(true);
 	Metrics::logClientIOMetrics(calculations, lineCounter, timer.getTime());
 	Metrics::logDataParsingMetricsClient(dataParsingTimeCalc, sizeOfDataParsedDataClientCalc, numDataParsesClient);

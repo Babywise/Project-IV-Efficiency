@@ -88,6 +88,21 @@ namespace Metrics {
 			return sum;
 		}
 	};
+
+	void logStartOfServer() {
+		
+		logger.log("Server - Metrics", serverMetricsLogFileName);
+		logger.log("-------------------------------------------------------------------------------", serverMetricsLogFileName);
+		
+	}
+
+	void logStartOfClient(char* filename) {
+		std::string fileNameStr = filename;
+		logger.log("Client - Metrics | " + fileNameStr, clientMetricsLogFileName);
+		logger.log("-------------------------------------------------------------------------------", clientMetricsLogFileName);
+
+	}
+
 	/// <summary>
 	/// prints system statistics using wmic
 	/// </summary>
@@ -98,13 +113,9 @@ namespace Metrics {
 		string archiveFilePath;
 
 		if ( clientOrServer ) {
-			logger.log("Client - Metrics", clientMetricsLogFileName);
-			logger.log("-------------------------------------------------------------------------------", clientMetricsLogFileName);
 			logFilePath = "\"%cd%/../Logs/" + logger.getFileTimeName() + clientMetricsLogFileName + ".log\"";
 			archiveFilePath = "\"%cd%/../Archive/" + clientMetricsLogFileName + ".archive\"";
 		} else {
-			logger.log("Server - Metrics", serverMetricsLogFileName);
-			logger.log("-------------------------------------------------------------------------------", serverMetricsLogFileName);
 			logFilePath = "\"%cd%/../Logs/" + logger.getFileTimeName() + serverMetricsLogFileName + ".log\"";
 			archiveFilePath = "\"%cd%/../Archive/" + serverMetricsLogFileName + ".archive\"";
 		}

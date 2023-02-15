@@ -203,6 +203,7 @@ int main()
 		send(ConnectionSocket, Tx, sizeof(Tx), 0);//send average back 
 	}
 #ifdef METRICS
+	Metrics::logStartOfServer();
 	Metrics::logSystemStatsMetrics(false);
 	Metrics::logCalcInfo(calcTime, numCalc);
 	Metrics::logDataParsingMetricsServer(dataParsingTimeCalc, sizeOfDataParsedDataServerCalc, numDataParsesServer);

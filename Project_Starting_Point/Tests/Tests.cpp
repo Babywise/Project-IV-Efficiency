@@ -1,14 +1,15 @@
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "Shared/Metrics.h"
+#include "../Shared/Metrics.h"
+#include "../Shared/configManager.h"
 #ifdef _WIN32
-#include <Windows.h>
 #endif
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-namespace Tests
+namespace Unit_Tests
 {
+
 	TEST_CLASS(Metrics_Tests)
 	{
 	public:
@@ -130,6 +131,63 @@ namespace Tests
 		}
 		#endif
 	};
+	TEST_CLASS(config_Manager_Tests) {
 
+	public:
+		TEST_METHOD(getConfig_exists_int) {
+			
+			string expected = "5";
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+			Assert::AreEqual(atoi(expected.c_str()), atoi(manager.getConfig("test").c_str()));
+		}
+		TEST_METHOD(getConfig_exists_float) {
+
+			string expected = "5.22";
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+			Assert::AreEqual(atof(expected.c_str()), atof(manager.getConfig("testfloat").c_str()));
+		}
+		TEST_METHOD(getConfig_exists_string) {
+
+			string expected = "works";
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+			Assert::AreEqual(expected, manager.getConfig("filetest"));
+		}
+		TEST_METHOD(getConfig_not_exists_int) {
+			string answer;
+			
+			configuration::configManager manager("");
+			answer = manager.getConfig("not this one");
+			Assert::AreEqual(0, (int)answer.size());
+		}
+
+	};
 	
+}
+
+namespace metrics_Testing
+{
+	TEST_CLASS(IO)
+	{
+	public:
+		TEST_METHOD(getFileSize)
+		{
+			string message = "Not implemented";
+			Assert::AreEqual(message,(string)"");
+		}
+		TEST_METHOD(averageTimeToGetLine)
+		{
+			string message = "Not implemented";
+			Assert::AreEqual(message, (string)"");
+		}
+		TEST_METHOD(totalLinesReadingFiles)
+		{
+			string message = "Not implemented";
+			Assert::AreEqual(message, (string)"");
+		}
+		TEST_METHOD(totalTimeReadingFiles)
+		{
+			string message = "Not implemented";
+			Assert::AreEqual(message, (string)"");
+		}
+	};
 }

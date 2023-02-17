@@ -26,6 +26,7 @@
     <Text Include="DataFile.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Shared\configManager.h" />
     <ClInclude Include="..\Shared\Logger.h" />
     <ClInclude Include="..\Shared\Metrics.h" />
   </ItemGroup>

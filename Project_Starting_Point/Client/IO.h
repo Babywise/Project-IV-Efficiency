@@ -24,7 +24,7 @@ namespace fileIO {
 		std::future<int> length = lengthPromise.get_future(); // Promise and future set for size since it needs to wait for a thread to finish to get the line size.
 		std::mutex lock; // lock queue when writing.
 		statuses status = not_started;
-		std::queue<std::string> lines; // list of lines in order
+		std::queue<char*> lines; // list of lines in order
 		int size=-1;
 	public:
 		
@@ -51,7 +51,7 @@ namespace fileIO {
 		std::string next();
 		bool hasNext();
 		int getLineCount();
-		
+		~fileBuffer();
 	};
 
 }
@@ -81,8 +81,8 @@ fileIO::fileBuffer::fileBuffer(std::string path) {
 		data[fsize] = 0;// 0 terminate file
 		std::string output = data;
 		free(data);
-		std::function<void()> f = [this, output]() {this->splitFile(output); };
-		std::thread thread(f);
+	std::thread thread(std::move([this, output]() {this->splitFile(output); }));
+		
 		thread.detach();
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
 		//if greater then 4MB join thread and redo for next chunk
@@ -201,6 +201,13 @@ int fileIO::fileBuffer::getLineCount() {
 	return totalSize;
 }
 
+inline fileIO::fileBuffer::~fileBuffer()
+{
+	std::cout << "";
+}
+
+
+
 
 
 
@@ -289,13 +296,16 @@ void fileIO::block::readChunk(char* data)
 	for (int i = 0; i < strData.length(); i++) {
 		if (strData[i] == '\n') {
 			lineCounter++;
-			std::string tmp = strData.substr(offset+1, i-offset);
 			
 
 			//insert tmp into list
 			if (this->readWrite == waiting) { // if waiting for a line add a line then set status to reading so the reader knows its ready
 				this->lock.lock();
-				this->lines.push(tmp);
+				//strData.substr(offset + 1, i - offset)
+				char* temp;
+				temp = (char*)malloc(i - offset+1);
+				strncpy_s(temp, i - offset + 1, (const char*)strData.c_str() + offset + 1, i - offset);
+				this->lines.push(temp);
 				this->lock.unlock();
 				this->readWrite = reading;
 			}
@@ -303,14 +313,20 @@ void fileIO::block::readChunk(char* data)
 				while (this->readWrite == reading) {
 					std::this_thread::sleep_for(std::chrono::microseconds(100));
 				}
+				char* temp;
+				temp = (char*)malloc(i - offset+1);
+				strncpy_s(temp, i - offset + 1, (const char*)strData.c_str() + offset + 1, i - offset);
 				this->lock.lock();
-				this->lines.push(tmp);
+				this->lines.push(temp);
 				this->lock.unlock();
 				this->readWrite = started;
 			}
 			else if (this->readWrite == started) {// if started and not reading just write new line
+				char* temp;
+				temp = (char*)malloc(i - offset+1);
+				strncpy_s(temp,i-offset+1, (const char*)strData.c_str()+offset+1, i - offset);
 				this->lock.lock();
-				this->lines.push(tmp);
+				this->lines.push(temp);
 				this->lock.unlock();
 			}
 			else { // error
@@ -323,7 +339,10 @@ void fileIO::block::readChunk(char* data)
 		}
 
 		if (i == strData.length() - 1) { // last line doesnt have new line
-			std::string tmp = strData.substr(offset + 1, i - offset);
+			char* tmp;
+			tmp = (char*)malloc(i - offset+1);
+			strncpy_s(tmp, i - offset + 1, (const char*)strData.c_str() + offset + 1, i - offset);
+			//= strData.substr(offset + 1, i - offset);
 			lineCounter++;
 			//insert tmp into list
 			if (this->readWrite == waiting) { // if waiting for a line add a line then set status to reading so the reader knows its ready
@@ -368,7 +387,7 @@ fileIO::block::block(char* data)
 	this->status = started;
 	this->readWrite = started;
 	std::function<void()> f = [this, data]() {this->readChunk(data); };
-	std::thread thread(f);
+	std::thread thread(std::move(f));
 	thread.detach();
 	std::this_thread::sleep_for(std::chrono::microseconds(10));
 }
@@ -423,6 +442,7 @@ std::string fileIO::block::getNext()
 	if (this->lines.size() > 0) {
 		this->readWrite = fileIO::reading;
 		result = this->lines.front(); // read from front
+		delete(this->lines.front());
 		this->lock.lock();
 		this->lines.pop(); // remove from front
 		this->lock.unlock();
@@ -439,7 +459,7 @@ std::string fileIO::block::getNext()
 		if (this->readWrite == reading || this->readWrite == done) { // can read now since the thread is either done writing or the next one is in the queue
 			if (this->lines.size() > 0) {
 				this->readWrite = fileIO::reading;
-				result = this->lines.front(); // read from front
+				result = *this->lines.front(); // read from front
 				this->lock.lock();
 				this->lines.pop(); // remove from front
 				this->lock.unlock();

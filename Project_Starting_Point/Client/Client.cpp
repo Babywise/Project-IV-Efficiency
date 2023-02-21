@@ -63,8 +63,13 @@ int main(int argc, char* argv[])
 	//startup getSize note. should be started before looking for clients
 	//std::thread sizeThread(GetSizePromise, std::move(sizeOfFile)); // begin getting size of file
 	//sizeThread.detach();
-	
-	fileIO::fileBuffer buffer(configurations.getConfigChar("dataFile"));
+	std::this_thread::sleep_for(std::chrono::seconds(6));
+	fileIO::fileBuffer* buffer = new fileIO::fileBuffer(configurations.getConfigChar("dataFile"));
+	std::this_thread::sleep_for(std::chrono::seconds(2));
+	while (buffer->hasNext()) {
+		std::cout << buffer->next();
+	}
+	std::this_thread::sleep_for(std::chrono::seconds(3));
 	system("pause");
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -97,7 +102,7 @@ int main(int argc, char* argv[])
 #ifdef METRICS
 		timer.start();
 #endif
-		strInput =buffer.next();
+		strInput =buffer->next();
 #ifdef METRICS
 		calculations.addPoint(timer.getTime());
 		lineCounter.addPoint(1); // add 1 for the get line above, add one for close file at end of loop add one for file init

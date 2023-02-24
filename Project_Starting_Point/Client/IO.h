@@ -43,9 +43,10 @@ namespace fileIO {
 		int length = -1;
 		std::vector<block*> chunks;
 		int threadCount = 1;
-		void splitFile(std::string input);
+		void splitFile(char* input);
 		statuses status = not_started;
 		int currentBlock = 0;
+		char* data;
 	public:
 		fileBuffer(std::string path);
 		std::string next();
@@ -72,17 +73,18 @@ fileIO::fileBuffer::fileBuffer(std::string path) {
 		fseek(f, 0, SEEK_SET); // set pointer back to beginning of file  
 
 		// if greater then 4MB then only malloc 4MB
-		char* data = (char*)malloc(fsize + 1);
-
+		this->data = (char*)malloc(fsize + 1);
+		//std::cout << "data exists";
 		//alter fsize to 4MB if bigger 
 		fread(data, fsize, 1, f); // read the file into the buffer
 		fclose(f); // close
 
-		data[fsize] = 0;// 0 terminate file
-		std::string output = data;
-		free(data);
-	std::thread thread(std::move([this, output]() {this->splitFile(output); }));
+		this->data[fsize] = 0;// 0 terminate file
 		
+	
+	std::thread thread(std::move([this]() {this->splitFile(this->data); })); // consumes a lot of memory
+	
+
 		thread.detach();
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
 		//if greater then 4MB join thread and redo for next chunk
@@ -97,36 +99,39 @@ fileIO::fileBuffer::fileBuffer(std::string path) {
 /// splits the data passed in into a preset number of threads
 /// </summary>
 /// <param name="input"></param>
-void fileIO::fileBuffer::splitFile(std::string input) {
-	if (input.length() <= 0) {
+void fileIO::fileBuffer::splitFile(char* input) {
+	if (strlen(input) <= 0) {
 		this->status = done;
 		return;
 	}
 	this->status = started;
-	int chunk = input.length()/this->threadCount;
+	int chunk = strlen(input) /this->threadCount;
 	int offset = 0;
 	for (int b = 0; b < this->threadCount-1; b++) { // for all threads except last since it picks up the remainder
-		for (int i = (chunk*b)+chunk; i < input.length(); i++) { // chunk *b + offset ---- 8000bytes / 8 threads ---- 1000 + offset ------ offset += char count to next \n
+		for (int i = (chunk*b)+chunk; i < strlen(input); i++) { // chunk *b + offset ---- 8000bytes / 8 threads ---- 1000 + offset ------ offset += char count to next \n
 			if (input[i] == '\n') {
 				std::string blockString;
 				if (offset == 0) {
-					blockString = input.substr(offset, i );
+					//blockString = input.substr(offset, i );
 				}
 				else {
-					blockString = input.substr(offset + 1, i - offset-1);
+					//blockString = input.substr(offset + 1, i - offset-1);
 				}
 				std::this_thread::sleep_for(std::chrono::microseconds(10));
 				block* b = new block((char*)blockString.c_str());
 				std::this_thread::sleep_for(std::chrono::microseconds(10));
 				this->chunks.push_back(b);
 				offset = i;
-				i = input.length() + 1;
+				i = strlen(input) + 1;
 			}
 		}
 	}
-	std::string blockStringTwo = input.substr(offset, input.length() - offset); // do last thread with its part plus remainder
+
+	char* blockStringTwo = (char*)malloc(strlen(input) - offset);
+	strncpy_s(blockStringTwo, strlen(input) - offset + 1, data + offset, strlen(input) - offset);// (input.substr(offset, strlen(input) - offset); // do last thread with its part plus remainder
 	std::this_thread::sleep_for(std::chrono::microseconds(10));
-	block* d = new block((char*)blockStringTwo.c_str());
+	free(input);
+	block* d = new block(blockStringTwo);
 	std::this_thread::sleep_for(std::chrono::microseconds(10));
 	this->chunks.push_back(d);
 	this->status = done;
@@ -373,7 +378,7 @@ void fileIO::block::readChunk(char* data)
 		}
 		
 	}
-	
+	//free(data);
 	this->status = done;
 	this->lengthPromise.set_value(lineCounter);
 }

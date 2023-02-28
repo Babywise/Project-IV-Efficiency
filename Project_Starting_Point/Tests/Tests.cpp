@@ -171,7 +171,10 @@ namespace Unit_Tests
 			std::vector<std::string> expected = { "hello\n","my\n","name\n","is\n","danny" };
 
 			int i = 0;
-			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
+			char* input = (char*)malloc(100);
+			strcpy_s(input, 40, "hello\nmy\nname\nis\ndanny");
+			fileIO::block b(input);
+		
 			while (b.hasNext()) {
 				std::string check = b.getNext();
 				string help = expected.at(i);
@@ -182,27 +185,41 @@ namespace Unit_Tests
 		}
 
 		TEST_METHOD(properLineCount) {
-			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
-			this_thread::sleep_for(std::chrono::milliseconds(500));
+			char* input = (char*)malloc(100);
+			strcpy_s(input, 40, "hello\nmy\nname\nis\ndanny");
+			fileIO::block b(input);
+			while (b.getSize() == -1) {
+			}
 			Assert::AreEqual(5, b.getSize());
 		}
 		TEST_METHOD(status_Done) {
-			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
-			this_thread::sleep_for(std::chrono::milliseconds(50));
+			char* input = (char*)malloc(100);
+			strcpy_s(input, 40, "hello\nmy\nname\nis\ndanny");
+			fileIO::block b(input);
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			Assert::AreEqual(2, (int)b.getStatus());
 		}
 		TEST_METHOD(status_Started) {
-			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
-			this_thread::sleep_for(std::chrono::milliseconds(5));
+			char* input = (char*)malloc(100);
+			strcpy_s(input, 40, "hello\nmy\nname\nis\ndanny");
+			fileIO::block b(input);
+			while (b.getStatus() == 1) {
+
+			}
 			Assert::AreEqual(2, (int)b.getStatus());
 		}
 		TEST_METHOD(has_next_true) {
-			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
-			this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+			char* input = (char*)malloc(100);
+			strcpy_s(input,40,"hello\nmy\nname\nis\ndanny");
+			fileIO::block b(input);
+		
 			Assert::AreEqual(true, b.hasNext());
 		}
 		TEST_METHOD(has_next_false) {
-			fileIO::block b((char*)"");
+			char* input = (char*)malloc(1);
+			input[0] = '\0';
+			fileIO::block b(input);
 			Assert::AreEqual(false, b.hasNext());
 		}
 	};
@@ -230,6 +247,9 @@ namespace Unit_Tests
 		TEST_METHOD(getLength) {
 			configuration::configManager manager("../../Tests/TestConfig.conf");
 			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			while(buffer.getLineCount() == -1) {
+				
+			}
 			Assert::AreEqual(504, buffer.getLineCount());
 		}
 	};

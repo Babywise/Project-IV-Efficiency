@@ -42,7 +42,7 @@ namespace fileIO {
 	private : 
 		int length = -1;
 		std::vector<block*> chunks;
-		int threadCount = 1;
+		int threadCount = 24;
 		void splitFile(char* input);
 		statuses status = not_started;
 		int currentBlock = 0;
@@ -82,7 +82,7 @@ fileIO::fileBuffer::fileBuffer(std::string path) {
 		this->data[fsize] = 0;// 0 terminate file
 		
 	
-	std::thread thread(std::move([this]() {this->splitFile(this->data); })); // consumes a lot of memory
+		std::thread thread(std::move([this]() {this->splitFile(this->data); })); // consumes a lot of memory
 	
 
 		thread.detach();
@@ -110,15 +110,19 @@ void fileIO::fileBuffer::splitFile(char* input) {
 	for (int b = 0; b < this->threadCount-1; b++) { // for all threads except last since it picks up the remainder
 		for (int i = (chunk*b)+chunk; i < strlen(input); i++) { // chunk *b + offset ---- 8000bytes / 8 threads ---- 1000 + offset ------ offset += char count to next \n
 			if (input[i] == '\n') {
-				std::string blockString;
+				char* blockString;
 				if (offset == 0) {
+					blockString = (char*)malloc(chunk+i+1);
+					strncpy_s(blockString, i + 1, input + offset,  i );
 					//blockString = input.substr(offset, i );
 				}
 				else {
+					blockString = (char*)malloc(i -offset+1);
+					strncpy_s(blockString, i-offset, input + offset+1, i-offset-1);
 					//blockString = input.substr(offset + 1, i - offset-1);
 				}
 				std::this_thread::sleep_for(std::chrono::microseconds(10));
-				block* b = new block((char*)blockString.c_str());
+				block* b = new block(blockString);
 				std::this_thread::sleep_for(std::chrono::microseconds(10));
 				this->chunks.push_back(b);
 				offset = i;
@@ -127,13 +131,22 @@ void fileIO::fileBuffer::splitFile(char* input) {
 		}
 	}
 
-	char* blockStringTwo = (char*)malloc(strlen(input) - offset);
-	strncpy_s(blockStringTwo, strlen(input) - offset + 1, data + offset, strlen(input) - offset);// (input.substr(offset, strlen(input) - offset); // do last thread with its part plus remainder
+	char* blockStringTwo = (char*)malloc(strlen(input) - offset+1);
+	if (this->threadCount > 1) {
+		strncpy_s(blockStringTwo, strlen(input) - offset + 1, data + offset + 1, strlen(input) - offset);// (input.substr(offset, strlen(input) - offset); // do last thread with its part plus remainder
+	}
+	else {
+		strncpy_s(blockStringTwo, strlen(input) - offset + 1, data + offset, strlen(input) - offset);// (input.substr(offset, strlen(input) - offset); // do last thread with its part plus remainder
+	}
+	blockStringTwo[strlen(input) - offset] = '\0';
 	std::this_thread::sleep_for(std::chrono::microseconds(10));
+
 	free(input);
+	
 	block* d = new block(blockStringTwo);
 	std::this_thread::sleep_for(std::chrono::microseconds(10));
 	this->chunks.push_back(d);
+
 	this->status = done;
 }
 
@@ -292,10 +305,13 @@ void GetSizePromise(std::promise<unsigned int> promise)
 void fileIO::block::readChunk(char* data)
 {
 	// move data into string to use substr
-	std::string strData;
-	strData = data;
-	int lineCounter = 0;
 
+	std::string strData(data);
+	if (strlen(data) > 1) {
+		delete(data); // comment this line for tests
+	}
+		
+	int lineCounter = 0;
 	int offset = -1; // used to offset starting point
 
 	for (int i = 0; i < strData.length(); i++) {
@@ -378,9 +394,10 @@ void fileIO::block::readChunk(char* data)
 		}
 		
 	}
-	//free(data);
 	this->status = done;
+	this->readWrite = done;
 	this->lengthPromise.set_value(lineCounter);
+
 }
 
 /// <summary>
@@ -389,12 +406,15 @@ void fileIO::block::readChunk(char* data)
 /// <param name="data"></param>
 fileIO::block::block(char* data)
 {
+
 	this->status = started;
 	this->readWrite = started;
-	std::function<void()> f = [this, data]() {this->readChunk(data); };
-	std::thread thread(std::move(f));
+	
+	std::thread thread([this,data]() {this->readChunk(data); });
 	thread.detach();
-	std::this_thread::sleep_for(std::chrono::microseconds(10));
+
+	std::this_thread::sleep_for(std::chrono::microseconds(3));
+
 }
 
 /// <summary>
@@ -424,6 +444,9 @@ int fileIO::block::getSize()
 bool fileIO::block::hasNext()
 {
 	bool isEmpty = this->lines.empty();
+	while (isEmpty == true && this->status != done) {
+		isEmpty = this->lines.empty();
+	}
 	if (this->status == fileIO::done && isEmpty == true) { // finished reading lines and no more lines.
 		return false;
 	}
@@ -447,7 +470,7 @@ std::string fileIO::block::getNext()
 	if (this->lines.size() > 0) {
 		this->readWrite = fileIO::reading;
 		result = this->lines.front(); // read from front
-		delete(this->lines.front());
+		free(this->lines.front());
 		this->lock.lock();
 		this->lines.pop(); // remove from front
 		this->lock.unlock();
@@ -464,7 +487,8 @@ std::string fileIO::block::getNext()
 		if (this->readWrite == reading || this->readWrite == done) { // can read now since the thread is either done writing or the next one is in the queue
 			if (this->lines.size() > 0) {
 				this->readWrite = fileIO::reading;
-				result = *this->lines.front(); // read from front
+				result = this->lines.front(); // read from front
+				free(this->lines.front());
 				this->lock.lock();
 				this->lines.pop(); // remove from front
 				this->lock.unlock();

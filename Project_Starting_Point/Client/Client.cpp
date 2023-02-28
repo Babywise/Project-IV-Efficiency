@@ -61,8 +61,8 @@ int main(int argc, char* argv[])
 #endif
 
 	//startup getSize note. should be started before looking for clients
-	//std::thread sizeThread(GetSizePromise, std::move(sizeOfFile)); // begin getting size of file
-	//sizeThread.detach();
+	std::thread sizeThread(GetSizePromise, std::move(sizeOfFile)); // begin getting size of file
+	sizeThread.detach();
 //	std::this_thread::sleep_for(std::chrono::seconds(2));
 	fileIO::fileBuffer* buffer = new fileIO::fileBuffer(configurations.getConfigChar("dataFile"));
 	std::this_thread::sleep_for(std::chrono::seconds(2));

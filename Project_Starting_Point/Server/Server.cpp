@@ -90,6 +90,7 @@ int main()
 		memset(RxBuffer, 0, sizeof(RxBuffer));
 		recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0); // get param name
 
+		//packet testing
 		Packet pRecv(RxBuffer);
 		
 		send(ConnectionSocket, "ACK", sizeof("ACK"), 0); // send ack

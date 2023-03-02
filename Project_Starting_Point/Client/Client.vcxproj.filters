@@ -24,7 +24,7 @@
     <ClCompile Include="..\Shared\Logger.cpp">
       <Filter>SharedCPP</Filter>
     </ClCompile>
-    <ClCompile Include="Clientv2.cpp">
+    <ClCompile Include="Client.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

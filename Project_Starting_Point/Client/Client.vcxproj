@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Shared\Logger.cpp" />
-    <ClCompile Include="Clientv2.cpp" />
+    <ClCompile Include="Client.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="DataFile.txt" />

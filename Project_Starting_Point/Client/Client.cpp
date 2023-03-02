@@ -41,7 +41,7 @@ float logTime; // used to measure getSize since it has been refactored for futur
 /// main loop 
 /// </summary>
 /// <returns></returns>
-int main1(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
 	fileIO::fileBuffer buffer(configurations.getConfigChar("dataFile"));
 
@@ -119,7 +119,16 @@ int main1(int argc, char* argv[])
 #ifdef METRICS
 				//start timer for data parsing
 				timer.start();
+
+				
 #endif
+				//------------------------------
+				//Packet testing
+				Packet pSend("src", "dest", ParamNames[iParamIndex], 5, "20:20", 0.00f);
+
+				send(ClientSocket, pSend.serialize(), 1000, 0);
+				//-----------------------------
+
 				offset = strInput.find_first_of(',', preOffset+1); // Find comma, get size of everything after it
 				// Creates a substring for the param name. Uses the offset values to know where to start and end
 				std::string strTx = strInput.substr(preOffset+1, offset - (preOffset+1));

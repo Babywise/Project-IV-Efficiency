@@ -310,15 +310,15 @@ const int MaxBufferSize = 1000;
 
 struct StorageTypes
 {
-	std::string startTime;
-	float startingFuel;
-	float sumFuel;
-	int size;
+	std::string startTime = "";
+	float startingFuel = 0;
+	float sumFuel = 0;
+	int size = 0;
 };
 
-void UpdateData(StorageTypes plane, float currentFuelPoint);
-float CalcAvg(StorageTypes plane);
-float CalcFuelConsumption(StorageTypes plane, float currentFuel);
+void UpdateData(StorageTypes* plane, float currentFuelPoint);
+float CalcAvg(StorageTypes* plane);
+float CalcFuelConsumption(StorageTypes* plane, float currentFuel);
 
 static int numCalc = 0;		//number of calculations
 static float calcTime = 0;
@@ -327,20 +327,26 @@ static float calcTime = 0;
 void clientHandler(SOCKET clientSocket)
 {
 
+	std::thread::id threadID = std::this_thread::get_id();
+	unsigned int planeID = *static_cast<unsigned int*>(static_cast<void*>(&threadID));
+
+	Packet p(planeID);
+	send(clientSocket, p.serialize(), MaxBufferSize, 0);
+
 	StorageTypes plane;
 	char RxBuffer[MaxBufferSize] = {}; // magic number
 	float fValue;
 	std::string timestamp;
 
 	int loopcounter = 0;
-
+	bool exit = false;
 	while (!exit) 
 	{
 		memset(RxBuffer, 0, sizeof(RxBuffer));
 
 		size_t result = recv(clientSocket, RxBuffer, sizeof(RxBuffer), 0); // get current value for variable
 
-		Packet p(RxBuffer);
+		p = Packet(RxBuffer);
 
 		if (strcmp(p.getParamName().c_str(), configurations.getConfigChar("columnOne")) == 0)
 		{
@@ -353,10 +359,10 @@ void clientHandler(SOCKET clientSocket)
 				plane.startTime = timestamp;
 			}
 
-			UpdateData(plane, fValue);
+			UpdateData(&plane, fValue);
 			
-			p.setCurrentFuel(CalcFuelConsumption(plane, fValue));
-			p.setAverageFuel(CalcAvg(plane));
+			p.setCurrentFuelConsumption(CalcFuelConsumption(&plane, fValue));
+			p.setAverageFuelConsumption(CalcAvg(&plane));
 			p.swapIP();
 			
 			send(clientSocket, p.serialize(), MaxBufferSize, 0);//send average back 
@@ -367,7 +373,7 @@ void clientHandler(SOCKET clientSocket)
 			std::string invalidMessage = "Invalid Parameter Name, Closing Connection.";
 			// Kill connection if not one of the correct param names
 			send(clientSocket, invalidMessage.c_str(), invalidMessage.length(), 0);//send average back 
-			closesocket(clientSocket);
+			exit = true;
 		}
 
 		loopcounter++;
@@ -398,7 +404,7 @@ int main()
 	sockaddr_in serverAddr;
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_addr.s_addr = INADDR_ANY;
-	serverAddr.sin_port = htons(8888);
+	serverAddr.sin_port = htons(atoi(configurations.getConfigChar("port"))); // Magic Number
 	if (bind(listenSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
 		std::cerr << "bind failed with error: " << WSAGetLastError() << '\n';
 		closesocket(listenSocket);
@@ -436,17 +442,17 @@ int main()
 	return 0;
 }
 
-void UpdateData(StorageTypes plane, float currentFuelPoint)
+void UpdateData(StorageTypes* plane, float currentFuelPoint)
 {
-	plane.size++;
-	plane.sumFuel += currentFuelPoint;
+	plane->size++;
+	plane->sumFuel += currentFuelPoint;
 }
 
-float CalcAvg(StorageTypes plane)
+float CalcAvg(StorageTypes* plane)
 {
-	return plane.sumFuel / plane.size;
+	return plane->sumFuel / plane->size;
 }
 
-float CalcFuelConsumption(StorageTypes plane, float currentFuel) {
-	return plane.startingFuel - currentFuel;
+float CalcFuelConsumption(StorageTypes* plane, float currentFuel) {
+	return plane->startingFuel - currentFuel;
 }

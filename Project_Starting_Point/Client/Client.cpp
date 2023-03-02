@@ -22,7 +22,7 @@ const char* wanAddr = configurations.getConfigChar("wanAddr");
 const int port = atof(configurations.getConfig("port").c_str());
 const std::string wan = configurations.getConfigChar("wan");
 const std::string lan = configurations.getConfigChar("lan");
-
+const int MaxBufferSize = 1000;
 
 
 //metrics variables
@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 	std::promise<unsigned int> sizeOfFile; // used to begin getting size of file while starting up server
 	std::future<unsigned int> uiSize = sizeOfFile.get_future();
 	std::vector<std::string> ParamNames;
-	char Rx[128]; // Get from Config File later (Magic Number)
+	char Rx[MaxBufferSize]; // Get from Config File later (Magic Number)
 
 #ifdef METRICS
 	int numTransmissions = 0;
@@ -90,6 +90,17 @@ int main(int argc, char* argv[])
 	unsigned int countTo = uiSize.get();
 #endif
 
+	memset(Rx, 0, sizeof(Rx));
+	recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve PlaneID
+
+	Packet plane(Rx);
+
+	std::string paramName;
+	std::string timestamp;
+	std::string fuelValue;
+
+	int offset, preOffset = 0;
+
 	// Loop through number of lines in the file
 	for (unsigned int l = 0; l < countTo; l++)
 	{
@@ -103,8 +114,46 @@ int main(int argc, char* argv[])
 		calculations.addPoint(timer.getTime());
 		lineCounter.addPoint(1); // add 1 for the get line above, add one for close file at end of loop add one for file init
 #endif
-// l != column headers it l is data values
 
+		
+		if (l == 0)
+		{
+			int endpos = strInput.find_first_of(',');
+			paramName = strInput.substr(0, endpos);
+		}
+
+		if (l > 0)
+		{
+			size_t offset, preOffset;
+			offset = preOffset = 0;
+
+			for (int pCounter = 0; pCounter < 2; pCounter++) {
+				offset = strInput.find_first_of(',', preOffset + 1);
+				if (pCounter == 0) {
+					timestamp = strInput.substr(preOffset + 1, offset - (preOffset + 1));
+				} else {
+					fuelValue = strInput.substr(preOffset + 1, offset - (preOffset + 1));
+				}
+				preOffset = offset; // Update offset to next column
+			}
+#ifdef LAN
+			plane = Packet("src", lanAddr, paramName, plane.getPlaneID(), timestamp, atof(fuelValue.c_str()));
+#endif
+#ifdef WAN
+			plane = Packet("src", wanAddr, paramName, plane.getPlaneID(), timestamp, atof(fuelValue.c_str()));
+#endif
+
+			send(ClientSocket, plane.serialize(), MaxBufferSize, 0); // Send parameter name to server
+			recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve PlaneID
+			plane = Packet(Rx);
+			std::cout << "Timestamp: " << plane.getTimestamp() << " | Fuel Consumption: " << plane.getCurrentFuelConsumption() <<
+				" | Average Fuel Consumption: " << plane.getAverageFuelConsumption() << std::endl;
+		}
+
+		int breakpoi = 0;
+
+/*
+// l != column headers it l is data values
 		if ( l > 0 )
 		{
 			size_t offset, preOffset; // Keeps track of which value to read (param position)
@@ -120,14 +169,9 @@ int main(int argc, char* argv[])
 				//start timer for data parsing
 				timer.start();
 
-				
-#endif
-				//------------------------------
-				//Packet testing
-				Packet pSend("src", "dest", ParamNames[iParamIndex], 5, "20:20", 0.00f);
 
-				send(ClientSocket, pSend.serialize(), 1000, 0);
-				//-----------------------------
+#endif
+
 
 				offset = strInput.find_first_of(',', preOffset+1); // Find comma, get size of everything after it
 				// Creates a substring for the param name. Uses the offset values to know where to start and end
@@ -138,7 +182,7 @@ int main(int argc, char* argv[])
 				dataParsingTimeCalc.addPoint(timer.getTime());
 				numDataParsesClient++;
 #endif
-				
+
 #ifdef METRICS
 				std::chrono::time_point<std::chrono::system_clock> start, end;
 
@@ -174,7 +218,7 @@ int main(int argc, char* argv[])
 					handshakeTransmissionCount = numTransmissions;
 				}
 #endif
-				
+
 
 				std::cout << ParamNames[iParamIndex] << " Avg: " << Rx << std::endl; // Print param name and average
 				preOffset = offset; // Update offset to next column
@@ -206,8 +250,9 @@ int main(int argc, char* argv[])
 			numDataParsesClient++;
 #endif
 		}
-	
+*/
 	}
+
 #ifdef METRICS
 	timer.start();
 	Metrics::logStartOfClient(configurations.getConfigChar("dataFile"));
@@ -218,6 +263,7 @@ int main(int argc, char* argv[])
 	send(ClientSocket, "***", 3,0);
 	closesocket(ClientSocket); // cleanup
 	WSACleanup();
+
 
 #ifdef METRICS
 

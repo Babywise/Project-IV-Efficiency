@@ -27,9 +27,6 @@
     <ClCompile Include="..\Shared\Logger.cpp">
       <Filter>SharedCPP</Filter>
     </ClCompile>
-    <ClCompile Include="IO.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="DataFile.txt">
@@ -40,10 +37,10 @@
     <ClInclude Include="..\Shared\Logger.h">
       <Filter>Shared_H</Filter>
     </ClInclude>
-    <ClInclude Include="..\Shared\Metrics.h">
+    <ClInclude Include="..\Shared\configManager.h">
       <Filter>Shared_H</Filter>
     </ClInclude>
-    <ClInclude Include="..\Shared\configManager.h">
+    <ClInclude Include="..\Shared\Metrics.h">
       <Filter>Shared_H</Filter>
     </ClInclude>
     <ClInclude Include="IO.h">

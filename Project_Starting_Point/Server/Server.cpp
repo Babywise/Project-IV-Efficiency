@@ -2,7 +2,7 @@
 #pragma comment(lib, "Ws2_32.lib")
 #include <iostream>
 
-#include "../Shared/Metrics.h"
+
 #include "../Shared/Logger.h"
 #include "../Shared/configManager.h"
 
@@ -82,15 +82,17 @@ int main()
 	int numConnections = 1;
 
 	std::cout << "Connection Established" << std::endl;
-
+	bool exit = false;
 	// if first byte of buffer is an asterisk close connection
-	while (RxBuffer[0] != configurations.getConfigChar("terminator")[0])
+	while (!exit)
 	{
-		float fValue = 0;
+			float fValue = 0;
 		memset(RxBuffer, 0, sizeof(RxBuffer));
 		recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0); // get param name
 		send(ConnectionSocket, "ACK", sizeof("ACK"), 0); // send ack
-
+		if (RxBuffer[0] == configurations.getConfigChar("terminator")[0])
+			exit = true;
+														 
 		// find param name recieved
 		if (strcmp(RxBuffer, configurations.getConfigChar("columnOne")) == 0)
 		{
@@ -233,10 +235,6 @@ int main()
 /// <param name="value"></param>
 void UpdateData(unsigned int uiIndex, float value)
 {
-#ifdef METRICS
-	//start timer for data parsing
-	timer.start();
-#endif
 	if (RxData[uiIndex].size == 0) // if first value
 	{
 		RxData[uiIndex].pData = new float[1]; // init pdata
@@ -248,18 +246,12 @@ void UpdateData(unsigned int uiIndex, float value)
 		float* pNewData = new float[RxData[uiIndex].size + 1];
 		for (unsigned int x = 0; x < RxData[uiIndex].size; x++)
 			pNewData[x] = RxData[uiIndex].pData[x]; // set next pdata to data input
-#ifdef METRICS
-		sizeOfDataParsedDataServerCalc.addPoint(RxData[uiIndex].size);
-#endif
+
 		pNewData[RxData[uiIndex].size] = value;
 		delete[] RxData[uiIndex].pData; // delete old memory
 		RxData[uiIndex].pData = pNewData; // replace with new data added
 		RxData[uiIndex].size++;
 	}
-#ifdef METRICS
-	dataParsingTimeCalc.addPoint(timer.getTime());
-	numDataParsesServer++;
-#endif
 }
 
 /// <summary>
@@ -270,12 +262,9 @@ void UpdateData(unsigned int uiIndex, float value)
 float CalcAvg(unsigned int uiIndex)
 {
 	float Avg = 0;
-	for (unsigned int x = 0; x < RxData[uiIndex].size; x++) {
+	for (unsigned int x = 0; x < RxData[uiIndex].size; x++)
 		Avg += RxData[uiIndex].pData[x];
-		numCalc += 1;
-	}
 
 	Avg = Avg / RxData[uiIndex].size;
-	numCalc += 1;
 	return Avg;
 }

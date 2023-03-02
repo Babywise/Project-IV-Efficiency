@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="..\Shared\Logger.cpp" />
     <ClCompile Include="Client.cpp" />
-    <ClCompile Include="IO.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="DataFile.txt" />

@@ -6,8 +6,6 @@
 #include <thread>
 
 //include local stuff
-#include "../Shared/Metrics.h"
-#include "../Shared/Logger.h"
 #include "IO.h"
 
 // defines
@@ -23,6 +21,7 @@ const char* wanAddr = configurations.getConfigChar("wanAddr");
 const int port = atof(configurations.getConfig("port").c_str());
 const std::string wan = configurations.getConfigChar("wan");
 const std::string lan = configurations.getConfigChar("lan");
+
 
 
 //metrics variables
@@ -43,6 +42,9 @@ float logTime; // used to measure getSize since it has been refactored for futur
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
+	fileIO::fileBuffer buffer(configurations.getConfigChar("dataFile"));
+
+
 	//setup
 	WSADATA wsaData;
 	SOCKET ClientSocket;
@@ -94,15 +96,10 @@ int main(int argc, char* argv[])
 #ifdef METRICS
 		timer.start();
 #endif
-		std::ifstream ifs(configurations.getConfigChar("dataFile")); // open datafile.txt | file opens on every loop execution
-		for (unsigned int iStart = 0; iStart < l; iStart++) {// get next line which is L
-			getline(ifs, strInput);
-		}
-		getline(ifs, strInput);
+		strInput =buffer.next();
 #ifdef METRICS
 		calculations.addPoint(timer.getTime());
-		lineCounter.addPoint(3); // add 1 for the get line above, add one for close file at end of loop add one for file init
-		lineCounter.addPoint(2*l); // add 2 lines for every loop of the for loop above
+		lineCounter.addPoint(1); // add 1 for the get line above, add one for close file at end of loop add one for file init
 #endif
 // l != column headers it l is data values
 
@@ -198,7 +195,7 @@ int main(int argc, char* argv[])
 			numDataParsesClient++;
 #endif
 		}
-		ifs.close(); // close file
+	
 	}
 #ifdef METRICS
 	timer.start();
@@ -207,6 +204,7 @@ int main(int argc, char* argv[])
 	Metrics::logClientIOMetrics(calculations, lineCounter, logTime);
 	Metrics::logDataParsingMetricsClient(dataParsingTimeCalc, sizeOfDataParsedDataClientCalc, numDataParsesClient);
 #endif
+	send(ClientSocket, "***", 3,0);
 	closesocket(ClientSocket); // cleanup
 	WSACleanup();
 

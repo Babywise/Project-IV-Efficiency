@@ -1,10 +1,6 @@
-/*
-* This file is used for code metric subroutines to help calculate various metrics of source code
-* v1.0 
-*	- Timer : Use start to begin timing a function and getTime to get time elapsed in ms since the start function was called
-*	- Calculation : used to get averages or other caluclations based on passed in data values
-*/
 #pragma once
+
+
 #include <Windows.h>
 #include <chrono>
 #include <vector>
@@ -50,7 +46,7 @@ namespace Metrics {
 		float getTime() {
 			steady_clock::time_point endTime = high_resolution_clock::now();
 
-			return float((endTime - startTime).count())/1000000;
+			return float((endTime - startTime).count()) / 1000000;
 
 		}
 	};
@@ -155,7 +151,7 @@ namespace Metrics {
 		int byteCounter = 0; // to get total number of bytes
 		for (const auto& entry : std::filesystem::directory_iterator("../Client/")) {
 			if (entry.path().extension().string() == ".txt") {
-				byteCounter+=std::filesystem::file_size(entry.path());
+				byteCounter += std::filesystem::file_size(entry.path());
 				fileCounter++;
 			}
 		}
@@ -165,7 +161,7 @@ namespace Metrics {
 		logger.emptyLine(clientMetricsLogFileName);
 	}
 
-	void logDataParsingMetricsClient(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataClientCalc, int numDataParsesClient){
+	void logDataParsingMetricsClient(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataClientCalc, int numDataParsesClient) {
 		//data parsing results
 		logger.log("Client - DataParsing - Total Time = " + std::to_string(dataParsingTimeCalc.getSum()) + " ms", clientMetricsLogFileName);
 		logger.log("Client - DataParsing - Average (Single Parse) = " + std::to_string(dataParsingTimeCalc.getAverage()) + " ms", clientMetricsLogFileName);
@@ -175,7 +171,7 @@ namespace Metrics {
 		logger.emptyLine(clientMetricsLogFileName);
 	}
 
-	void logDataParsingMetricsServer(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataServerCalc, int numDataParsesServer){
+	void logDataParsingMetricsServer(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataServerCalc, int numDataParsesServer) {
 		//data parsing results
 		logger.log("Server - DataParsing - Total Time = " + std::to_string(dataParsingTimeCalc.getSum()) + " ms", serverMetricsLogFileName);
 		logger.log("Server - DataParsing - Average (Single Parse) = " + std::to_string(dataParsingTimeCalc.getAverage()) + " ms", serverMetricsLogFileName);
@@ -192,7 +188,7 @@ namespace Metrics {
 		logger.emptyLine(serverMetricsLogFileName);
 	}
 
-	void logMemoryMetricsServer(Calculations sizeOfMemoryServerCalc){
+	void logMemoryMetricsServer(Calculations sizeOfMemoryServerCalc) {
 		//memory results
 		logger.log("Server - Memory - Total Memory Allocated: " + std::to_string(sizeOfMemoryServerCalc.getSum()) + " Bytes", serverMetricsLogFileName);
 		logger.emptyLine(serverMetricsLogFileName);

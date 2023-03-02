@@ -5,6 +5,7 @@
 #include "../Client/Client.cpp"
 #ifdef _WIN32
 #endif
+using namespace std;
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -162,6 +163,76 @@ namespace Unit_Tests
 		}
 
 	};
+
+	TEST_CLASS(block_tests)
+	{
+	public:
+		TEST_METHOD(Proper_order) {
+			std::vector<std::string> expected = { "hello\n","my\n","name\n","is\n","danny" };
+
+			int i = 0;
+			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
+			while (b.hasNext()) {
+				std::string check = b.getNext();
+				string help = expected.at(i);
+				Assert::AreEqual(help, check);
+				i++;
+			}
+			Assert::AreEqual(1, 1);
+		}
+
+		TEST_METHOD(properLineCount) {
+			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
+			this_thread::sleep_for(std::chrono::milliseconds(500));
+			Assert::AreEqual(5, b.getSize());
+		}
+		TEST_METHOD(status_Done) {
+			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
+			this_thread::sleep_for(std::chrono::milliseconds(50));
+			Assert::AreEqual(2, (int)b.getStatus());
+		}
+		TEST_METHOD(status_Started) {
+			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
+			this_thread::sleep_for(std::chrono::milliseconds(5));
+			Assert::AreEqual(2, (int)b.getStatus());
+		}
+		TEST_METHOD(has_next_true) {
+			fileIO::block b((char*)"hello\nmy\nname\nis\ndanny");
+			this_thread::sleep_for(std::chrono::milliseconds(2000));
+			Assert::AreEqual(true, b.hasNext());
+		}
+		TEST_METHOD(has_next_false) {
+			fileIO::block b((char*)"");
+			Assert::AreEqual(false, b.hasNext());
+		}
+	};
+
+	TEST_CLASS(fileBuffer_Tests)
+	{
+	public:
+		TEST_METHOD(has_next_true) {
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			Assert::AreEqual(true, buffer.hasNext());
+		}
+		TEST_METHOD(has_next_false) {
+			fileIO::fileBuffer buffer("testData.txt");
+			Assert::AreEqual(false, buffer.hasNext());
+		}
+		TEST_METHOD(nextLine_test) {
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			string answer = buffer.next();
+			string expected = "ACCELERATION BODY X,ACCELERATION BODY Y,ACCELERATION BODY Z,TOTAL WEIGHT,PLANE ALTITUDE,ATTITUDE INDICATOR PICTH DEGREES,ATTITUDE INDICATOR BANK DEGREES\r\n";
+
+			Assert::AreEqual(expected, answer);
+		}
+		TEST_METHOD(getLength) {
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			Assert::AreEqual(505, buffer.getLineCount());
+		}
+	};
 	
 }
 
@@ -211,6 +282,46 @@ namespace metrics_Testing
 
 			//assert
 			if (time < maxTime) {
+				Assert::AreEqual(1, 1);
+			}
+			else {
+				Assert::Fail();
+			}
+		}
+
+		TEST_METHOD(totalTimeToGetLine)
+		{
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			int countTo = buffer.getLineCount();
+			timer.start();
+			for (int i = 0; i < countTo; i++) {
+				std::string strInput = buffer.next();
+			}
+			float result = timer.getTime();
+			float maxTime = 1000;
+
+			if (result < maxTime) {
+				Assert::AreEqual(1, 1);
+			}
+			else {
+				Assert::Fail();
+			}
+		}
+		TEST_METHOD(averageTimeToGetLine)
+		{
+			Metrics::Calculations calculations;
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			int countTo = buffer.getLineCount();
+			
+			for (int i = 0; i < countTo; i++) {
+				timer.start();
+				std::string strInput = buffer.next();
+				calculations.addPoint(timer.getTime());
+			}
+
+			float maxTime = 1;
+
+			if (calculations.getAverage() <= maxTime) {
 				Assert::AreEqual(1, 1);
 			}
 			else {

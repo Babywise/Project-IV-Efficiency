@@ -7,6 +7,7 @@
 
 //include local stuff
 #include "IO.h"
+#include "../Shared/Packet.h"
 
 // defines
 //#define WAN
@@ -40,7 +41,7 @@ float logTime; // used to measure getSize since it has been refactored for futur
 /// main loop 
 /// </summary>
 /// <returns></returns>
-int main(int argc, char* argv[])
+int main1(int argc, char* argv[])
 {
 	fileIO::fileBuffer buffer(configurations.getConfigChar("dataFile"));
 
@@ -96,14 +97,15 @@ int main(int argc, char* argv[])
 #ifdef METRICS
 		timer.start();
 #endif
-		strInput =buffer.next();
+		strInput = buffer.next();
+
 #ifdef METRICS
 		calculations.addPoint(timer.getTime());
 		lineCounter.addPoint(1); // add 1 for the get line above, add one for close file at end of loop add one for file init
 #endif
 // l != column headers it l is data values
 
-		if (l > 0)
+		if ( l > 0 )
 		{
 			size_t offset, preOffset; // Keeps track of which value to read (param position)
 			offset = preOffset = 0;

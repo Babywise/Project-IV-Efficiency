@@ -25,6 +25,10 @@
   <ItemGroup>
     <ClInclude Include="..\Shared\Logger.h" />
     <ClInclude Include="..\Shared\Metrics.h" />
+    <ClInclude Include="..\Shared\Packet.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Shared\config.conf" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

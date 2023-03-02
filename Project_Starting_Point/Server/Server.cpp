@@ -1,7 +1,7 @@
 #include <windows.networking.sockets.h>
 #pragma comment(lib, "Ws2_32.lib")
 #include <iostream>
-
+#include "../Shared/Packet.h"
 
 #include "../Shared/Logger.h"
 #include "../Shared/configManager.h"
@@ -43,7 +43,7 @@ int main()
 	//setup
 	WSADATA wsaData;
 	SOCKET ServerSocket, ConnectionSocket;
-	char RxBuffer[128] = {}; // magic number
+	char RxBuffer[1000] = {}; // magic number
 #ifdef METRICS
 	sizeOfMemoryServerCalc.addPoint(128);
 #endif
@@ -89,6 +89,9 @@ int main()
 			float fValue = 0;
 		memset(RxBuffer, 0, sizeof(RxBuffer));
 		recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0); // get param name
+
+		Packet pRecv(RxBuffer);
+		
 		send(ConnectionSocket, "ACK", sizeof("ACK"), 0); // send ack
 		if (RxBuffer[0] == configurations.getConfigChar("terminator")[0])
 			exit = true;
@@ -96,6 +99,9 @@ int main()
 		// find param name recieved
 		if (strcmp(RxBuffer, configurations.getConfigChar("columnOne")) == 0)
 		{
+
+			
+
 			memset(RxBuffer, 0, sizeof(RxBuffer));
 			size_t result = recv(ConnectionSocket, RxBuffer, sizeof(RxBuffer), 0); // get current value for variable
 			fValue = (float)atof(RxBuffer);

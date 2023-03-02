@@ -1,26 +1,31 @@
 #include <windows.networking.sockets.h>
 #pragma comment(lib, "Ws2_32.lib")
-#include <iostream>
-#include <fstream>
-#include <string>
+
+//include externals
 #include <vector>
+#include <thread>
 
-
+//include local stuff
 #include "../Shared/Metrics.h"
 #include "../Shared/Logger.h"
-#include "../Shared/configManager.h"
+#include "IO.h"
+
+// defines
 //#define WAN
 #define LAN
+#define METRICS
 
+
+//variables
 configuration::configManager configurations("../Shared/config.conf");
 const char* lanAddr = configurations.getConfigChar("lanAddr");
 const char* wanAddr = configurations.getConfigChar("wanAddr");
 const int port = atof(configurations.getConfig("port").c_str());
-const string wan = configurations.getConfigChar("wan");
-const string lan = configurations.getConfigChar("lan");
+const std::string wan = configurations.getConfigChar("wan");
+const std::string lan = configurations.getConfigChar("lan");
 
-#define METRICS
 
+//metrics variables
 #ifdef METRICS
 int numDataParsesClient = 0;
 Metrics::Calculations calculations;
@@ -28,32 +33,35 @@ Metrics::Timer timer;
 Metrics::Calculations lineCounter; // line counter used to determine total number of lines used in fileIO
 Metrics::Calculations dataParsingTimeCalc;
 Metrics::Calculations sizeOfDataParsedDataClientCalc;
+float logTime; // used to measure getSize since it has been refactored for future and promise
 #endif
 
-using namespace std;
 
-unsigned int GetSize();
 /// <summary>
 /// main loop 
 /// </summary>
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
-	
 	//setup
 	WSADATA wsaData;
 	SOCKET ClientSocket;
 	sockaddr_in SvrAddr;
-	unsigned int uiSize = 0;
-	vector<string> ParamNames;
+	std::promise<unsigned int> sizeOfFile; // used to begin getting size of file while starting up server
+	std::future<unsigned int> uiSize = sizeOfFile.get_future();
+	std::vector<std::string> ParamNames;
 	char Rx[128]; // Get from Config File later (Magic Number)
+
 #ifdef METRICS
 	int numTransmissions = 0;
 	int numHandshakes = 0;
-	vector<long long> handshakeTimes;
+	std::vector<long long> handshakeTimes;
 	int handshakeTransmissionCount = 0;
 #endif
 
+	//startup getSize note. should be started before looking for clients
+	std::thread sizeThread(GetSizePromise, std::move(sizeOfFile)); // begin getting size of file
+	sizeThread.detach();
 
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -71,16 +79,22 @@ int main(int argc, char* argv[])
 
 	connect(ClientSocket, (struct sockaddr*)&SvrAddr, sizeof(SvrAddr)); // connect
 
-	uiSize = GetSize(); // Gets the total number of lines from the file
+#ifdef METRICS
+	timer.start();
+	unsigned int countTo = uiSize.get();
+	logTime = timer.getTime();
+#else
+	unsigned int countTo = uiSize.get();
+#endif
 
 	// Loop through number of lines in the file
-	for (unsigned int l = 0; l < uiSize; l++)
+	for (unsigned int l = 0; l < countTo; l++)
 	{
-		string strInput;
+		std::string strInput;
 #ifdef METRICS
 		timer.start();
 #endif
-		ifstream ifs(configurations.getConfigChar("dataFile")); // open datafile.txt | file opens on every loop execution
+		std::ifstream ifs(configurations.getConfigChar("dataFile")); // open datafile.txt | file opens on every loop execution
 		for (unsigned int iStart = 0; iStart < l; iStart++) {// get next line which is L
 			getline(ifs, strInput);
 		}
@@ -109,7 +123,7 @@ int main(int argc, char* argv[])
 #endif
 				offset = strInput.find_first_of(',', preOffset+1); // Find comma, get size of everything after it
 				// Creates a substring for the param name. Uses the offset values to know where to start and end
-				string strTx = strInput.substr(preOffset+1, offset - (preOffset+1)); 
+				std::string strTx = strInput.substr(preOffset+1, offset - (preOffset+1));
 				//get timer for data parsing
 #ifdef METRICS
 				sizeOfDataParsedDataClientCalc.addPoint(strTx.length());
@@ -154,7 +168,7 @@ int main(int argc, char* argv[])
 #endif
 				
 
-				cout << ParamNames[iParamIndex] << " Avg: " << Rx << endl; // Print param name and average
+				std::cout << ParamNames[iParamIndex] << " Avg: " << Rx << std::endl; // Print param name and average
 				preOffset = offset; // Update offset to next column
 				iParamIndex++; // Increment index of param to read from buffer
 
@@ -173,7 +187,7 @@ int main(int argc, char* argv[])
 			while (offset != std::string::npos)
 			{
 				offset = strInput.find_first_of(',', preOffset + 1); // find next value after , from the offset ie: offset = 1 get value after second csv (comma-seperated-value)
-				string newParam = strInput.substr(preOffset + 1, offset - (preOffset + 1));
+				std::string newParam = strInput.substr(preOffset + 1, offset - (preOffset + 1));
 				ParamNames.push_back(newParam); // All param names
 				preOffset = offset;
 #ifdef METRICS
@@ -188,10 +202,9 @@ int main(int argc, char* argv[])
 	}
 #ifdef METRICS
 	timer.start();
-	GetSize();
 	Metrics::logStartOfClient(configurations.getConfigChar("dataFile"));
 	Metrics::logSystemStatsMetrics(true);
-	Metrics::logClientIOMetrics(calculations, lineCounter, timer.getTime());
+	Metrics::logClientIOMetrics(calculations, lineCounter, logTime);
 	Metrics::logDataParsingMetricsClient(dataParsingTimeCalc, sizeOfDataParsedDataClientCalc, numDataParsesClient);
 #endif
 	closesocket(ClientSocket); // cleanup
@@ -218,25 +231,7 @@ int main(int argc, char* argv[])
 	return 1;
 }
 
-/// <summary>
-/// gets the size of the file DataFile.txt
-/// Note. should run before looking for clients perhaps in a thread
-/// </summary>
-/// <returns>uiSize (number of lines in the file)</returns>
-unsigned int GetSize()
 
-{
-	string strInput;
-	unsigned int uiSize = 0;
-	ifstream ifs(configurations.getConfigChar("dataFile"));
-	if (ifs.is_open())
-	{
-		while (!ifs.eof())
-		{
-			getline(ifs, strInput);
-			uiSize++;
-		}
-	}
 
-	return uiSize;
-}
+
+

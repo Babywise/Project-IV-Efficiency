@@ -17,7 +17,7 @@ Metrics::Calculations sizeOfDataParsedDataServerCalc;
 Metrics::Calculations sizeOfMemoryServerCalc;
 #endif
 
-using namespace std;
+
 
 const int numColumns = 7;
 
@@ -72,7 +72,7 @@ int main()
 
 #endif
 
-	cout << "Waiting for client connection\n" << endl;
+	std::cout << "Waiting for client connection\n" << std::endl;
 	ConnectionSocket = SOCKET_ERROR;
 	ConnectionSocket = accept(ServerSocket, NULL, NULL);
 
@@ -81,7 +81,7 @@ int main()
 
 	int numConnections = 1;
 
-	cout << "Connection Established" << endl;
+	std::cout << "Connection Established" << std::endl;
 
 	// if first byte of buffer is an asterisk close connection
 	while (RxBuffer[0] != configurations.getConfigChar("terminator")[0])

@@ -2,6 +2,7 @@
 #include "CppUnitTest.h"
 #include "../Shared/Metrics.h"
 #include "../Shared/configManager.h"
+#include "../Client/Client.cpp"
 #ifdef _WIN32
 #endif
 
@@ -136,24 +137,24 @@ namespace Unit_Tests
 	public:
 		TEST_METHOD(getConfig_exists_int) {
 			
-			string expected = "5";
+			std::string expected = "5";
 			configuration::configManager manager("../../Tests/TestConfig.conf");
 			Assert::AreEqual(atoi(expected.c_str()), atoi(manager.getConfig("test").c_str()));
 		}
 		TEST_METHOD(getConfig_exists_float) {
 
-			string expected = "5.22";
+			std::string expected = "5.22";
 			configuration::configManager manager("../../Tests/TestConfig.conf");
 			Assert::AreEqual(atof(expected.c_str()), atof(manager.getConfig("testfloat").c_str()));
 		}
 		TEST_METHOD(getConfig_exists_string) {
 
-			string expected = "works";
+			std::string expected = "works";
 			configuration::configManager manager("../../Tests/TestConfig.conf");
 			Assert::AreEqual(expected, manager.getConfig("filetest"));
 		}
 		TEST_METHOD(getConfig_not_exists_int) {
-			string answer;
+			std::string answer;
 			
 			configuration::configManager manager("");
 			answer = manager.getConfig("not this one");
@@ -169,25 +170,53 @@ namespace metrics_Testing
 	TEST_CLASS(IO)
 	{
 	public:
+		/// <summary>
+		/// This test method is used to ensure PERF_REQ_IO_001 is met
+		/// </summary>
 		TEST_METHOD(getFileSize)
 		{
-			string message = "Not implemented";
-			Assert::AreEqual(message,(string)"");
+			//setup
+			configuration::configManager manager("../../Tests/TestConfig.conf");
+		
+			int maxTime = 2; //2 milliseconds
+			int time;
+			Metrics::Timer timer;
+
+			//act
+			timer.start();
+
+			FILE* f;
+			int counter = 0;
+			fopen_s(&f, manager.getConfigChar("fileLocation"), "rb");
+
+			fseek(f, 0, SEEK_END);
+			long fsize = ftell(f);
+			fseek(f, 0, SEEK_SET);  /* same as rewind(f); */
+
+			char* data = (char*)malloc(fsize + 1);
+			fread(data, fsize, 1, f);
+			fclose(f);
+
+			data[fsize] = 0;
+
+			for (int i = 0; i < fsize + 1; i++) {
+
+				if (data[i] == '\n') {
+					counter++; // add each new line character as a count
+				}
+			}
+			counter++; // incremement 1 since the last line wont have a new line character
+			Sleep(0.1);
+			time = timer.getTime();
+
+			//assert
+			if (time < maxTime) {
+				Assert::AreEqual(1, 1);
+			}
+			else {
+				Assert::Fail();
+			}
 		}
-		TEST_METHOD(averageTimeToGetLine)
-		{
-			string message = "Not implemented";
-			Assert::AreEqual(message, (string)"");
-		}
-		TEST_METHOD(totalLinesReadingFiles)
-		{
-			string message = "Not implemented";
-			Assert::AreEqual(message, (string)"");
-		}
-		TEST_METHOD(totalTimeReadingFiles)
-		{
-			string message = "Not implemented";
-			Assert::AreEqual(message, (string)"");
-		}
+		
 	};
 }

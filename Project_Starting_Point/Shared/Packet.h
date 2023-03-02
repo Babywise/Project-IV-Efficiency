@@ -24,6 +24,11 @@ class Packet {
 		float fuelTotalQuantity = 0;
 	}FD;
 
+	struct FlightResponse {
+		float currentFuelConsumption = 0;
+		float averageFuelConsumption = 0;
+	}FR;
+
 	char* TxBuffer = {};
 
 public:
@@ -35,6 +40,7 @@ public:
 	{
 		std::memcpy(&this->head, RxBuffer, sizeof(this->head));
 		std::memcpy(&this->FD, RxBuffer + sizeof(this->head), sizeof(this->FD));
+		std::memcpy(&this->FR, RxBuffer + sizeof(this->head) + sizeof(this->FD), sizeof(this->FR));
 	}
 	/// <summary>
 	/// Packet Creation Constructor
@@ -63,10 +69,11 @@ public:
 	{
 		this->head.seq++;
 
-		this->TxBuffer = (char*)malloc(sizeof(head) + sizeof(FD));
+		this->TxBuffer = (char*)malloc(sizeof(head) + sizeof(FD) + sizeof(this->FR));
 
 		std::memcpy(this->TxBuffer, &this->head, sizeof(this->head));
 		std::memcpy(this->TxBuffer + sizeof(this->head), &this->FD, sizeof(this->FD));
+		std::memcpy(this->TxBuffer + sizeof(this->head) + sizeof(this->FD), &this->FR, sizeof(this->FR));
 
 		return this->TxBuffer;
 	}
@@ -100,6 +107,40 @@ public:
 	float getFuelTotalQuantity()
 	{
 		return this->FD.fuelTotalQuantity;
+	}
+	/// <summary>
+	/// Retrieve the Paramter Name from the FlightData
+	/// </summary>
+	/// <returns></returns>
+	std::string getParamName() 
+	{
+		std::string paramName = this->FD.paramName;
+		return paramName;
+	}
+	/// <summary>
+	/// Set the Current Fuel Value in FlightResponse
+	/// </summary>
+	/// <param name="currentFuel"></param>
+	void setCurrentFuel(float currentFuel) 
+	{
+		this->FR.currentFuelConsumption = currentFuel;
+	}
+	/// <summary>
+	/// Set the Average Fuel Value in FlightResponse
+	/// </summary>
+	/// <param name="avgFuel"></param>
+	void setAverageFuel(float avgFuel) 
+	{
+		this->FR.averageFuelConsumption = avgFuel;
+	}
+	/// <summary>
+	/// Swaps the Source and Destination IPs
+	/// </summary>
+	void swapIP() {
+		char temp[maxIPStringLength] = {};
+		strncpy(temp, this->head.srcIP, maxIPStringLength);
+		strncpy(this->head.srcIP, this->head.destIP, maxIPStringLength);
+		strncpy(this->head.destIP, temp, maxIPStringLength);
 	}
 
 

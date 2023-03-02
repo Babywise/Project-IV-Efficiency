@@ -1,3 +1,5 @@
+/*
+
 #include <windows.networking.sockets.h>
 #pragma comment(lib, "Ws2_32.lib")
 #include <iostream>
@@ -274,4 +276,177 @@ float CalcAvg(unsigned int uiIndex)
 
 	Avg = Avg / RxData[uiIndex].size;
 	return Avg;
+}
+*/
+
+#include <windows.networking.sockets.h>
+
+#include <iostream>
+
+#include <string>
+#include <thread>
+#include <vector>
+
+#include "../Shared/Packet.h"
+
+#include "../Shared/Logger.h"
+#include "../Shared/configManager.h"
+
+configuration::configManager configurations("../Shared/config.conf");
+#ifdef METRICS
+int numDataParsesServer = 0;
+float maxSizeRxData = 0;
+
+Metrics::Timer timer;
+Metrics::Calculations dataParsingTimeCalc;
+Metrics::Calculations sizeOfDataParsedDataServerCalc;
+Metrics::Calculations sizeOfMemoryServerCalc;
+#endif
+
+#pragma comment (lib, "Ws2_32.lib")
+
+const int numColumns = 1;
+const int MaxBufferSize = 1000;
+
+struct StorageTypes
+{
+	std::string startTime;
+	float startingFuel;
+	float sumFuel;
+	int size;
+};
+
+void UpdateData(StorageTypes plane, float currentFuelPoint);
+float CalcAvg(StorageTypes plane);
+float CalcFuelConsumption(StorageTypes plane, float currentFuel);
+
+static int numCalc = 0;		//number of calculations
+static float calcTime = 0;
+
+
+void clientHandler(SOCKET clientSocket)
+{
+
+	StorageTypes plane;
+	char RxBuffer[MaxBufferSize] = {}; // magic number
+	float fValue;
+	std::string timestamp;
+
+	int loopcounter = 0;
+
+	while (!exit) 
+	{
+		memset(RxBuffer, 0, sizeof(RxBuffer));
+
+		size_t result = recv(clientSocket, RxBuffer, sizeof(RxBuffer), 0); // get current value for variable
+
+		Packet p(RxBuffer);
+
+		if (strcmp(p.getParamName().c_str(), configurations.getConfigChar("columnOne")) == 0)
+		{
+
+			fValue = p.getFuelTotalQuantity();
+			timestamp = p.getTimestamp();
+
+			if (loopcounter == 0) {
+				plane.startingFuel = fValue;
+				plane.startTime = timestamp;
+			}
+
+			UpdateData(plane, fValue);
+			
+			p.setCurrentFuel(CalcFuelConsumption(plane, fValue));
+			p.setAverageFuel(CalcAvg(plane));
+			p.swapIP();
+			
+			send(clientSocket, p.serialize(), MaxBufferSize, 0);//send average back 
+
+		}
+		else
+		{
+			std::string invalidMessage = "Invalid Parameter Name, Closing Connection.";
+			// Kill connection if not one of the correct param names
+			send(clientSocket, invalidMessage.c_str(), invalidMessage.length(), 0);//send average back 
+			closesocket(clientSocket);
+		}
+
+		loopcounter++;
+
+	}
+
+	closesocket(clientSocket);
+}
+
+int main()
+{
+	// Initialize Winsock
+	WSADATA wsaData;
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+		std::cerr << "WSAStartup failed.\n";
+		return 1;
+	}
+
+	// Create a socket for listening
+	SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (listenSocket == INVALID_SOCKET) {
+		std::cerr << "socket failed with error: " << WSAGetLastError() << '\n';
+		WSACleanup();
+		return 1;
+	}
+
+	// Bind the socket to an address and port
+	sockaddr_in serverAddr;
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_addr.s_addr = INADDR_ANY;
+	serverAddr.sin_port = htons(8888);
+	if (bind(listenSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+		std::cerr << "bind failed with error: " << WSAGetLastError() << '\n';
+		closesocket(listenSocket);
+		WSACleanup();
+		return 1;
+	}
+
+	// Start listening for incoming connections
+	if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
+		std::cerr << "listen failed with error: " << WSAGetLastError() << '\n';
+		closesocket(listenSocket);
+		WSACleanup();
+		return 1;
+	}
+
+	std::vector<std::thread> threads;
+
+	// Accept incoming connections and spawn a thread to handle each one
+	while (true) {
+		SOCKET clientSocket = accept(listenSocket, NULL, NULL);
+		if (clientSocket == INVALID_SOCKET) {
+			std::cerr << "accept failed with error: " << WSAGetLastError() << '\n';
+			closesocket(listenSocket);
+			WSACleanup();
+			return 1;
+		}
+
+		threads.emplace_back(clientHandler, clientSocket);
+	}
+
+	// Close the listening socket and cleanup Winsock
+	closesocket(listenSocket);
+	WSACleanup();
+
+	return 0;
+}
+
+void UpdateData(StorageTypes plane, float currentFuelPoint)
+{
+	plane.size++;
+	plane.sumFuel += currentFuelPoint;
+}
+
+float CalcAvg(StorageTypes plane)
+{
+	return plane.sumFuel / plane.size;
+}
+
+float CalcFuelConsumption(StorageTypes plane, float currentFuel) {
+	return plane.startingFuel - currentFuel;
 }

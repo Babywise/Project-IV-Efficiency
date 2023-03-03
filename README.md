@@ -1,12 +1,21 @@
 # Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+In this project we will be creating efficient software. Legacy code has been provided but needs to be improved. Better usage of memory, cpu, and disk will be included in this scope as well as faster timing. The software itself is a client server architecture. The client reads teleletry data from a file and sends it to the server. The server averages those data values with all recieved and sends back an average.
 
 # Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+
+To get started you first need to install the software which can be found here % fill this in %
+
+Server<br>
+     <li> Once downloaded extract the folder</li>
+     <li> The system should have at minimum a quad core cpu (non-virtualized) with a base clock of 2600MHz or more, 4GB of ram</li>
+     <li> Open the configuration.conf file and under the wan = x.x.x.x replace x.x.x.x with your wan IP and replace port = 27001 with the port you wish to use.</li>
+     <li> Run the server.exe</li>
+     <br>
+Client<br>
+     <li> Once downloaded extract the folder</li>
+     <li> The system should have at minimum a dual core cpu, 2GB of ram, HDD 7200RPM disk with at least 2GB of storage remaining.</li>
+     <li> Open the configuration.conf file and replace the wan = x.x.x.x with the server you would like to connect to and replace port = 27001 with the port you wish to use</li> 
+     <li> Run the client.exe</li>
 
 # Build and Test
 TODO: Describe and show how to build your code and run the tests. 

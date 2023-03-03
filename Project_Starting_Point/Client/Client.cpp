@@ -93,6 +93,10 @@ int main(int argc, char* argv[])
 	memset(Rx, 0, sizeof(Rx));
 	recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve PlaneID
 
+#ifdef METRICS
+	numTransmissions++;
+#endif
+
 	Packet plane(Rx);
 
 	std::string paramName;
@@ -147,8 +151,26 @@ int main(int argc, char* argv[])
 			plane = Packet("src", wanAddr, paramName, plane.getPlaneID(), timestamp, atof(fuelValue.c_str()));
 #endif
 
+#ifdef METRICS
+			std::chrono::time_point<std::chrono::system_clock> start, end;
+			start = std::chrono::system_clock::now();
+#endif
+
 			send(ClientSocket, plane.serialize(), MaxBufferSize, 0); // Send parameter name to server
 			recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve PlaneID
+
+#ifdef METRICS
+			numTransmissions++;
+			numTransmissions++;
+			numHandshakes++;
+			if (l == 1) { handshakeTransmissionCount = numTransmissions - 1; }
+			end = std::chrono::system_clock::now();
+			std::chrono::duration<double> elapsedTimeSeconds = end - start;
+			auto elapsedTimeMicSec = std::chrono::duration_cast<std::chrono::microseconds>(elapsedTimeSeconds).count();
+			handshakeTimes.push_back(elapsedTimeMicSec);
+			//cout << "HandshakeTime: " << elapsedTimeMicSec << endl;
+
+#endif
 			plane = Packet(Rx);
 			if (l < countTo - 1) 
 			{
@@ -164,114 +186,13 @@ int main(int argc, char* argv[])
 				std::cout << "Flight Ending Fuel: " << startingFuel - plane.getCurrentFuelConsumption() << std::endl;
 				std::cout << "Flight Total Fuel Consumption: " << plane.getCurrentFuelConsumption() << std::endl;
 				std::cout << "Flight Average Fuel: " << plane.getAverageFuelConsumption() << std::endl << std::endl;
-			}
-			
+			}	
 		}
-
-/*
-// l != column headers it l is data values
-		if ( l > 0 )
-		{
-			size_t offset, preOffset; // Keeps track of which value to read (param position)
-			offset = preOffset = 0;
-			unsigned int iParamIndex = 0;
-			//while (offset != std::string::npos)
-
-
-			// This loop gets the parameter names and values. These are sent to the server where we recieve an acknowledgement
-			while(iParamIndex != atoi(configurations.getConfigChar("paramCount")))
-			{
-#ifdef METRICS
-				//start timer for data parsing
-				timer.start();
-
-
-#endif
-
-
-				offset = strInput.find_first_of(',', preOffset+1); // Find comma, get size of everything after it
-				// Creates a substring for the param name. Uses the offset values to know where to start and end
-				std::string strTx = strInput.substr(preOffset+1, offset - (preOffset+1));
-				//get timer for data parsing
-#ifdef METRICS
-				sizeOfDataParsedDataClientCalc.addPoint(strTx.length());
-				dataParsingTimeCalc.addPoint(timer.getTime());
-				numDataParsesClient++;
-#endif
-
-#ifdef METRICS
-				std::chrono::time_point<std::chrono::system_clock> start, end;
-
-				start = std::chrono::system_clock::now();
-#endif
-				send(ClientSocket, ParamNames[iParamIndex].c_str(), (int)ParamNames[iParamIndex].length(), 0); // Send parameter name to server
-#ifdef METRICS
-				numTransmissions++;
-#endif
-
-				recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve Ack
-#ifdef METRICS
-				numTransmissions++;
-#endif
-
-				send(ClientSocket, strTx.c_str(), (int)strTx.length(), 0); // Send value to server
-#ifdef METRICS
-				numTransmissions++;
-#endif
-
-				recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve Average
-#ifdef METRICS
-				numTransmissions++;
-				numHandshakes++;
-
-				end = std::chrono::system_clock::now();
-				std::chrono::duration<double> elapsedTimeSeconds = end - start;
-				auto elapsedTimeMicSec = std::chrono::duration_cast<std::chrono::microseconds>(elapsedTimeSeconds).count();
-				handshakeTimes.push_back(elapsedTimeMicSec);
-				//cout << "HandshakeTime: " << elapsedTimeMicSec << endl;
-
-				if (numHandshakes == 1) {
-					handshakeTransmissionCount = numTransmissions;
-				}
-#endif
-
-
-				std::cout << ParamNames[iParamIndex] << " Avg: " << Rx << std::endl; // Print param name and average
-				preOffset = offset; // Update offset to next column
-				iParamIndex++; // Increment index of param to read from buffer
-
-			}
-		}
-		else
-		{
-#ifdef METRICS
-			//start timer for data parsing
-			timer.start();
-#endif
-			ParamNames.push_back("TIME STAMP"); // if is index 0 write timestamp
-			size_t offset, preOffset;
-			offset = 0;
-			preOffset = -1;
-			while (offset != std::string::npos)
-			{
-				offset = strInput.find_first_of(',', preOffset + 1); // find next value after , from the offset ie: offset = 1 get value after second csv (comma-seperated-value)
-				std::string newParam = strInput.substr(preOffset + 1, offset - (preOffset + 1));
-				ParamNames.push_back(newParam); // All param names
-				preOffset = offset;
-#ifdef METRICS
-				sizeOfDataParsedDataClientCalc.addPoint(newParam.length());
-			}
-			//get timer for data parsing
-			dataParsingTimeCalc.addPoint(timer.getTime());
-			numDataParsesClient++;
-#endif
-		}
-*/
 	}
 
 #ifdef METRICS
 	timer.start();
-	Metrics::logStartOfClient(configurations.getConfigChar("dataFile"));
+	Metrics::logStartOfClient(configurations.getConfigChar("dataFile"), plane.getPlaneID());
 	Metrics::logSystemStatsMetrics(true);
 	Metrics::logClientIOMetrics(calculations, lineCounter, logTime);
 	Metrics::logDataParsingMetricsClient(dataParsingTimeCalc, sizeOfDataParsedDataClientCalc, numDataParsesClient);
@@ -283,28 +204,23 @@ int main(int argc, char* argv[])
 	system("pause");
 
 
-//#ifdef METRICS
-//
-//	int avgHandshake = 0;
-//	for (int i = 0; i < handshakeTimes.size(); i++) {
-//		avgHandshake += handshakeTimes.at(i);
-//	}
-//
-//	avgHandshake = avgHandshake / handshakeTimes.size();
-//
-//	#ifdef WAN
-//		Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, wan);
-//	#endif // WAN
-//	#ifdef LAN
-//		Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, lan);
-//	#endif // LAN
-//	Metrics::addLogEndOfFileSpacing(true);
-//#endif
+#ifdef METRICS
+
+	int avgHandshake = 0;
+	for (int i = 0; i < handshakeTimes.size(); i++) {
+		avgHandshake += handshakeTimes.at(i);
+	}
+
+	avgHandshake = avgHandshake / handshakeTimes.size();
+
+	#ifdef WAN
+		Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, wan);
+	#endif // WAN
+	#ifdef LAN
+		Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, lan);
+	#endif // LAN
+	Metrics::addLogEndOfFileSpacing(true);
+#endif
 
 	return 1;
 }
-
-
-
-
-

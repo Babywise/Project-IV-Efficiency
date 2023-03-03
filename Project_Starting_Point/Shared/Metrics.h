@@ -88,14 +88,14 @@ namespace Metrics {
 	void logStartOfServer() {
 		
 		logger.log("Server - Metrics", serverMetricsLogFileName);
-		logger.log("-------------------------------------------------------------------------------", serverMetricsLogFileName);
+		logger.log("-----------------------------------------------------------------------------------", serverMetricsLogFileName);
 		
 	}
 
-	void logStartOfClient(char* filename) {
+	void logStartOfClient(char* filename, int planeID) {
 		std::string fileNameStr = filename;
-		logger.log("Client - Metrics | " + fileNameStr, clientMetricsLogFileName);
-		logger.log("-------------------------------------------------------------------------------", clientMetricsLogFileName);
+		logger.log("Client - Metrics | ID: " + std::to_string(planeID) + " | " + fileNameStr, clientMetricsLogFileName);
+		logger.log("-----------------------------------------------------------------------------------", clientMetricsLogFileName);
 
 	}
 

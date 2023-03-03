@@ -1,4 +1,20 @@
 #pragma once
+/*
+* Author : Danny Smith
+* Group : 8 
+*  - Nicholas Prince, Islam Ahmed, Raven So, Danny Smith
+* Date : March 3, 2023
+* Version : 1
+* 
+* Description : This file buffer is designed to increase speed, efficiency and memory limitations to file reading. This file buffer will read the provided file using the configs from the config file provided
+* It will use as many threads as indicated, keep memory to a specific maximum, and read files at blazing speeds in the background allowing lines to be buffered for later use in the background
+* 
+* Notes. 
+*	- New line characters are for windows using \n
+*	- Improper configurations can lead to fatel errors
+*	- Logging has not yet been implemented
+* 
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <future>
@@ -7,6 +23,7 @@
 #include <queue>
 #include <filesystem>
 #include "../Shared/configManager.h"
+
 /// <summary>
 /// gets the size of the file using a promise
 /// </summary>
@@ -72,9 +89,16 @@ namespace fileIO {
 /// </summary>
 /// <param name="path"></param>
 fileIO::fileBuffer::fileBuffer(std::string path, std::string config) {
-	configuration::configManager* conf= new configuration::configManager(config);
+	configuration::configManager* conf= new configuration::configManager(config); //create a config manager from the file provided
 	this->config = conf;
-	std::function t = [this, path]() {this->helper(path); };
+	this->threadCount = atoi(this->config->getConfigChar("threadCountIO")); // set threads to use
+	if (this->threadCount <= 0) { // ensure not less then 1 thread
+		this->threadCount = 1;
+	}
+	else if (this->threadCount > atoi(this->config->getConfigChar("maxIOThreads")) ){ // ensure not more then max threads
+		this->threadCount = atoi(this->config->getConfigChar("maxIOThreads"));
+	}
+	std::function t = [this, path]() {this->helper(path); }; // begin buffering
 	std::thread worker(t);
 	worker.detach();
 }
@@ -213,15 +237,14 @@ void fileIO::fileBuffer::splitFile(char* input) {
 		for (int i = (chunk*b)+chunk; i < strlen(input); i++) { // chunk *b + offset ---- 8000bytes / 8 threads ---- 1000 + offset ------ offset += char count to next \n
 			if (input[i] == '\n') {
 				
-				
-				if (offset == 0) {
+				if (offset == 0) { // if at beginning of file done account for newline char
 					char* blockString =(char*)malloc(chunk+i+1);
-					strncpy_s(blockString, i + 1, input + offset,  i );
+					strncpy_s(blockString, i + 1, input + offset,  i ); // copy this chunk of memory
 					try {
 						std::this_thread::sleep_for(std::chrono::microseconds(10));
-						block* bl = new block(blockString);
+						block* bl = new block(blockString); // create a block with this block of data
 						std::this_thread::sleep_for(std::chrono::microseconds(10));
-						this->chunks.push_back(bl);
+						this->chunks.push_back(bl); // add to queue of blocks
 						offset = i;
 						i = strlen(input) + 1;
 					}
@@ -229,17 +252,17 @@ void fileIO::fileBuffer::splitFile(char* input) {
 						std::cout << e.what();
 					}
 				}
-				else {
+				else { // not the first chunk of data so account of \n
 					char* blockString = (char*)malloc(i -offset+1);
-					strncpy_s(blockString, i-offset, input + offset+1, i-offset-1);
+					strncpy_s(blockString, i-offset, input + offset+1, i-offset-1); // copy data
 					try {
 						std::this_thread::sleep_for(std::chrono::microseconds(10));
 						block* bl;
-						bl = (block*)malloc(sizeof(block));
+						bl = (block*)malloc(sizeof(block)); // create a block 
 						bl = new block(blockString);
 						std::this_thread::sleep_for(std::chrono::microseconds(10));
 						this->lock.lock();
-						this->chunks.push_back(bl);
+						this->chunks.push_back(bl); // add block to queue
 						this->lock.unlock();
 
 
@@ -250,7 +273,7 @@ void fileIO::fileBuffer::splitFile(char* input) {
 						std::cout << e.what();
 					}
 				}
-				
+				i += atoi(this->config->getConfigChar("minLineLength")); // add minimum line length to skip much closer to the end of line, this reduced checks for \n
 			}
 		}
 	}
@@ -271,7 +294,7 @@ void fileIO::fileBuffer::splitFile(char* input) {
 	std::this_thread::sleep_for(std::chrono::microseconds(10));
 	this->chunks.push_back(d);
 
-	this->status = done;
+	this->status = done; // complete this object
 	this->nextStep = done;
 }
 
@@ -280,30 +303,30 @@ void fileIO::fileBuffer::splitFile(char* input) {
 /// </summary>
 /// <returns></returns>
 std::string fileIO::fileBuffer::next() {
-	if (this->hasNext()) {
+	if (this->hasNext()) { // ensure there is a next before returning data
 		while (this->status != done && this->chunks.size() >= this->currentBlock) { // if all blocks are added to the vector this can be started, or at least one chunk is added to the vector
-			if (this->chunks.size() >= this->currentBlock) {
+			if (this->chunks.size() >= this->currentBlock) { // break from current loop ( this is not working in the while loop ) 
 				break;
 			}
 			std::this_thread::sleep_for(std::chrono::microseconds(10));
 		}
-		while (this->chunks.size() <= currentBlock) {
-			if (paging == done && currentBlock == this->chunks.size()) {
+		while (this->chunks.size() <= this->currentBlock) { //  wait for there to be another block in queue
+			if (paging == done && this->currentBlock == this->chunks.size()) {
 				return std::string();
 			}
 		}
-		if (this->chunks.at(currentBlock)->hasNext()) { // if current block has next return it
-			return this->chunks.at(currentBlock)->getNext();
+		if (this->chunks.at(this->currentBlock)->hasNext()) { // if current block has next return it
+			return this->chunks.at(this->currentBlock)->getNext();
 		}
 		else { // current block is done and empty
-			if (currentBlock != this->chunks.size()) {
-				delete(this->chunks.at(currentBlock)); // free memory
-				currentBlock++;
+			if (this->currentBlock != this->chunks.size()) {
+				delete(this->chunks.at(this->currentBlock)); // free memory
+				this->currentBlock++;
 				
-				return this->next(); // ------------------------------------------------------------------------------------------------------------------------------------------------- Recursive function ----------------------------
+				return this->next(); // ------------------------------------------------------------------------------------------------------------------------------------------------- Recursive function CAUTION ----------------------------
 			}
 			else {
-				return std::string();
+				return std::string(); // Return empty string if something went wrong
 			}
 		}
 	}
@@ -315,41 +338,41 @@ std::string fileIO::fileBuffer::next() {
 /// </summary>
 /// <returns></returns>
 bool fileIO::fileBuffer::hasNext() {
-	while (this->nextStep == not_started) {
+	while (this->nextStep == not_started) {// wait for blocks to be populated to ensure they can be accessed
 
 	}
 	while (this->status != done && this->chunks.size() >= this->currentBlock) { // if all blocks are added to the vector this can be started, or at least one chunk is added to the vector
 		if (this->chunks.size() >= this->currentBlock) {
 			break;
 		}
-		std::this_thread::sleep_for(std::chrono::microseconds(10));
+		std::this_thread::sleep_for(std::chrono::microseconds(10)); // reduce cpu utilization
 	}
-	if (this->chunks.size() > currentBlock) {
-		if (this->chunks.at(currentBlock)->hasNext()) { // current block has another
+	if (this->chunks.size() > this->currentBlock) {
+		if (this->chunks.at(this->currentBlock)->hasNext()) { // current block has another
 			return true;
 		}
 		else {
-			while (currentBlock <= this->chunks.size() - 1) { // go to next block and check if that one has a next and repeat until the end or a next is found.
-				delete(this->chunks.at(currentBlock)); // free memory
-				this->currentBlock++;
-				if (this->chunks.size() > currentBlock) {
-					if (this->chunks.at(currentBlock)->hasNext()) {
+			while (this->currentBlock <= this->chunks.size() - 1) { // go to next block and check if that one has a next and repeat until the end or a next is found.
+				delete(this->chunks.at(this->currentBlock)); // free memory
+				this->currentBlock++; // move to next block this ones empty
+				if (this->chunks.size() > this->currentBlock) {
+					if (this->chunks.at(this->currentBlock)->hasNext()) {
 						return true;
 					}
 				}
 			}
-			if (this->paging != done) {
+			if (this->paging != done) { // paging isnt done and weve made it this far so we know more data will fill up in the queue later
 				return true;
 			}
-			else {
+			else { // something went wrong theres nothing here
 				return false;
 			}
 		}
 	}
-	if (this->paging != done) {
+	if (this->paging != done) {// paging isnt done and weve made it this far so we know more data will fill up in the queue later
 		return true;
 	}
-	else {
+	else {// something went wrong theres nothing here
 		return false;
 	}
 }
@@ -361,10 +384,10 @@ bool fileIO::fileBuffer::hasNext() {
 /// <returns></returns>
 int fileIO::fileBuffer::getLineCount() {
 	int totalSize = 0;
-	while (this->chunks.size() != this->threadCount) {
+	while (this->chunks.size() != this->threadCount) { // ensure all blocks have been started before proceeding since they need to be accessed
 
 	}
-		for (int i = currentBlock; i < this->chunks.size(); i++) {
+		for (int i = this->currentBlock; i < this->chunks.size(); i++) { // for all current blocks to end block get their size and return the sum
 	
 			while (this->chunks.at(i)->getStatus() != done) {
 
@@ -471,11 +494,9 @@ void fileIO::block::readChunk(char* data)
 		if (strData[i] == '\n') {
 			lineCounter++;
 			
-
 			//insert tmp into list
 			if (this->readWrite == waiting) { // if waiting for a line add a line then set status to reading so the reader knows its ready
 				this->lock.lock();
-				//strData.substr(offset + 1, i - offset)
 				char* temp;
 				temp = (char*)malloc(i - offset+2);
 				strncpy_s(temp, i - offset + 1, (const char*)strData.c_str() + offset + 1, i - offset);
@@ -516,7 +537,6 @@ void fileIO::block::readChunk(char* data)
 			char* tmp;
 			tmp = (char*)malloc(i - offset+2);
 			strncpy_s(tmp, i - offset + 1, (const char*)strData.c_str() + offset + 1, i - offset);
-			//= strData.substr(offset + 1, i - offset);
 			lineCounter++;
 			//insert tmp into list
 			if (this->readWrite == waiting) { // if waiting for a line add a line then set status to reading so the reader knows its ready
@@ -548,8 +568,8 @@ void fileIO::block::readChunk(char* data)
 		
 	}
 	this->status = done;
-	this->readWrite = done;
-	this->lengthPromise.set_value(lineCounter);
+	this->readWrite = done; // complete this chunks reading statuses
+	this->lengthPromise.set_value(lineCounter); // set line count promise
 
 }
 
@@ -561,9 +581,9 @@ fileIO::block::block(char* data)
 {
 
 	this->status = started;
-	this->readWrite = started;
+	this->readWrite = started; // set statuses to started
 	
-	std::thread thread([this,data]() {this->readChunk(data); });
+	std::thread thread([this,data]() {this->readChunk(data); }); // begin reading the data into chunks
 	thread.detach();
 
 	std::this_thread::sleep_for(std::chrono::microseconds(3));
@@ -575,19 +595,9 @@ fileIO::block::block(char* data)
 /// </summary>
 /// <returns></returns>
 int fileIO::block::getCurrentSize() {
-
-	
-
-
-		
-		if (this->lines.size() < 0) {
-
-		}
-	
 		return this->lines.size();
-	
-	
 }
+
 /// <summary>
 /// This function gets the total number of lines in this chunk of data
 /// Note. Returns -1 if getSize is not ready
@@ -595,12 +605,12 @@ int fileIO::block::getCurrentSize() {
 /// <returns></returns>
 int fileIO::block::getSize()
 {
-	if (this->size != -1){
+	if (this->size != -1){ // -1 means it hasent been set yet so if it has been set return it
 
 		return this->size;
 	}
-	else if (this->length._Is_ready()) {
-		this->size = this->lines.size();
+	else if (this->length._Is_ready()) { // check if the promise is ready since we want all lines to be done before answering total number of lines
+		this->size = this->lines.size(); // set this->size so we done need to check the mutex next time
 		return this->size;
 	}
 	else {
@@ -615,16 +625,20 @@ int fileIO::block::getSize()
 /// <returns></returns>
 bool fileIO::block::hasNext()
 {
-	
-	bool isEmpty = this->lines.empty();
-	while (isEmpty == true && this->status != done) {
+	this->lock.lock();
+	bool isEmpty = this->lines.empty(); // check if the lines are empty
+	this->lock.unlock();
+	while (isEmpty == true && this->status != done) { // if its empty and not done then wait
+		this->lock.lock();
 		isEmpty = this->lines.empty();
+		this->lock.unlock();
 	}
+	//there has been a line added to the queue or its finished doing its work
 	if (this->status == fileIO::done && isEmpty == true) { // finished reading lines and no more lines.
 		return false;
 	}
 	else {
-		return true;
+		return true;// there is a new line that was added to the queue
 	}
 }
 /// <summary>

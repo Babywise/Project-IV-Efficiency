@@ -229,17 +229,17 @@ namespace Unit_Tests
 	public:
 		TEST_METHOD(has_next_true) {
 			configuration::configManager manager("../../Tests/TestConfig.conf");
-			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt", "../../Tests/TestConfig.conf");
 			std::this_thread::sleep_for(std::chrono::milliseconds(3));
 			Assert::AreEqual(true, buffer.hasNext());
 		}
 		TEST_METHOD(has_next_false) {
-			fileIO::fileBuffer buffer("testData.txt");
+			fileIO::fileBuffer buffer("testData.txt", "../../Tests/TestConfig.conf");
 			Assert::AreEqual(false, buffer.hasNext());
 		}
 		TEST_METHOD(nextLine_test) {
 			configuration::configManager manager("../../Tests/TestConfig.conf");
-			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt", "../../Tests/TestConfig.conf");
 			string answer = buffer.next();
 			string expected = "ACCELERATION BODY X,ACCELERATION BODY Y,ACCELERATION BODY Z,TOTAL WEIGHT,PLANE ALTITUDE,ATTITUDE INDICATOR PITCH DEGREES,ATTITUDE INDICATOR BANK DEGREES\r\n";
 
@@ -247,7 +247,7 @@ namespace Unit_Tests
 		}
 		TEST_METHOD(getLength) {
 			configuration::configManager manager("../../Tests/TestConfig.conf");
-			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt", "../../Tests/TestConfig.conf");
 			while(buffer.getLineCount() == 0) {
 				
 			}
@@ -312,7 +312,7 @@ namespace metrics_Testing
 
 		TEST_METHOD(totalTimeToGetLine)
 		{
-			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt","../../Tests/TestConfig.conf");
 			int countTo = buffer.getLineCount();
 			timer.start();
 			for (int i = 0; i < countTo; i++) {
@@ -331,7 +331,7 @@ namespace metrics_Testing
 		TEST_METHOD(averageTimeToGetLine)
 		{
 			Metrics::Calculations calculations;
-			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			fileIO::fileBuffer buffer("../../Client/DataFile.txt", "../../Tests/TestConfig.conf");
 			int countTo = buffer.getLineCount();
 			
 			for (int i = 0; i < countTo; i++) {

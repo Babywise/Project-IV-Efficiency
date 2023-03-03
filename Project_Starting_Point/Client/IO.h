@@ -6,8 +6,11 @@
 #include "../Shared/Metrics.h"
 #include <queue>
 #include <filesystem>
-
-
+#include "../Shared/configManager.h"
+/// <summary>
+/// gets the size of the file using a promise
+/// </summary>
+/// <param name="promise"></param>
 void GetSizePromise(std::promise<unsigned int> promise);
 
 /// <summary>
@@ -20,22 +23,20 @@ namespace fileIO {
 	private:
 		statuses readWrite;// used to block writing to the queue if a read is requested
 		
-		void readChunk(char* data); 
-		std::promise<int> lengthPromise;
+		void readChunk(char* data);  // reads the buffer given and inputs lines into the queue
+		std::promise<int> lengthPromise; // length of the file
 		std::future<int> length = lengthPromise.get_future(); // Promise and future set for size since it needs to wait for a thread to finish to get the line size.
 		std::mutex lock; // lock queue when writing.
-		statuses status = not_started;
+		statuses status = not_started; // status for block
 		std::queue<char*> lines; // list of lines in order
-		
 		int size=-1;
-
 	public:
-		int getCurrentSize();
-		block(char* data);
-		int getSize();
-		bool hasNext();
-		std::string getNext();
-		statuses getStatus();
+		int getCurrentSize(); // get current number of lines in block
+		block(char* data); // start buffering the data into line queue
+		int getSize(); // get number of lines in block
+		bool hasNext(); // has another line available
+		std::string getNext(); // gets the next line in the chunk
+		statuses getStatus(); // get current status
 
 
 	};
@@ -43,22 +44,23 @@ namespace fileIO {
 
 	class fileBuffer {
 	private : 
-		statuses paging = statuses::not_started;
-		statuses nextStep = statuses::not_started;
-		int length = -1;
-		std::vector<block*> chunks;
-		int threadCount = 24;
-		void splitFile(char* input);
-		statuses status = not_started;
-		int currentBlock = 0;
-		std::mutex lock;
-		void helper(std::string path);
+		statuses paging = statuses::not_started; // paging the file status for over maz size
+		statuses nextStep = statuses::not_started; // if all blocks have been added to queue
+		int length = -1; // length of entire file
+		std::vector<block*> chunks; // chunks of the file ie each thread analyzing a block
+		int threadCount = 24; // count of threads used for each chunk
+		void splitFile(char* input); // split the file into smaller chunks
+		statuses status = not_started; // status of the buffering
+		int currentBlock = 0; // current block to be read from for keeping order
+		std::mutex lock; // lock
+		void helper(std::string path); // helper function for chunking the file from filebuffer initializer
+		configuration::configManager* config;
 	public:
-		fileBuffer(std::string path);
-		std::string next();
-		bool hasNext();
-		int getLineCount();
-		~fileBuffer();
+		fileBuffer(std::string path,std::string config); // read the file from the path into a buffer
+		std::string next(); // get next line in the file
+		bool hasNext(); // has another line in the file
+		int getLineCount(); // get count of all files
+		~fileBuffer(); // destructor
 		
 	};
 
@@ -69,12 +71,19 @@ namespace fileIO {
 /// initialize the fileBuffer with the path provided uses as many threads as indicated in the config file
 /// </summary>
 /// <param name="path"></param>
-fileIO::fileBuffer::fileBuffer(std::string path) {
+fileIO::fileBuffer::fileBuffer(std::string path, std::string config) {
+	configuration::configManager* conf= new configuration::configManager(config);
+	this->config = conf;
 	std::function t = [this, path]() {this->helper(path); };
 	std::thread worker(t);
 	worker.detach();
 }
 
+/// <summary>
+/// Helper function that takes a file buffer path and splits the file into the max file size at a time ie 1.5MB 
+/// Begins chunking the data into threads to create chunks
+/// </summary>
+/// <param name="path"></param>
 void fileIO::fileBuffer::helper(std::string path) {
 
 
@@ -88,14 +97,14 @@ void fileIO::fileBuffer::helper(std::string path) {
 		fseek(f, 0, SEEK_SET); // set pointer back to beginning of file  
 
 		//if greater then 4 MB only malloc 4MB
-		if (fsize < 2000000) { // if file size is greater then max bytes allowed on memory
+		if (fsize < atoi(this->config->getConfigChar("maxBufferFile"))) { // if file size is greater then max bytes allowed on memory
 			char* data = (char*)malloc(fsize + 1);
 			fread(data, fsize, 1, f); // read the file into the buffer
 			fclose(f); // close
 
 			data[fsize] = 0;// 0 terminate file
 
-			std::thread thread(std::move([this,data]() {this->splitFile(data); })); // consumes a lot of memory
+			std::thread thread(std::move([this,data]() {this->splitFile(data); })); // split the full file into chunks
 
 
 			thread.detach();
@@ -103,13 +112,14 @@ void fileIO::fileBuffer::helper(std::string path) {
 
 
 		}//if
-		else {
-			bool flag = false;
-			this->paging = started;
-			int current = 0;
+		else { // if file is greater then the max buffer size
+			bool flag = false; // if data is at end done keep looking for newline char
+			this->paging = started;// start paging status
+			int current = 0; // used to keep track of current position in file
+
 			while (current < fsize) {
-				int max = 2000000; // max bytes that can be read at once
-				char* data = (char*)malloc(max + 210); // only allocate max+1 byte each time.
+				int max = atoi(this->config->getConfigChar("maxBufferFile")); // max bytes that can be read at once
+				char* data = (char*)malloc(max + atoi(this->config->getConfigChar("searchBytes"))); // only allocate max+1 byte each time.
 
 				if (current + max > fsize) { // if next block of bytes goes over the total size only read up to the total size
 					max = fsize - current;
@@ -117,9 +127,10 @@ void fileIO::fileBuffer::helper(std::string path) {
 				}
 				current += max; // increment current by the next block size
 				fread(data, max, 1, f); // read the file into the buffer
+				int searchTo = atoi(this->config->getConfigChar("searchBytes"));
 				if (!flag) {
-					for (int z = 0; z < 200; z++) {
-						if (data[max + z - 1] != 13) {
+					for (int z = 0; z < searchTo; z++) { // read next bytes of file until new line character is found to not split lines apart and ensure full line readings
+						if (data[max + z - 1] != 13) { // if not new line from prevous read then read the next byte
 							char* tmp = (char*)malloc(1);
 
 							fread(tmp, 1, 1, f);
@@ -127,9 +138,9 @@ void fileIO::fileBuffer::helper(std::string path) {
 							free(tmp);
 
 						}
-						else {
+						else { // if last read was new line escape this loop
 							current += z;
-							z = 300;
+							z = searchTo+100;
 						}
 
 					}
@@ -137,28 +148,30 @@ void fileIO::fileBuffer::helper(std::string path) {
 				data[max] = 0;// 0 terminate file
 
 
-				std::thread thread(std::move([this,data]() {this->splitFile(data); })); // consumes a lot of memory
+				std::thread thread(std::move([this,data]() {this->splitFile(data); })); //split the data for this chunk of data into blocks
 				thread.detach();
 				std::this_thread::sleep_for(std::chrono::microseconds(10));
 
-				while (this->nextStep != done) {
+				while (this->nextStep != done) { // wait for blocks to finish being created
 
 				}
-				this->nextStep = started;
-				// monitor lines remaining without crashing the system here
-				int totalSize = 1001;
-				while (totalSize > 0) {
+				this->nextStep = started; // set status to nextStep as started
+
+
+
+				// monitor lines remaining 
+				int totalSize = atoi(this->config->getConfigChar("linesRemainingInBuffer"))+10;
+				while (totalSize > atoi(this->config->getConfigChar("linesRemainingInBuffer"))) {
 					totalSize = 0;
 
 
-					for (int counter2 = this->currentBlock; counter2 < this->chunks.size(); counter2++) {
+					for (int counter2 = this->currentBlock; counter2 < this->chunks.size(); counter2++) { // if lines remaining in the buffer is lower then in config start next chunk of data
 
 					
-							if (this->chunks.at(counter2) != nullptr) {
+							if (this->chunks.at(counter2) != nullptr) { // if not null pointer ( old tests some blocks got corrupt -- this is a fail safe to prevent crashes
 								int tmp;
 								tmp = this->chunks.at(counter2)->getCurrentSize();
 								if (tmp < 0) {
-									std::cout << "here";
 								}
 								else {
 									totalSize += tmp;
@@ -168,21 +181,15 @@ void fileIO::fileBuffer::helper(std::string path) {
 						
 						
 				}
-				std::cout << "here";
+
 				std::this_thread::sleep_for(std::chrono::milliseconds(3));
 			}
-				
-		
-
-
 		}
-			
 			fclose(f); // close
-			
-			this->paging = done;
+			this->paging = done; // all work is done set statuses to done.. Not including nextStep splitFile takes care of that
 			this->status = done;
 	}// if open
-	else {
+	else { // if file fails to open set all statuses to done
 		this->paging = done;
 		this->status = done;
 		this->nextStep = done;
@@ -234,7 +241,6 @@ void fileIO::fileBuffer::splitFile(char* input) {
 						this->lock.lock();
 						this->chunks.push_back(bl);
 						this->lock.unlock();
-						std::cout << "hi";
 
 
 						offset = i;
@@ -275,7 +281,10 @@ void fileIO::fileBuffer::splitFile(char* input) {
 /// <returns></returns>
 std::string fileIO::fileBuffer::next() {
 	if (this->hasNext()) {
-		while (this->status != done && this->chunks.size() >= currentBlock) { // if all blocks are added to the vector this can be started, or at least one chunk is added to the vector
+		while (this->status != done && this->chunks.size() >= this->currentBlock) { // if all blocks are added to the vector this can be started, or at least one chunk is added to the vector
+			if (this->chunks.size() >= this->currentBlock) {
+				break;
+			}
 			std::this_thread::sleep_for(std::chrono::microseconds(10));
 		}
 		while (this->chunks.size() <= currentBlock) {
@@ -306,10 +315,13 @@ std::string fileIO::fileBuffer::next() {
 /// </summary>
 /// <returns></returns>
 bool fileIO::fileBuffer::hasNext() {
-	while (!this->nextStep) {
+	while (this->nextStep == not_started) {
 
 	}
-	while (this->status != done && this->chunks.size() >= currentBlock) { // if all blocks are added to the vector this can be started, or at least one chunk is added to the vector
+	while (this->status != done && this->chunks.size() >= this->currentBlock) { // if all blocks are added to the vector this can be started, or at least one chunk is added to the vector
+		if (this->chunks.size() >= this->currentBlock) {
+			break;
+		}
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
 	}
 	if (this->chunks.size() > currentBlock) {
@@ -363,16 +375,13 @@ int fileIO::fileBuffer::getLineCount() {
 	return totalSize;
 }
 
+/// <summary>
+/// destructor
+/// </summary>
 inline fileIO::fileBuffer::~fileBuffer()
 {
-	std::cout << "";
+
 }
-
-
-
-
-
-
 
 
 /// <summary>
@@ -561,6 +570,10 @@ fileIO::block::block(char* data)
 
 }
 
+/// <summary>
+/// gets the current number of currently available lines in the buffer
+/// </summary>
+/// <returns></returns>
 int fileIO::block::getCurrentSize() {
 
 	
@@ -568,7 +581,7 @@ int fileIO::block::getCurrentSize() {
 
 		
 		if (this->lines.size() < 0) {
-			std::cout << "here";
+
 		}
 	
 		return this->lines.size();

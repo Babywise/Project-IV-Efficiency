@@ -63,14 +63,17 @@ int main(int argc, char* argv[])
 	//startup getSize note. should be started before looking for clients
 	std::thread sizeThread(GetSizePromise, std::move(sizeOfFile)); // begin getting size of file
 	sizeThread.detach();
-//	std::this_thread::sleep_for(std::chrono::seconds(2));
-	fileIO::fileBuffer* buffer = new fileIO::fileBuffer(configurations.getConfigChar("dataFile"));
-	std::this_thread::sleep_for(std::chrono::seconds(2));
-	while (buffer->hasNext()) {
+	fileIO::fileBuffer* buffer = new fileIO::fileBuffer(configurations.getConfigChar("dataFile"), "../Shared/config.conf"); // begin buffering file
+
+
+
+	while (buffer->hasNext()) { // use whole file ----- for testing
 		std::cout << buffer->next();
 	}
-	std::this_thread::sleep_for(std::chrono::seconds(3));
-	system("pause");
+
+
+
+
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	SvrAddr.sin_family = AF_INET;

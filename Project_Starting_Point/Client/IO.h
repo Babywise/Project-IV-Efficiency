@@ -19,15 +19,18 @@ namespace fileIO {
 	class block {
 	private:
 		statuses readWrite;// used to block writing to the queue if a read is requested
+		
 		void readChunk(char* data); 
 		std::promise<int> lengthPromise;
 		std::future<int> length = lengthPromise.get_future(); // Promise and future set for size since it needs to wait for a thread to finish to get the line size.
 		std::mutex lock; // lock queue when writing.
 		statuses status = not_started;
 		std::queue<char*> lines; // list of lines in order
-		int size=-1;
-	public:
 		
+		int size=-1;
+
+	public:
+		int getCurrentSize();
 		block(char* data);
 		int getSize();
 		bool hasNext();
@@ -40,19 +43,23 @@ namespace fileIO {
 
 	class fileBuffer {
 	private : 
+		statuses paging = statuses::not_started;
+		statuses nextStep = statuses::not_started;
 		int length = -1;
 		std::vector<block*> chunks;
 		int threadCount = 24;
 		void splitFile(char* input);
 		statuses status = not_started;
 		int currentBlock = 0;
-		char* data;
+		std::mutex lock;
+		void helper(std::string path);
 	public:
 		fileBuffer(std::string path);
 		std::string next();
 		bool hasNext();
 		int getLineCount();
 		~fileBuffer();
+		
 	};
 
 }
@@ -63,36 +70,124 @@ namespace fileIO {
 /// </summary>
 /// <param name="path"></param>
 fileIO::fileBuffer::fileBuffer(std::string path) {
-	// do everything below in a new thread and return
+	std::function t = [this, path]() {this->helper(path); };
+	std::thread worker(t);
+	worker.detach();
+}
+
+void fileIO::fileBuffer::helper(std::string path) {
+
+
 	FILE* f;//FILE pointer
 	int counter = 0;
 	fopen_s(&f, path.c_str(), "rb"); // open the file in binary read
+
 	if (f != 0) {
 		fseek(f, 0, SEEK_END);// go to end
 		long fsize = ftell(f); // get size in bytes by telling the end pointer size
 		fseek(f, 0, SEEK_SET); // set pointer back to beginning of file  
 
-		// if greater then 4MB then only malloc 4MB
-		this->data = (char*)malloc(fsize + 1);
-		//std::cout << "data exists";
-		//alter fsize to 4MB if bigger 
-		fread(data, fsize, 1, f); // read the file into the buffer
-		fclose(f); // close
+		//if greater then 4 MB only malloc 4MB
+		if (fsize < 2000000) { // if file size is greater then max bytes allowed on memory
+			char* data = (char*)malloc(fsize + 1);
+			fread(data, fsize, 1, f); // read the file into the buffer
+			fclose(f); // close
 
-		this->data[fsize] = 0;// 0 terminate file
+			data[fsize] = 0;// 0 terminate file
+
+			std::thread thread(std::move([this,data]() {this->splitFile(data); })); // consumes a lot of memory
+
+
+			thread.detach();
+			std::this_thread::sleep_for(std::chrono::microseconds(10));
+
+
+		}//if
+		else {
+			bool flag = false;
+			this->paging = started;
+			int current = 0;
+			while (current < fsize) {
+				int max = 2000000; // max bytes that can be read at once
+				char* data = (char*)malloc(max + 210); // only allocate max+1 byte each time.
+
+				if (current + max > fsize) { // if next block of bytes goes over the total size only read up to the total size
+					max = fsize - current;
+					flag = true;
+				}
+				current += max; // increment current by the next block size
+				fread(data, max, 1, f); // read the file into the buffer
+				if (!flag) {
+					for (int z = 0; z < 200; z++) {
+						if (data[max + z - 1] != 13) {
+							char* tmp = (char*)malloc(1);
+
+							fread(tmp, 1, 1, f);
+							data[max + z] = tmp[0];
+							free(tmp);
+
+						}
+						else {
+							current += z;
+							z = 300;
+						}
+
+					}
+				}
+				data[max] = 0;// 0 terminate file
+
+
+				std::thread thread(std::move([this,data]() {this->splitFile(data); })); // consumes a lot of memory
+				thread.detach();
+				std::this_thread::sleep_for(std::chrono::microseconds(10));
+
+				while (this->nextStep != done) {
+
+				}
+				this->nextStep = started;
+				// monitor lines remaining without crashing the system here
+				int totalSize = 1001;
+				while (totalSize > 0) {
+					totalSize = 0;
+
+
+					for (int counter2 = this->currentBlock; counter2 < this->chunks.size(); counter2++) {
+
+					
+							if (this->chunks.at(counter2) != nullptr) {
+								int tmp;
+								tmp = this->chunks.at(counter2)->getCurrentSize();
+								if (tmp < 0) {
+									std::cout << "here";
+								}
+								else {
+									totalSize += tmp;
+								}
+							}
+					}
+						
+						
+				}
+				std::cout << "here";
+				std::this_thread::sleep_for(std::chrono::milliseconds(3));
+			}
+				
 		
-	
-		std::thread thread(std::move([this]() {this->splitFile(this->data); })); // consumes a lot of memory
-	
 
-		thread.detach();
-		std::this_thread::sleep_for(std::chrono::microseconds(10));
-		//if greater then 4MB join thread and redo for next chunk
-	}
+
+		}
+			
+			fclose(f); // close
+			
+			this->paging = done;
+			this->status = done;
+	}// if open
 	else {
+		this->paging = done;
 		this->status = done;
+		this->nextStep = done;
 	}
-	
+
 }
 
 /// <summary>
@@ -110,33 +205,56 @@ void fileIO::fileBuffer::splitFile(char* input) {
 	for (int b = 0; b < this->threadCount-1; b++) { // for all threads except last since it picks up the remainder
 		for (int i = (chunk*b)+chunk; i < strlen(input); i++) { // chunk *b + offset ---- 8000bytes / 8 threads ---- 1000 + offset ------ offset += char count to next \n
 			if (input[i] == '\n') {
-				char* blockString;
+				
+				
 				if (offset == 0) {
-					blockString = (char*)malloc(chunk+i+1);
+					char* blockString =(char*)malloc(chunk+i+1);
 					strncpy_s(blockString, i + 1, input + offset,  i );
-					//blockString = input.substr(offset, i );
+					try {
+						std::this_thread::sleep_for(std::chrono::microseconds(10));
+						block* bl = new block(blockString);
+						std::this_thread::sleep_for(std::chrono::microseconds(10));
+						this->chunks.push_back(bl);
+						offset = i;
+						i = strlen(input) + 1;
+					}
+					catch (std::exception e) {
+						std::cout << e.what();
+					}
 				}
 				else {
-					blockString = (char*)malloc(i -offset+1);
+					char* blockString = (char*)malloc(i -offset+1);
 					strncpy_s(blockString, i-offset, input + offset+1, i-offset-1);
-					//blockString = input.substr(offset + 1, i - offset-1);
+					try {
+						std::this_thread::sleep_for(std::chrono::microseconds(10));
+						block* bl;
+						bl = (block*)malloc(sizeof(block));
+						bl = new block(blockString);
+						std::this_thread::sleep_for(std::chrono::microseconds(10));
+						this->lock.lock();
+						this->chunks.push_back(bl);
+						this->lock.unlock();
+						std::cout << "hi";
+
+
+						offset = i;
+						i = strlen(input) + 1;
+					}
+					catch (std::exception e) {
+						std::cout << e.what();
+					}
 				}
-				std::this_thread::sleep_for(std::chrono::microseconds(10));
-				block* b = new block(blockString);
-				std::this_thread::sleep_for(std::chrono::microseconds(10));
-				this->chunks.push_back(b);
-				offset = i;
-				i = strlen(input) + 1;
+				
 			}
 		}
 	}
 
 	char* blockStringTwo = (char*)malloc(strlen(input) - offset+1);
 	if (this->threadCount > 1) {
-		strncpy_s(blockStringTwo, strlen(input) - offset + 1, data + offset + 1, strlen(input) - offset);// (input.substr(offset, strlen(input) - offset); // do last thread with its part plus remainder
+		strncpy_s(blockStringTwo, strlen(input) - offset + 1, input + offset + 1, strlen(input) - offset);// (input.substr(offset, strlen(input) - offset); // do last thread with its part plus remainder
 	}
 	else {
-		strncpy_s(blockStringTwo, strlen(input) - offset + 1, data + offset, strlen(input) - offset);// (input.substr(offset, strlen(input) - offset); // do last thread with its part plus remainder
+		strncpy_s(blockStringTwo, strlen(input) - offset + 1, input + offset, strlen(input) - offset);// (input.substr(offset, strlen(input) - offset); // do last thread with its part plus remainder
 	}
 	blockStringTwo[strlen(input) - offset] = '\0';
 	std::this_thread::sleep_for(std::chrono::microseconds(10));
@@ -148,6 +266,7 @@ void fileIO::fileBuffer::splitFile(char* input) {
 	this->chunks.push_back(d);
 
 	this->status = done;
+	this->nextStep = done;
 }
 
 /// <summary>
@@ -158,6 +277,11 @@ std::string fileIO::fileBuffer::next() {
 	if (this->hasNext()) {
 		while (this->status != done && this->chunks.size() >= currentBlock) { // if all blocks are added to the vector this can be started, or at least one chunk is added to the vector
 			std::this_thread::sleep_for(std::chrono::microseconds(10));
+		}
+		while (this->chunks.size() <= currentBlock) {
+			if (paging == done && currentBlock == this->chunks.size()) {
+				return std::string();
+			}
 		}
 		if (this->chunks.at(currentBlock)->hasNext()) { // if current block has next return it
 			return this->chunks.at(currentBlock)->getNext();
@@ -182,6 +306,9 @@ std::string fileIO::fileBuffer::next() {
 /// </summary>
 /// <returns></returns>
 bool fileIO::fileBuffer::hasNext() {
+	while (!this->nextStep) {
+
+	}
 	while (this->status != done && this->chunks.size() >= currentBlock) { // if all blocks are added to the vector this can be started, or at least one chunk is added to the vector
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
 	}
@@ -190,17 +317,29 @@ bool fileIO::fileBuffer::hasNext() {
 			return true;
 		}
 		else {
-			while (currentBlock < this->chunks.size() - 1) { // go to next block and check if that one has a next and repeat until the end or a next is found.
+			while (currentBlock <= this->chunks.size() - 1) { // go to next block and check if that one has a next and repeat until the end or a next is found.
 				delete(this->chunks.at(currentBlock)); // free memory
-				currentBlock++;
-				if (this->chunks.at(currentBlock)->hasNext()) {
-					return true;
+				this->currentBlock++;
+				if (this->chunks.size() > currentBlock) {
+					if (this->chunks.at(currentBlock)->hasNext()) {
+						return true;
+					}
 				}
 			}
-			return false;
+			if (this->paging != done) {
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 	}
-	return false;
+	if (this->paging != done) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 
@@ -210,9 +349,14 @@ bool fileIO::fileBuffer::hasNext() {
 /// <returns></returns>
 int fileIO::fileBuffer::getLineCount() {
 	int totalSize = 0;
-	while (this->status != done) {
+	while (this->chunks.size() != this->threadCount) {
+
 	}
-		for (int i = 0; i < this->chunks.size(); i++) {
+		for (int i = currentBlock; i < this->chunks.size(); i++) {
+	
+			while (this->chunks.at(i)->getStatus() != done) {
+
+			}
 			totalSize+=this->chunks.at(i)->getSize();
 		}
 	
@@ -288,7 +432,7 @@ void GetSizePromise(std::promise<unsigned int> promise)
 				}
 				free(data);
 			}
-			std::cout << counter;
+
 			promise.set_value(counter); // default -1
 			fclose(f); // close
 		}
@@ -308,7 +452,7 @@ void fileIO::block::readChunk(char* data)
 
 	std::string strData(data);
 	if (strlen(data) > 1) {
-		delete(data); // comment this line for tests
+		free(data); // comment this line for tests
 	}
 		
 	int lineCounter = 0;
@@ -324,7 +468,7 @@ void fileIO::block::readChunk(char* data)
 				this->lock.lock();
 				//strData.substr(offset + 1, i - offset)
 				char* temp;
-				temp = (char*)malloc(i - offset+1);
+				temp = (char*)malloc(i - offset+2);
 				strncpy_s(temp, i - offset + 1, (const char*)strData.c_str() + offset + 1, i - offset);
 				this->lines.push(temp);
 				this->lock.unlock();
@@ -344,7 +488,7 @@ void fileIO::block::readChunk(char* data)
 			}
 			else if (this->readWrite == started) {// if started and not reading just write new line
 				char* temp;
-				temp = (char*)malloc(i - offset+1);
+				temp = (char*)malloc(i - offset+2);
 				strncpy_s(temp,i-offset+1, (const char*)strData.c_str()+offset+1, i - offset);
 				this->lock.lock();
 				this->lines.push(temp);
@@ -361,7 +505,7 @@ void fileIO::block::readChunk(char* data)
 
 		if (i == strData.length() - 1) { // last line doesnt have new line
 			char* tmp;
-			tmp = (char*)malloc(i - offset+1);
+			tmp = (char*)malloc(i - offset+2);
 			strncpy_s(tmp, i - offset + 1, (const char*)strData.c_str() + offset + 1, i - offset);
 			//= strData.substr(offset + 1, i - offset);
 			lineCounter++;
@@ -417,6 +561,20 @@ fileIO::block::block(char* data)
 
 }
 
+int fileIO::block::getCurrentSize() {
+
+	
+
+
+		
+		if (this->lines.size() < 0) {
+			std::cout << "here";
+		}
+	
+		return this->lines.size();
+	
+	
+}
 /// <summary>
 /// This function gets the total number of lines in this chunk of data
 /// Note. Returns -1 if getSize is not ready
@@ -425,10 +583,11 @@ fileIO::block::block(char* data)
 int fileIO::block::getSize()
 {
 	if (this->size != -1){
+
 		return this->size;
 	}
 	else if (this->length._Is_ready()) {
-		this->size = this->length._Get_value();
+		this->size = this->lines.size();
 		return this->size;
 	}
 	else {
@@ -443,6 +602,7 @@ int fileIO::block::getSize()
 /// <returns></returns>
 bool fileIO::block::hasNext()
 {
+	
 	bool isEmpty = this->lines.empty();
 	while (isEmpty == true && this->status != done) {
 		isEmpty = this->lines.empty();

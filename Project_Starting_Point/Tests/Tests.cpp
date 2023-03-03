@@ -230,6 +230,7 @@ namespace Unit_Tests
 		TEST_METHOD(has_next_true) {
 			configuration::configManager manager("../../Tests/TestConfig.conf");
 			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
+			std::this_thread::sleep_for(std::chrono::milliseconds(3));
 			Assert::AreEqual(true, buffer.hasNext());
 		}
 		TEST_METHOD(has_next_false) {
@@ -247,7 +248,7 @@ namespace Unit_Tests
 		TEST_METHOD(getLength) {
 			configuration::configManager manager("../../Tests/TestConfig.conf");
 			fileIO::fileBuffer buffer("../../Client/DataFile.txt");
-			while(buffer.getLineCount() == -1) {
+			while(buffer.getLineCount() == 0) {
 				
 			}
 			Assert::AreEqual(504, buffer.getLineCount());

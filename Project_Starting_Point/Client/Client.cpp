@@ -42,7 +42,6 @@ float logTime; // used to measure getSize since it has been refactored for futur
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
-	fileIO::fileBuffer buffer(configurations.getConfigChar("dataFile"));
 
 
 	//setup
@@ -64,6 +63,14 @@ int main(int argc, char* argv[])
 	//startup getSize note. should be started before looking for clients
 	std::thread sizeThread(GetSizePromise, std::move(sizeOfFile)); // begin getting size of file
 	sizeThread.detach();
+	fileIO::fileBuffer* buffer = new fileIO::fileBuffer(configurations.getConfigChar("dataFile"), "../Shared/config.conf"); // begin buffering file
+
+
+
+
+
+
+
 
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -96,7 +103,7 @@ int main(int argc, char* argv[])
 #ifdef METRICS
 		timer.start();
 #endif
-		strInput =buffer.next();
+		strInput =buffer->next();
 #ifdef METRICS
 		calculations.addPoint(timer.getTime());
 		lineCounter.addPoint(1); // add 1 for the get line above, add one for close file at end of loop add one for file init

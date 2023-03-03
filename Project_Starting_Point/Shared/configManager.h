@@ -25,8 +25,13 @@ namespace configuration {
 				while (!ifs.eof())
 				{
 					getline(ifs, strInput);
-					params.push_back(strInput.substr(0, strInput.find_first_of('=')-1)); // get param name
-					paramValues.push_back(strInput.substr(strInput.find_first_of('=') + 2,(strInput.length()- strInput.find_first_of('=') + 1)));// get associated value
+					if (strInput.length() > 0) { // empty lines ignored
+						if (strInput.at(0) != '#') { // lines that start with pound ignored
+							params.push_back(strInput.substr(0, strInput.find_first_of('=') - 1)); // get param name
+							paramValues.push_back(strInput.substr(strInput.find_first_of('=') + 2, (strInput.length() - strInput.find_first_of('=') + 1)));// get associated value
+
+						}
+					}
 				}
 			}
 			

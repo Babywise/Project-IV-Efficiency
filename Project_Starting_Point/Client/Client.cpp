@@ -67,9 +67,7 @@ int main(int argc, char* argv[])
 
 
 
-	while (buffer->hasNext()) { // use whole file ----- for testing
-		std::cout << buffer->next();
-	}
+
 
 
 

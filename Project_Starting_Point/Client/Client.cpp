@@ -98,6 +98,7 @@ int main(int argc, char* argv[])
 	std::string paramName;
 	std::string timestamp;
 	std::string fuelValue;
+	float startingFuel;
 
 	int offset, preOffset = 0;
 
@@ -132,6 +133,9 @@ int main(int argc, char* argv[])
 				if (pCounter == 0) {
 					timestamp = strInput.substr(preOffset + 1, offset - (preOffset + 1));
 				} else {
+					if (l == 1) {
+						startingFuel = atof(strInput.substr(preOffset + 1, offset - (preOffset + 1)).c_str());
+					}
 					fuelValue = strInput.substr(preOffset + 1, offset - (preOffset + 1));
 				}
 				preOffset = offset; // Update offset to next column
@@ -146,11 +150,23 @@ int main(int argc, char* argv[])
 			send(ClientSocket, plane.serialize(), MaxBufferSize, 0); // Send parameter name to server
 			recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve PlaneID
 			plane = Packet(Rx);
-			std::cout << "Timestamp: " << plane.getTimestamp() << " | Fuel Consumption: " << plane.getCurrentFuelConsumption() <<
-				" | Average Fuel Consumption: " << plane.getAverageFuelConsumption() << std::endl;
+			if (l < countTo - 1) 
+			{
+				std::cout << "Timestamp: " << plane.getTimestamp() << " | Fuel Consumption: " << plane.getCurrentFuelConsumption() <<
+					" | Average Fuel Consumption: " << plane.getAverageFuelConsumption() << std::endl;
+			}
+			else
+			{
+				std::cout << std::endl << "Flight Statistics: " << std::endl;
+				std::cout << "Flight ID: " << plane.getPlaneID() << std::endl;
+				std::cout << "Flight Duration (seconds): " << plane.getTimestamp() << std::endl;
+				std::cout << "Flight Starting Fuel: " << startingFuel << std::endl;
+				std::cout << "Flight Ending Fuel: " << startingFuel - plane.getCurrentFuelConsumption() << std::endl;
+				std::cout << "Flight Total Fuel Consumption: " << plane.getCurrentFuelConsumption() << std::endl;
+				std::cout << "Flight Average Fuel: " << plane.getAverageFuelConsumption() << std::endl << std::endl;
+			}
+			
 		}
-
-		int breakpoi = 0;
 
 /*
 // l != column headers it l is data values
@@ -260,28 +276,30 @@ int main(int argc, char* argv[])
 	Metrics::logClientIOMetrics(calculations, lineCounter, logTime);
 	Metrics::logDataParsingMetricsClient(dataParsingTimeCalc, sizeOfDataParsedDataClientCalc, numDataParsesClient);
 #endif
-	send(ClientSocket, "***", 3,0);
+
 	closesocket(ClientSocket); // cleanup
 	WSACleanup();
 
+	system("pause");
 
-#ifdef METRICS
 
-	int avgHandshake = 0;
-	for (int i = 0; i < handshakeTimes.size(); i++) {
-		avgHandshake += handshakeTimes.at(i);
-	}
-
-	avgHandshake = avgHandshake / handshakeTimes.size();
-
-	#ifdef WAN
-		Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, wan);
-	#endif // WAN
-	#ifdef LAN
-		Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, lan);
-	#endif // LAN
-	Metrics::addLogEndOfFileSpacing(true);
-#endif
+//#ifdef METRICS
+//
+//	int avgHandshake = 0;
+//	for (int i = 0; i < handshakeTimes.size(); i++) {
+//		avgHandshake += handshakeTimes.at(i);
+//	}
+//
+//	avgHandshake = avgHandshake / handshakeTimes.size();
+//
+//	#ifdef WAN
+//		Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, wan);
+//	#endif // WAN
+//	#ifdef LAN
+//		Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, lan);
+//	#endif // LAN
+//	Metrics::addLogEndOfFileSpacing(true);
+//#endif
 
 	return 1;
 }

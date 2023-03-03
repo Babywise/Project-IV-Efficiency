@@ -311,12 +311,13 @@ const int MaxBufferSize = 1000;
 struct StorageTypes
 {
 	std::string startTime = "";
+	std::string currentTime = "";
 	float startingFuel = 0;
 	float sumFuel = 0;
 	int size = 0;
 };
 
-void UpdateData(StorageTypes* plane, float currentFuelPoint);
+void UpdateData(StorageTypes* plane, float currentFuelPoint, std::string timeStamp);
 float CalcAvg(StorageTypes* plane);
 float CalcFuelConsumption(StorageTypes* plane, float currentFuel);
 
@@ -330,6 +331,8 @@ void clientHandler(SOCKET clientSocket)
 	std::thread::id threadID = std::this_thread::get_id();
 	unsigned int planeID = *static_cast<unsigned int*>(static_cast<void*>(&threadID));
 
+	std::cout << "Connection Established with Plane: " << planeID << std::endl;
+
 	Packet p(planeID);
 	send(clientSocket, p.serialize(), MaxBufferSize, 0);
 
@@ -338,9 +341,9 @@ void clientHandler(SOCKET clientSocket)
 	float fValue;
 	std::string timestamp;
 
-	int loopcounter = 0;
+	int loopCounter = 0;
 	bool exit = false;
-	while (!exit) 
+	while (!exit)
 	{
 		memset(RxBuffer, 0, sizeof(RxBuffer));
 
@@ -348,39 +351,65 @@ void clientHandler(SOCKET clientSocket)
 
 		p = Packet(RxBuffer);
 
-		if (strcmp(p.getParamName().c_str(), configurations.getConfigChar("columnOne")) == 0)
-		{
-
-			fValue = p.getFuelTotalQuantity();
-			timestamp = p.getTimestamp();
-
-			if (loopcounter == 0) {
-				plane.startingFuel = fValue;
-				plane.startTime = timestamp;
-			}
-
-			UpdateData(&plane, fValue);
-			
+		if (strcmp(p.getTimestamp().c_str(), "*") == 0) 
+		{ 
 			p.setCurrentFuelConsumption(CalcFuelConsumption(&plane, fValue));
 			p.setAverageFuelConsumption(CalcAvg(&plane));
 			p.swapIP();
-			
-			send(clientSocket, p.serialize(), MaxBufferSize, 0);//send average back 
 
+
+			std::tm tm1 = {};
+			std::istringstream ss1(plane.startTime);
+			ss1 >> std::get_time(&tm1, "%d_%m_%Y %H:%M:%S");
+			auto timeStart = std::chrono::system_clock::from_time_t(std::mktime(&tm1));
+
+			std::tm tm2 = {};
+			std::istringstream ss2(plane.currentTime);
+			ss2 >> std::get_time(&tm2, "%d_%m_%Y %H:%M:%S");
+			auto timeEnd = std::chrono::system_clock::from_time_t(std::mktime(&tm2));
+
+			auto diff = std::chrono::duration_cast<std::chrono::seconds>(timeEnd - timeStart).count();
+
+			p.setTimeStamp(std::to_string(diff));
+
+			send(clientSocket, p.serialize(), MaxBufferSize, 0); //send final stats back 
+
+			exit = true; 
+		} else {
+
+			if (strcmp(p.getParamName().c_str(), configurations.getConfigChar("columnOne")) == 0) {
+
+				fValue = p.getFuelTotalQuantity();
+				timestamp = p.getTimestamp();
+
+				if (loopCounter == 0) {
+					plane.startingFuel = fValue;
+					plane.startTime = timestamp;
+				}
+
+				UpdateData(&plane, fValue, timestamp);
+
+				p.setCurrentFuelConsumption(CalcFuelConsumption(&plane, fValue));
+				p.setAverageFuelConsumption(CalcAvg(&plane));
+				p.swapIP();
+
+				send(clientSocket, p.serialize(), MaxBufferSize, 0);//send average back 
+
+			} else {
+
+				std::string invalidMessage = "Invalid Parameter Name, Closing Connection.";
+				// Kill connection if not one of the correct param names
+				send(clientSocket, invalidMessage.c_str(), invalidMessage.length(), 0);//send average back 
+				exit = true;
+
+			}
 		}
-		else
-		{
-			std::string invalidMessage = "Invalid Parameter Name, Closing Connection.";
-			// Kill connection if not one of the correct param names
-			send(clientSocket, invalidMessage.c_str(), invalidMessage.length(), 0);//send average back 
-			exit = true;
-		}
-
-		loopcounter++;
-
+		loopCounter++;
 	}
 
+	std::cout << "Closing connection to Plane: " << planeID << std::endl;
 	closesocket(clientSocket);
+
 }
 
 int main()
@@ -442,10 +471,11 @@ int main()
 	return 0;
 }
 
-void UpdateData(StorageTypes* plane, float currentFuelPoint)
+void UpdateData(StorageTypes* plane, float currentFuelPoint, std::string timeStamp)
 {
 	plane->size++;
 	plane->sumFuel += currentFuelPoint;
+	plane->currentTime = timeStamp;
 }
 
 float CalcAvg(StorageTypes* plane)

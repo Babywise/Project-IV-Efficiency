@@ -64,7 +64,7 @@ public:
 	Packet(int planeID)
 	{
 		this->head.planeID = planeID;
-		this->head.seq = 0;	
+		this->head.seq = 0;
 	}
 	/// <summary>
 	/// Serialize function
@@ -124,7 +124,7 @@ public:
 	/// Retrieve the Paramter Name from the FlightData
 	/// </summary>
 	/// <returns></returns>
-	std::string getParamName() 
+	std::string getParamName()
 	{
 		std::string paramName = this->FD.paramName;
 		return paramName;
@@ -168,5 +168,8 @@ public:
 	/// <returns></returns>
 	int getPlaneID() {
 		return this->head.planeID;
+	}
+	void setTimeStamp(std::string timestamp) {
+		std::memcpy(this->FD.timestamp, timestamp.c_str(), maxTimeStampStringLength);
 	}
 };

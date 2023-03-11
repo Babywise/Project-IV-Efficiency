@@ -434,7 +434,7 @@ void clientHandler(SOCKET clientSocket)
 
 	// Do the Network Logging for each client connection.
 	connectionEndTime = std::chrono::system_clock::now();
-	std::chrono::duration<double> currentUptime = connectionEndTime - serverStartTime;
+	auto currentUptime = std::chrono::duration_cast<std::chrono::milliseconds>(connectionEndTime - serverStartTime);
 	Metrics::logNetworkMetricsServer(planeID, currentUptime, numConnections);
 
 }
@@ -461,7 +461,10 @@ int main()
 		WSACleanup();
 		return 1;
 	} else {
+#ifdef METRICS
+		Metrics::logStartOfServer();
 		serverStartTime = std::chrono::system_clock::now();
+#endif // METRICS
 	}
 
 	// Bind the socket to an address and port

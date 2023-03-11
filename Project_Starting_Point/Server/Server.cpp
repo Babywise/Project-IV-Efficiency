@@ -293,7 +293,12 @@ float CalcAvg(unsigned int uiIndex)
 #include "../Shared/configManager.h"
 
 configuration::configManager configurations("../Shared/config.conf");
+
+#define METRICS
 #ifdef METRICS
+
+#include "../Shared/Metrics.h"
+
 int numDataParsesServer = 0;
 float maxSizeRxData = 0;
 
@@ -301,7 +306,14 @@ Metrics::Timer timer;
 Metrics::Calculations dataParsingTimeCalc;
 Metrics::Calculations sizeOfDataParsedDataServerCalc;
 Metrics::Calculations sizeOfMemoryServerCalc;
-#endif
+
+// Network
+int numConnections;
+CRITICAL_SECTION critical;
+
+std::chrono::time_point<std::chrono::system_clock> serverStartTime;
+
+#endif // METRICS
 
 #pragma comment (lib, "Ws2_32.lib")
 
@@ -327,6 +339,16 @@ static float calcTime = 0;
 
 void clientHandler(SOCKET clientSocket)
 {
+#ifdef METRICS
+	// This is a critical section to avoid a deadlock while updating the global numConnections variable.
+	EnterCriticalSection(&critical);
+	numConnections++;
+	LeaveCriticalSection(&critical);
+
+	// Initialize the endtime Variable. We don't want this to be global.
+	std::chrono::time_point<std::chrono::system_clock> connectionEndTime;
+
+#endif // METRICS
 
 	std::thread::id threadID = std::this_thread::get_id();
 	unsigned int planeID = *static_cast<unsigned int*>(static_cast<void*>(&threadID));
@@ -410,10 +432,21 @@ void clientHandler(SOCKET clientSocket)
 	std::cout << "Closing connection to Plane: " << planeID << std::endl;
 	closesocket(clientSocket);
 
+	// Do the Network Logging for each client connection.
+	connectionEndTime = std::chrono::system_clock::now();
+	std::chrono::duration<double> currentUptime = connectionEndTime - serverStartTime;
+	Metrics::logNetworkMetricsServer(planeID, currentUptime, numConnections);
+
 }
 
 int main()
 {
+
+#ifdef METRICS
+	InitializeCriticalSection(&critical);
+#endif // METRICS
+
+
 	// Initialize Winsock
 	WSADATA wsaData;
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -427,6 +460,8 @@ int main()
 		std::cerr << "socket failed with error: " << WSAGetLastError() << '\n';
 		WSACleanup();
 		return 1;
+	} else {
+		serverStartTime = std::chrono::system_clock::now();
 	}
 
 	// Bind the socket to an address and port
@@ -467,6 +502,10 @@ int main()
 	// Close the listening socket and cleanup Winsock
 	closesocket(listenSocket);
 	WSACleanup();
+
+#ifdef METRICS
+	DeleteCriticalSection(&critical);
+#endif // METRICS
 
 	return 0;
 }

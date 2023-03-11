@@ -370,6 +370,7 @@ void clientHandler(SOCKET clientSocket)
 	bool exit = false;
 
 	bool failedConn = false;
+	std::string errMessage;
 
 	while (!exit)
 	{
@@ -377,11 +378,21 @@ void clientHandler(SOCKET clientSocket)
 	
 		size_t result = recv(clientSocket, RxBuffer, sizeof(RxBuffer), 0); 
 
-		if (result == SOCKET_ERROR) {
-			bool failedConn = true;
+		if (result == SOCKET_ERROR || result == 0) {
+			failedConn = true;
+
+			DWORD err = GetLastError();
+			LPSTR messageBuffer = nullptr;
+
+			size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+				NULL, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+
+			std::string message(messageBuffer, size);
+			errMessage = message;
+
 			break;
 		}
-
+		
 		p = Packet(RxBuffer);
 
 		if (strcmp(p.getTimestamp().c_str(), "*") == 0) 
@@ -458,7 +469,7 @@ void clientHandler(SOCKET clientSocket)
 	}
 	LeaveCriticalSection(&critical);
 
-	Metrics::logNetworkMetricsServer(planeID, currentUptime, numTotalConnections, numCurrentConnections, numCompletedConnections, numFailedConnections);
+	Metrics::logNetworkMetricsServer(planeID, currentUptime, numTotalConnections, numCurrentConnections, numCompletedConnections, numFailedConnections, errMessage);
 
 }
 

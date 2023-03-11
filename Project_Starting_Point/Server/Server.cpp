@@ -308,7 +308,10 @@ Metrics::Calculations sizeOfDataParsedDataServerCalc;
 Metrics::Calculations sizeOfMemoryServerCalc;
 
 // Network
-int numConnections;
+int numTotalConnections;
+int numCompletedConnections;
+int numCurrentConnections;
+int numFailedConnections;
 CRITICAL_SECTION critical;
 
 std::chrono::time_point<std::chrono::system_clock> serverStartTime;
@@ -340,14 +343,14 @@ static float calcTime = 0;
 void clientHandler(SOCKET clientSocket)
 {
 #ifdef METRICS
-	// This is a critical section to avoid a deadlock while updating the global numConnections variable.
+	// This is a critical section to avoid a deadlock while updating the global variables.
 	EnterCriticalSection(&critical);
-	numConnections++;
+	numTotalConnections++;
+	numCurrentConnections++;
 	LeaveCriticalSection(&critical);
 
 	// Initialize the endtime Variable. We don't want this to be global.
 	std::chrono::time_point<std::chrono::system_clock> connectionEndTime;
-
 #endif // METRICS
 
 	std::thread::id threadID = std::this_thread::get_id();
@@ -365,11 +368,19 @@ void clientHandler(SOCKET clientSocket)
 
 	int loopCounter = 0;
 	bool exit = false;
+
+	bool failedConn = false;
+
 	while (!exit)
 	{
 		memset(RxBuffer, 0, sizeof(RxBuffer));
+	
+		size_t result = recv(clientSocket, RxBuffer, sizeof(RxBuffer), 0); 
 
-		size_t result = recv(clientSocket, RxBuffer, sizeof(RxBuffer), 0); // get current value for variable
+		if (result == SOCKET_ERROR) {
+			bool failedConn = true;
+			break;
+		}
 
 		p = Packet(RxBuffer);
 
@@ -435,7 +446,19 @@ void clientHandler(SOCKET clientSocket)
 	// Do the Network Logging for each client connection.
 	connectionEndTime = std::chrono::system_clock::now();
 	auto currentUptime = std::chrono::duration_cast<std::chrono::milliseconds>(connectionEndTime - serverStartTime);
-	Metrics::logNetworkMetricsServer(planeID, currentUptime, numConnections);
+
+	// This is a critical section to avoid a deadlock while updating the global variables.
+	EnterCriticalSection(&critical);
+	numCurrentConnections--; // socket closed so decrement the current connections.
+	// if the failed boolean is false we have a completed connection
+	if (failedConn == false) {
+		numCompletedConnections++;
+	} else {
+		numFailedConnections++;
+	}
+	LeaveCriticalSection(&critical);
+
+	Metrics::logNetworkMetricsServer(planeID, currentUptime, numTotalConnections, numCurrentConnections, numCompletedConnections, numFailedConnections);
 
 }
 
@@ -489,7 +512,7 @@ int main()
 
 	std::vector<std::thread> threads;
 
-	// Accept incoming connections and spawn a thread to handle each one
+	// Accept incoming connections and spawn a thread to handle each client
 	while (true) {
 		SOCKET clientSocket = accept(listenSocket, NULL, NULL);
 		if (clientSocket == INVALID_SOCKET) {
@@ -498,6 +521,9 @@ int main()
 			WSACleanup();
 			return 1;
 		}
+
+		DWORD timeout = atoi(configurations.getConfigChar("sockettimeoutseconds")) * 1000;
+		setsockopt(clientSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
 
 		threads.emplace_back(clientHandler, clientSocket);
 	}

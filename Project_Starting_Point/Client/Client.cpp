@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
 #endif
 
 			send(ClientSocket, plane.serialize(), MaxBufferSize, 0); // Send parameter name to server
-			recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve PlaneID
+			size_t result = recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve PlaneID
 
 #ifdef METRICS
 			numTransmissions++;
@@ -171,22 +171,39 @@ int main(int argc, char* argv[])
 			//cout << "HandshakeTime: " << elapsedTimeMicSec << endl;
 
 #endif
-			plane = Packet(Rx);
-			if (l < countTo - 1) 
-			{
-				std::cout << "Timestamp: " << plane.getTimestamp() << " | Fuel Consumption: " << plane.getCurrentFuelConsumption() <<
-					" | Average Fuel Consumption: " << plane.getAverageFuelConsumption() << std::endl;
+
+			if (result == SOCKET_ERROR) {
+
+				DWORD err = GetLastError();
+				LPSTR messageBuffer = nullptr;
+
+				size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+					NULL, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+
+				std::string errMessage(messageBuffer, size);
+				std::cout << errMessage << std::endl;
+
+				break;
+
+			} else {
+
+				plane = Packet(Rx);
+
+				if (l < countTo - 1)
+				{
+					std::cout << "Timestamp: " << plane.getTimestamp() << " | Fuel Consumption: " << plane.getCurrentFuelConsumption() <<
+						" | Average Fuel Consumption: " << plane.getAverageFuelConsumption() << std::endl;
+				} else
+				{
+					std::cout << std::endl << "Flight Statistics: " << std::endl;
+					std::cout << "Flight ID: " << plane.getPlaneID() << std::endl;
+					std::cout << "Flight Duration (seconds): " << plane.getTimestamp() << std::endl;
+					std::cout << "Flight Starting Fuel: " << startingFuel << std::endl;
+					std::cout << "Flight Ending Fuel: " << startingFuel - plane.getCurrentFuelConsumption() << std::endl;
+					std::cout << "Flight Total Fuel Consumption: " << plane.getCurrentFuelConsumption() << std::endl;
+					std::cout << "Flight Average Fuel: " << plane.getAverageFuelConsumption() << std::endl << std::endl;
+				}
 			}
-			else
-			{
-				std::cout << std::endl << "Flight Statistics: " << std::endl;
-				std::cout << "Flight ID: " << plane.getPlaneID() << std::endl;
-				std::cout << "Flight Duration (seconds): " << plane.getTimestamp() << std::endl;
-				std::cout << "Flight Starting Fuel: " << startingFuel << std::endl;
-				std::cout << "Flight Ending Fuel: " << startingFuel - plane.getCurrentFuelConsumption() << std::endl;
-				std::cout << "Flight Total Fuel Consumption: " << plane.getCurrentFuelConsumption() << std::endl;
-				std::cout << "Flight Average Fuel: " << plane.getAverageFuelConsumption() << std::endl << std::endl;
-			}	
 		}
 	}
 

@@ -204,11 +204,16 @@ namespace Metrics {
 		
 	}
 
-	void logNetworkMetricsServer(int planeID, auto currentUptime, int numConnections) {
+	void logNetworkMetricsServer(int planeID, auto currentUptime, int numTotalConnections, 
+		int numCurrentConnections, int numCompletedConnections, int numFailedConnections) {
+
 		// Server Network Results
 		logger.log("Server - Network - PlaneID: " + std::to_string(planeID), serverMetricsLogFileName);
 		logger.log("Server - Network - Current Server Uptime: " + std::to_string(currentUptime.count()) + "ms", serverMetricsLogFileName);
-		logger.log("Server - Network - Connection Counter: " + std::to_string(numConnections), serverMetricsLogFileName);
+		logger.log("Server - Network - Total Connection Counter: " + std::to_string(numTotalConnections), serverMetricsLogFileName);
+		logger.log("Server - Network - Current Connection Counter: " + std::to_string(numCurrentConnections), serverMetricsLogFileName);
+		logger.log("Server - Network - Completed Connection Counter: " + std::to_string(numCompletedConnections), serverMetricsLogFileName);
+		logger.log("Server - Network - Failed Connection Counter: " + std::to_string(numFailedConnections), serverMetricsLogFileName);
 		logger.emptyLine(serverMetricsLogFileName);
 	}
 	/// <summary>

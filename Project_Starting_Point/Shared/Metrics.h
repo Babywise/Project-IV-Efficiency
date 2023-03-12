@@ -141,9 +141,9 @@ namespace Metrics {
 		Timer timer;
 
 		// log information from counters and timers
-		logger.log("Client - IO - Get File Size :" + std::to_string(timeToGetSize) + "ms", clientMetricsLogFileName);
-		logger.log("Client - IO - Average time to get line from file : " + std::to_string(calculations.getAverage()) + "ms", clientMetricsLogFileName);
-		logger.log("Client - IO - TotalTime reading files to get specific lines : " + std::to_string(calculations.getSum()) + "ms", clientMetricsLogFileName);
+		logger.log("Client - IO - Get File Size : " + std::to_string(timeToGetSize) + " ms", clientMetricsLogFileName);
+		logger.log("Client - IO - Average time to get line from file : " + std::to_string(calculations.getAverage()) + " ms", clientMetricsLogFileName);
+		logger.log("Client - IO - TotalTime reading files to get specific lines : " + std::to_string(calculations.getSum()) + " ms", clientMetricsLogFileName);
 		logger.log("Client - IO - Total lines reading files ( not including get file length ) : " + std::to_string(int(lineCounter.getSum())), clientMetricsLogFileName);
 
 		// get file counts, plus total bytes of data from all .txt files
@@ -166,7 +166,6 @@ namespace Metrics {
 		logger.log("Client - DataParsing - Total Time = " + std::to_string(dataParsingTimeCalc.getSum()) + " ms", clientMetricsLogFileName);
 		logger.log("Client - DataParsing - Average (Single Parse) = " + std::to_string(dataParsingTimeCalc.getAverage()) + " ms", clientMetricsLogFileName);
 		logger.log("Client - DataParsing - # of Conversions = " + std::to_string(numDataParsesClient), clientMetricsLogFileName);
-		logger.log("Client - DataParsing - Input Size of Parsed Data = " + std::to_string(std::filesystem::file_size("DataFile.txt")) + " Bytes", clientMetricsLogFileName);
 		logger.log("Client - DataParsing - Total Size of Parsed Data = " + std::to_string((int)sizeOfDataParsedDataClientCalc.getSum()) + " Bytes", clientMetricsLogFileName);
 		logger.emptyLine(clientMetricsLogFileName);
 	}

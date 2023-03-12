@@ -169,7 +169,19 @@ public:
 	int getPlaneID() {
 		return this->head.planeID;
 	}
+	/// <summary>
+	/// Set the timestamp value in FlightData
+	/// </summary>
+	/// <param name="timestamp"></param>
 	void setTimeStamp(std::string timestamp) {
 		std::memcpy(this->FD.timestamp, timestamp.c_str(), maxTimeStampStringLength);
 	}
+	/// <summary>
+	/// Retrieves the size of the body contents use for Tx/Rx Buffer
+	/// </summary>
+	/// <returns>size of packet</returns>
+	static int getPacketSize() {
+		return sizeof(head) + sizeof(FD) + sizeof(FR);
+	}
+
 };

@@ -321,7 +321,6 @@ std::chrono::time_point<std::chrono::system_clock> serverStartTime;
 #pragma comment (lib, "Ws2_32.lib")
 
 const int numColumns = 1;
-const int MaxBufferSize = 1000;
 
 struct StorageTypes
 {
@@ -359,10 +358,12 @@ void clientHandler(SOCKET clientSocket)
 	std::cout << "Connection Established with Plane: " << planeID << std::endl;
 
 	Packet p(planeID);
-	send(clientSocket, p.serialize(), MaxBufferSize, 0);
+	send(clientSocket, p.serialize(), Packet::getPacketSize(), 0);
 
 	StorageTypes plane;
-	char RxBuffer[MaxBufferSize] = {}; // magic number
+	char* RxBuffer = (char*)malloc(Packet::getPacketSize());
+	memset(RxBuffer, NULL, Packet::getPacketSize());
+	//char RxBuffer[MaxBufferSize] = {}; // magic number
 	float fValue;
 	std::string timestamp;
 
@@ -374,9 +375,11 @@ void clientHandler(SOCKET clientSocket)
 
 	while (!exit)
 	{
-		memset(RxBuffer, 0, sizeof(RxBuffer));
+		memset(RxBuffer, NULL, Packet::getPacketSize());
+		//memset(RxBuffer, 0, sizeof(RxBuffer));
 	
-		size_t result = recv(clientSocket, RxBuffer, sizeof(RxBuffer), 0); 
+		size_t result = recv(clientSocket, RxBuffer, Packet::getPacketSize(), 0);
+		//size_t result = recv(clientSocket, RxBuffer, sizeof(RxBuffer), 0); 
 
 		if (result == SOCKET_ERROR || result == 0) {
 			failedConn = true;
@@ -416,7 +419,7 @@ void clientHandler(SOCKET clientSocket)
 
 			p.setTimeStamp(std::to_string(diff));
 
-			send(clientSocket, p.serialize(), MaxBufferSize, 0); //send final stats back 
+			send(clientSocket, p.serialize(), Packet::getPacketSize(), 0); //send final stats back 
 
 			exit = true; 
 		} else {
@@ -437,7 +440,7 @@ void clientHandler(SOCKET clientSocket)
 				p.setAverageFuelConsumption(CalcAvg(&plane));
 				p.swapIP();
 
-				send(clientSocket, p.serialize(), MaxBufferSize, 0);//send average back 
+				send(clientSocket, p.serialize(), Packet::getPacketSize(), 0);//send average back 
 
 			} else {
 

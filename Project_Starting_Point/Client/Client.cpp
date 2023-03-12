@@ -14,7 +14,7 @@
 #define LAN
 #define METRICS
 
-
+using namespace std;
 //variables
 configuration::configManager configurations("../Shared/config.conf");
 const char* lanAddr = configurations.getConfigChar("lanAddr");
@@ -22,17 +22,15 @@ const char* wanAddr = configurations.getConfigChar("wanAddr");
 const int port = atof(configurations.getConfig("port").c_str());
 const std::string wan = configurations.getConfigChar("wan");
 const std::string lan = configurations.getConfigChar("lan");
-const int MaxBufferSize = 1000;
-
 
 //metrics variables
 #ifdef METRICS
 int numDataParsesClient = 0;
-Metrics::Calculations calculations;
+Metrics::Calculations IOCalculations;
 Metrics::Timer timer;
 Metrics::Calculations lineCounter; // line counter used to determine total number of lines used in fileIO
-Metrics::Calculations dataParsingTimeCalc;
-Metrics::Calculations sizeOfDataParsedDataClientCalc;
+Metrics::Calculations dataParsingTimeCalc; //parse time calculations
+Metrics::Calculations sizeOfDataParsedDataClientCalc; //size of parsed data
 float logTime; // used to measure getSize since it has been refactored for future and promise
 #endif
 
@@ -53,7 +51,7 @@ int main(int argc, char* argv[])
 	std::promise<unsigned int> sizeOfFile; // used to begin getting size of file while starting up server
 	std::future<unsigned int> uiSize = sizeOfFile.get_future();
 	std::vector<std::string> ParamNames;
-	char Rx[MaxBufferSize]; // Get from Config File later (Magic Number)
+	char* Rx = (char*)malloc(Packet::getPacketSize());
 
 #ifdef METRICS
 	int numTransmissions = 0;
@@ -90,8 +88,8 @@ int main(int argc, char* argv[])
 	unsigned int countTo = uiSize.get();
 #endif
 
-	memset(Rx, 0, sizeof(Rx));
-	recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve PlaneID
+	memset(Rx, 0, Packet::getPacketSize());
+	recv(ClientSocket, Rx, Packet::getPacketSize(), 0); // Recieve PlaneID
 
 #ifdef METRICS
 	numTransmissions++;
@@ -116,15 +114,17 @@ int main(int argc, char* argv[])
 		strInput = buffer.next();
 
 #ifdef METRICS
-		calculations.addPoint(timer.getTime());
+		IOCalculations.addPoint(timer.getTime());
 		lineCounter.addPoint(1); // add 1 for the get line above, add one for close file at end of loop add one for file init
 #endif
 
-		
 		if (l == 0)
 		{
 			int endpos = strInput.find_first_of(',');
 			paramName = strInput.substr(0, endpos);
+#ifdef METRICS
+			numDataParsesClient++;
+#endif
 		}
 
 		if (l > 0)
@@ -136,13 +136,27 @@ int main(int argc, char* argv[])
 				offset = strInput.find_first_of(',', preOffset + 1);
 				if (pCounter == 0) {
 					timestamp = strInput.substr(preOffset + 1, offset - (preOffset + 1));
+
 				} else {
 					if (l == 1) {
 						startingFuel = atof(strInput.substr(preOffset + 1, offset - (preOffset + 1)).c_str());
+#ifdef METRICS
+						sizeOfDataParsedDataClientCalc.addPoint(sizeof(startingFuel));
+						numDataParsesClient++;
+#endif
 					}
 					fuelValue = strInput.substr(preOffset + 1, offset - (preOffset + 1));
+#ifdef METRICS
+					sizeOfDataParsedDataClientCalc.addPoint(sizeof(startingFuel));
+					numDataParsesClient++;
+#endif
 				}
 				preOffset = offset; // Update offset to next column
+#ifdef METRICS
+				numDataParsesClient++;
+				sizeOfDataParsedDataClientCalc.addPoint(sizeof(timestamp));
+				dataParsingTimeCalc.addPoint(timer.getTime());
+#endif
 			}
 #ifdef LAN
 			plane = Packet("src", lanAddr, paramName, plane.getPlaneID(), timestamp, atof(fuelValue.c_str()));
@@ -156,8 +170,8 @@ int main(int argc, char* argv[])
 			start = std::chrono::system_clock::now();
 #endif
 
-			send(ClientSocket, plane.serialize(), MaxBufferSize, 0); // Send parameter name to server
-			size_t result = recv(ClientSocket, Rx, sizeof(Rx), 0); // Recieve PlaneID
+			send(ClientSocket, plane.serialize(), Packet::getPacketSize(), 0); // Send parameter name to server
+			size_t result = recv(ClientSocket, Rx, Packet::getPacketSize(), 0); // Recieve PlaneID
 
 #ifdef METRICS
 			numTransmissions++;
@@ -211,15 +225,12 @@ int main(int argc, char* argv[])
 	timer.start();
 	Metrics::logStartOfClient(configurations.getConfigChar("dataFile"), plane.getPlaneID());
 	Metrics::logSystemStatsMetrics(true);
-	Metrics::logClientIOMetrics(calculations, lineCounter, logTime);
+	Metrics::logClientIOMetrics(IOCalculations, lineCounter, logTime);
 	Metrics::logDataParsingMetricsClient(dataParsingTimeCalc, sizeOfDataParsedDataClientCalc, numDataParsesClient);
 #endif
 
 	closesocket(ClientSocket); // cleanup
 	WSACleanup();
-
-	system("pause");
-
 
 #ifdef METRICS
 

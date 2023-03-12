@@ -85,17 +85,31 @@ namespace Metrics {
 		}
 	};
 
+	/// <summary>
+	/// calls logger function on appropriate target
+	/// </summary>
+	/// <param name="clientOrServer">Client = True, Server = False</param>
+	void addLogDivider(bool clientOrServer) {
+		if ( clientOrServer ) {
+			logger.log("-----------------------------------------------------------------------------------", clientMetricsLogFileName);
+			logger.emptyLine(clientMetricsLogFileName);
+		} else {
+			logger.log("-----------------------------------------------------------------------------------", serverMetricsLogFileName);
+			logger.emptyLine(serverMetricsLogFileName);
+		}
+	}
+
 	void logStartOfServer() {
 		
 		logger.log("Server - Metrics", serverMetricsLogFileName);
-		logger.log("-----------------------------------------------------------------------------------", serverMetricsLogFileName);
+		addLogDivider(false);
 		
 	}
 
 	void logStartOfClient(char* filename, int planeID) {
 		std::string fileNameStr = filename;
 		logger.log("Client - Metrics | ID: " + std::to_string(planeID) + " | " + fileNameStr, clientMetricsLogFileName);
-		logger.log("-----------------------------------------------------------------------------------", clientMetricsLogFileName);
+		addLogDivider(true);
 
 	}
 
@@ -149,7 +163,7 @@ namespace Metrics {
 		// get file counts, plus total bytes of data from all .txt files
 		int fileCounter = 0; // to count number of txt files
 		int byteCounter = 0; // to get total number of bytes
-		for (const auto& entry : std::filesystem::directory_iterator("../Client/")) {
+		for (const auto& entry : std::filesystem::directory_iterator("./")) {
 			if (entry.path().extension().string() == ".txt") {
 				byteCounter += std::filesystem::file_size(entry.path());
 				fileCounter++;
@@ -177,6 +191,7 @@ namespace Metrics {
 		logger.log("Server - DataParsing - # of Conversions = " + std::to_string(numDataParsesServer), serverMetricsLogFileName);
 		logger.log("Server - DataParsing - Total Size of Parsed Data = " + std::to_string((int)sizeOfDataParsedDataServerCalc.getSum()) + " Bytes", serverMetricsLogFileName);
 		logger.emptyLine(serverMetricsLogFileName);
+		addLogDivider(false);
 	}
 
 	void logCalcInfo(float calcTime, int numCalc) {

@@ -303,6 +303,7 @@ int numDataParsesServer = 0;
 float maxSizeRxData = 0;
 
 Metrics::Timer timer;
+Metrics::Timer calcTimer;
 Metrics::Calculations dataParsingTimeCalc;
 Metrics::Calculations sizeOfDataParsedDataServerCalc;
 Metrics::Calculations sizeOfMemoryServerCalc;
@@ -313,6 +314,7 @@ int numCompletedConnections;
 int numCurrentConnections;
 int numFailedConnections;
 CRITICAL_SECTION critical;
+CRITICAL_SECTION loggingCritical;
 
 std::chrono::time_point<std::chrono::system_clock> serverStartTime;
 
@@ -358,12 +360,14 @@ void clientHandler(SOCKET clientSocket)
 	std::cout << "Connection Established with Plane: " << planeID << std::endl;
 
 	Packet p(planeID);
+#ifdef METRICS
+	numDataParsesServer += 3;
+#endif
 	send(clientSocket, p.serialize(), Packet::getPacketSize(), 0);
 
 	StorageTypes plane;
 	char* RxBuffer = (char*)malloc(Packet::getPacketSize());
 	memset(RxBuffer, NULL, Packet::getPacketSize());
-	//char RxBuffer[MaxBufferSize] = {}; // magic number
 	float fValue;
 	std::string timestamp;
 
@@ -376,10 +380,8 @@ void clientHandler(SOCKET clientSocket)
 	while (!exit)
 	{
 		memset(RxBuffer, NULL, Packet::getPacketSize());
-		//memset(RxBuffer, 0, sizeof(RxBuffer));
 	
 		size_t result = recv(clientSocket, RxBuffer, Packet::getPacketSize(), 0);
-		//size_t result = recv(clientSocket, RxBuffer, sizeof(RxBuffer), 0); 
 
 		if (result == SOCKET_ERROR || result == 0) {
 			failedConn = true;
@@ -395,15 +397,24 @@ void clientHandler(SOCKET clientSocket)
 
 			break;
 		}
-		
+
+#ifdef METRICS
+		timer.start();
+#endif
+
 		p = Packet(RxBuffer);
+
+#ifdef METRICS
+		dataParsingTimeCalc.addPoint(timer.getTime());
+		numDataParsesServer += 3;
+		sizeOfDataParsedDataServerCalc.addPoint(sizeof(p));
+#endif
 
 		if (strcmp(p.getTimestamp().c_str(), "*") == 0) 
 		{ 
 			p.setCurrentFuelConsumption(CalcFuelConsumption(&plane, fValue));
 			p.setAverageFuelConsumption(CalcAvg(&plane));
 			p.swapIP();
-
 
 			std::tm tm1 = {};
 			std::istringstream ss1(plane.startTime);
@@ -472,8 +483,11 @@ void clientHandler(SOCKET clientSocket)
 	}
 	LeaveCriticalSection(&critical);
 
+	EnterCriticalSection(&loggingCritical);
 	Metrics::logNetworkMetricsServer(planeID, currentUptime, numTotalConnections, numCurrentConnections, numCompletedConnections, numFailedConnections, errMessage);
-
+	Metrics::logCalcInfo(calcTime, numCalc);
+	Metrics::logDataParsingMetricsServer(dataParsingTimeCalc, sizeOfDataParsedDataServerCalc, numDataParsesServer);
+	LeaveCriticalSection(&loggingCritical);
 }
 
 int main()
@@ -481,6 +495,7 @@ int main()
 
 #ifdef METRICS
 	InitializeCriticalSection(&critical);
+	InitializeCriticalSection(&loggingCritical);
 #endif // METRICS
 
 
@@ -500,54 +515,56 @@ int main()
 	} else {
 #ifdef METRICS
 		Metrics::logStartOfServer();
+		Metrics::logSystemStatsMetrics(false);
 		serverStartTime = std::chrono::system_clock::now();
 #endif // METRICS
-	}
+		//}
 
-	// Bind the socket to an address and port
-	sockaddr_in serverAddr;
-	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_addr.s_addr = INADDR_ANY;
-	serverAddr.sin_port = htons(atoi(configurations.getConfigChar("port"))); // Magic Number
-	if (bind(listenSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
-		std::cerr << "bind failed with error: " << WSAGetLastError() << '\n';
-		closesocket(listenSocket);
-		WSACleanup();
-		return 1;
-	}
-
-	// Start listening for incoming connections
-	if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
-		std::cerr << "listen failed with error: " << WSAGetLastError() << '\n';
-		closesocket(listenSocket);
-		WSACleanup();
-		return 1;
-	}
-
-	std::vector<std::thread> threads;
-
-	// Accept incoming connections and spawn a thread to handle each client
-	while (true) {
-		SOCKET clientSocket = accept(listenSocket, NULL, NULL);
-		if (clientSocket == INVALID_SOCKET) {
-			std::cerr << "accept failed with error: " << WSAGetLastError() << '\n';
+		// Bind the socket to an address and port
+		sockaddr_in serverAddr;
+		serverAddr.sin_family = AF_INET;
+		serverAddr.sin_addr.s_addr = INADDR_ANY;
+		serverAddr.sin_port = htons(atoi(configurations.getConfigChar("port"))); // Magic Number
+		if ( bind(listenSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR ) {
+			std::cerr << "bind failed with error: " << WSAGetLastError() << '\n';
 			closesocket(listenSocket);
 			WSACleanup();
 			return 1;
 		}
 
-		DWORD timeout = atoi(configurations.getConfigChar("sockettimeoutseconds")) * 1000;
-		setsockopt(clientSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
+		// Start listening for incoming connections
+		if ( listen(listenSocket, SOMAXCONN) == SOCKET_ERROR ) {
+			std::cerr << "listen failed with error: " << WSAGetLastError() << '\n';
+			closesocket(listenSocket);
+			WSACleanup();
+			return 1;
+		}
 
-		threads.emplace_back(clientHandler, clientSocket);
+		std::vector<std::thread> threads;
+
+		// Accept incoming connections and spawn a thread to handle each client
+		while ( true ) {
+			SOCKET clientSocket = accept(listenSocket, NULL, NULL);
+			if ( clientSocket == INVALID_SOCKET ) {
+				std::cerr << "accept failed with error: " << WSAGetLastError() << '\n';
+				closesocket(listenSocket);
+				WSACleanup();
+				return 1;
+			}
+
+			DWORD timeout = atoi(configurations.getConfigChar("sockettimeoutseconds")) * 1000;
+			setsockopt(clientSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
+
+			threads.emplace_back(clientHandler, clientSocket);
+		}
 	}
-
 	// Close the listening socket and cleanup Winsock
 	closesocket(listenSocket);
 	WSACleanup();
 
 #ifdef METRICS
 	DeleteCriticalSection(&critical);
+	DeleteCriticalSection(&loggingCritical);
 #endif // METRICS
 
 	return 0;
@@ -555,16 +572,39 @@ int main()
 
 void UpdateData(StorageTypes* plane, float currentFuelPoint, std::string timeStamp)
 {
+#ifdef METRICS
+	calcTimer.start();
+#endif
 	plane->size++;
 	plane->sumFuel += currentFuelPoint;
 	plane->currentTime = timeStamp;
+#ifdef METRICS
+	calcTime += calcTimer.getTime();
+	numCalc += 2;
+#endif
 }
 
 float CalcAvg(StorageTypes* plane)
 {
-	return plane->sumFuel / plane->size;
+#ifdef METRICS
+	calcTimer.start();
+#endif
+	float result = plane->sumFuel / plane->size;
+#ifdef METRICS
+	calcTime += calcTimer.getTime();
+	numCalc++;
+#endif
+	return result;
 }
 
 float CalcFuelConsumption(StorageTypes* plane, float currentFuel) {
-	return plane->startingFuel - currentFuel;
+#ifdef METRICS
+	calcTimer.start();
+#endif
+	float result = plane->startingFuel - currentFuel;
+#ifdef METRICS
+	calcTime += calcTimer.getTime();
+	numCalc++;
+#endif
+	return result;
 }

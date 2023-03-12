@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 	unsigned int countTo = uiSize.get();
 #endif
 
-	memset(Rx, 0, Packet::getPacketSize());
+	memset(Rx, NULL, Packet::getPacketSize());
 	recv(ClientSocket, Rx, Packet::getPacketSize(), 0); // Recieve PlaneID
 
 #ifdef METRICS
@@ -225,7 +225,6 @@ int main(int argc, char* argv[])
 	timer.start();
 	Metrics::logStartOfClient(configurations.getConfigChar("dataFile"), plane.getPlaneID());
 	Metrics::logSystemStatsMetrics(true);
-	Metrics::logClientIOMetrics(IOCalculations, lineCounter, logTime);
 	Metrics::logDataParsingMetricsClient(dataParsingTimeCalc, sizeOfDataParsedDataClientCalc, numDataParsesClient);
 #endif
 
@@ -247,6 +246,7 @@ int main(int argc, char* argv[])
 	#ifdef LAN
 		Metrics::logNetworkMetricsClient(numTransmissions, avgHandshake, handshakeTransmissionCount, lan);
 	#endif // LAN
+	Metrics::logClientIOMetrics(IOCalculations, lineCounter, logTime);
 	Metrics::addLogEndOfFileSpacing(true);
 #endif
 

@@ -12,9 +12,8 @@
 // defines
 //#define WAN
 #define LAN
-#define METRICS
+//#define METRICS
 
-using namespace std;
 //variables
 configuration::configManager configurations("../Shared/config.conf");
 const char* lanAddr = configurations.getConfigChar("lanAddr");
@@ -41,8 +40,6 @@ float logTime; // used to measure getSize since it has been refactored for futur
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
-
-
 	//setup
 	WSADATA wsaData;
 	SOCKET ClientSocket;
@@ -58,12 +55,11 @@ int main(int argc, char* argv[])
 	std::vector<long long> handshakeTimes;
 	int handshakeTransmissionCount = 0;
 #endif
-
 	//startup getSize note. should be started before looking for clients
 	std::thread sizeThread(GetSizePromise, std::move(sizeOfFile)); // begin getting size of file
 	sizeThread.detach();
 	fileIO::fileBuffer* buffer = new fileIO::fileBuffer(configurations.getConfigChar("dataFile"), "../Shared/config.conf"); // begin buffering file
-
+	
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	SvrAddr.sin_family = AF_INET;

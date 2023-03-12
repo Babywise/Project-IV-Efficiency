@@ -13,7 +13,7 @@
 
 configuration::configManager configurations("../Shared/config.conf");
 
-#define METRICS
+//#define METRICS
 #ifdef METRICS
 
 #include "../Shared/Metrics.h"
@@ -199,7 +199,7 @@ void clientHandler(SOCKET clientSocket)
 
 	std::cout << "Closing connection to Plane: " << planeID << std::endl;
 	closesocket(clientSocket);
-
+#ifdef METRICS
 	// Do the Network Logging for each client connection.
 	connectionEndTime = std::chrono::system_clock::now();
 	auto currentUptime = std::chrono::duration_cast<std::chrono::milliseconds>(connectionEndTime - serverStartTime);
@@ -220,6 +220,7 @@ void clientHandler(SOCKET clientSocket)
 	Metrics::logCalcInfo(calcTime, numCalc);
 	Metrics::logDataParsingMetricsServer(dataParsingTimeCalc, sizeOfDataParsedDataServerCalc, numDataParsesServer);
 	LeaveCriticalSection(&loggingCritical);
+#endif
 }
 
 int main()

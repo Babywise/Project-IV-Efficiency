@@ -10,7 +10,7 @@
 
 using namespace std::chrono;
 
-#define METRICS // used to set metrics run or not
+//#define METRICS // used to set metrics run or not
 
 /// <summary>
 /// Namespace is used for ease of use and quality of life calculations of code metrics

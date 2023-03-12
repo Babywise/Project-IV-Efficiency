@@ -17,8 +17,8 @@ using namespace std::chrono;
 /// </summary>
 namespace Metrics {
 	
-	const std::string clientMetricsLogFileName = "Client - Metrics";
-	const std::string serverMetricsLogFileName = "Server - Metrics";
+	std::string clientMetricsLogFileName;
+	std::string serverMetricsLogFileName;
 	Logger logger;
 
 	/// <summary>
@@ -85,30 +85,38 @@ namespace Metrics {
 		}
 	};
 
+	void setClientLogName(std::string clientMetricsLogFileName) {
+		Metrics::clientMetricsLogFileName = clientMetricsLogFileName;
+	}
+
+	void setServerLogName(std::string serverMetricsLogFileName) {
+		Metrics::serverMetricsLogFileName = serverMetricsLogFileName;
+	}
+
 	/// <summary>
 	/// calls logger function on appropriate target
 	/// </summary>
 	/// <param name="clientOrServer">Client = True, Server = False</param>
 	void addLogDivider(bool clientOrServer) {
 		if ( clientOrServer ) {
-			logger.log("-----------------------------------------------------------------------------------", clientMetricsLogFileName);
-			logger.emptyLine(clientMetricsLogFileName);
+			logger.log("-----------------------------------------------------------------------------------", clientMetricsLogFileName, true);
+			logger.emptyLine(clientMetricsLogFileName, true);
 		} else {
-			logger.log("-----------------------------------------------------------------------------------", serverMetricsLogFileName);
-			logger.emptyLine(serverMetricsLogFileName);
+			logger.log("-----------------------------------------------------------------------------------", serverMetricsLogFileName, false);
+			logger.emptyLine(serverMetricsLogFileName, false);
 		}
 	}
 
 	void logStartOfServer() {
 		
-		logger.log("Server - Metrics", serverMetricsLogFileName);
+		logger.log("Server - Metrics", serverMetricsLogFileName, false);
 		addLogDivider(false);
 		
 	}
 
 	void logStartOfClient(char* filename, int planeID) {
 		std::string fileNameStr = filename;
-		logger.log("Client - Metrics | ID: " + std::to_string(planeID) + " | " + fileNameStr, clientMetricsLogFileName);
+		logger.log("Client - Metrics | ID: " + std::to_string(planeID) + " | " + fileNameStr, clientMetricsLogFileName, true);
 		addLogDivider(true);
 
 	}
@@ -123,11 +131,11 @@ namespace Metrics {
 		std::string archiveFilePath;
 
 		if ( clientOrServer ) {
-			logFilePath = "\"%cd%/../Logs/" + logger.getFileTimeName() + clientMetricsLogFileName + ".log\"";
-			archiveFilePath = "\"%cd%/../Archive/" + clientMetricsLogFileName + ".archive\"";
+			logFilePath = "\"%cd%/../Logs/Client/" + logger.getFileTimeName() + clientMetricsLogFileName + ".log\"";
+			archiveFilePath = "\"%cd%/../Archive/" + std::string("Client - Metrics") + ".archive\"";
 		} else {
-			logFilePath = "\"%cd%/../Logs/" + logger.getFileTimeName() + serverMetricsLogFileName + ".log\"";
-			archiveFilePath = "\"%cd%/../Archive/" + serverMetricsLogFileName + ".archive\"";
+			logFilePath = "\"%cd%/../Logs/Server/" + logger.getFileTimeName() + serverMetricsLogFileName + ".log\"";
+			archiveFilePath = "\"%cd%/../Archive/" + std::string("Server - Metrics") + ".archive\"";
 		}
 
 		// log and archive system information
@@ -155,10 +163,10 @@ namespace Metrics {
 		Timer timer;
 
 		// log information from counters and timers
-		logger.log("Client - IO - Get File Size : " + std::to_string(timeToGetSize) + " ms", clientMetricsLogFileName);
-		logger.log("Client - IO - Average time to get line from file : " + std::to_string(calculations.getAverage()) + " ms", clientMetricsLogFileName);
-		logger.log("Client - IO - TotalTime reading files to get specific lines : " + std::to_string(calculations.getSum()) + " ms", clientMetricsLogFileName);
-		logger.log("Client - IO - Total lines reading files ( not including get file length ) : " + std::to_string(int(lineCounter.getSum())), clientMetricsLogFileName);
+		logger.log("Client - IO - Get File Size : " + std::to_string(timeToGetSize) + " ms", clientMetricsLogFileName, true);
+		logger.log("Client - IO - Average time to get line from file : " + std::to_string(calculations.getAverage()) + " ms", clientMetricsLogFileName, true);
+		logger.log("Client - IO - TotalTime reading files to get specific lines : " + std::to_string(calculations.getSum()) + " ms", clientMetricsLogFileName, true);
+		logger.log("Client - IO - Total lines reading files ( not including get file length ) : " + std::to_string(int(lineCounter.getSum())), clientMetricsLogFileName, true);
 
 		// get file counts, plus total bytes of data from all .txt files
 		int fileCounter = 0; // to count number of txt files
@@ -170,51 +178,51 @@ namespace Metrics {
 			}
 		}
 		// log data about file counts and bytes
-		logger.log("Client - IO - Data File Count (.txt) is : " + std::to_string(fileCounter), clientMetricsLogFileName);
-		logger.log("Client - IO - Total bytes in data files is : " + std::to_string(byteCounter), clientMetricsLogFileName);
-		logger.emptyLine(clientMetricsLogFileName);
+		logger.log("Client - IO - Data File Count (.txt) is : " + std::to_string(fileCounter), clientMetricsLogFileName, true);
+		logger.log("Client - IO - Total bytes in data files is : " + std::to_string(byteCounter), clientMetricsLogFileName, true);
+		logger.emptyLine(clientMetricsLogFileName, true);
 	}
 
 	void logDataParsingMetricsClient(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataClientCalc, int numDataParsesClient) {
 		//data parsing results
-		logger.log("Client - DataParsing - Total Time = " + std::to_string(dataParsingTimeCalc.getSum()) + " ms", clientMetricsLogFileName);
-		logger.log("Client - DataParsing - Average (Single Parse) = " + std::to_string(dataParsingTimeCalc.getAverage()) + " ms", clientMetricsLogFileName);
-		logger.log("Client - DataParsing - # of Conversions = " + std::to_string(numDataParsesClient), clientMetricsLogFileName);
-		logger.log("Client - DataParsing - Total Size of Parsed Data = " + std::to_string((int)sizeOfDataParsedDataClientCalc.getSum()) + " Bytes", clientMetricsLogFileName);
-		logger.emptyLine(clientMetricsLogFileName);
+		logger.log("Client - DataParsing - Total Time = " + std::to_string(dataParsingTimeCalc.getSum()) + " ms", clientMetricsLogFileName, true);
+		logger.log("Client - DataParsing - Average (Single Parse) = " + std::to_string(dataParsingTimeCalc.getAverage()) + " ms", clientMetricsLogFileName, true);
+		logger.log("Client - DataParsing - # of Conversions = " + std::to_string(numDataParsesClient), clientMetricsLogFileName, true);
+		logger.log("Client - DataParsing - Total Size of Parsed Data = " + std::to_string((int)sizeOfDataParsedDataClientCalc.getSum()) + " Bytes", clientMetricsLogFileName, true);
+		logger.emptyLine(clientMetricsLogFileName, true);
 	}
 
 	void logDataParsingMetricsServer(Calculations dataParsingTimeCalc, Calculations sizeOfDataParsedDataServerCalc, int numDataParsesServer) {
 		//data parsing results
-		logger.log("Server - DataParsing - Total Time = " + std::to_string(dataParsingTimeCalc.getSum()) + " ms", serverMetricsLogFileName);
-		logger.log("Server - DataParsing - Average (Single Parse) = " + std::to_string(dataParsingTimeCalc.getAverage()) + " ms", serverMetricsLogFileName);
-		logger.log("Server - DataParsing - # of Conversions = " + std::to_string(numDataParsesServer), serverMetricsLogFileName);
-		logger.log("Server - DataParsing - Total Size of Parsed Data = " + std::to_string((int)sizeOfDataParsedDataServerCalc.getSum()) + " Bytes", serverMetricsLogFileName);
-		logger.emptyLine(serverMetricsLogFileName);
+		logger.log("Server - DataParsing - Total Time = " + std::to_string(dataParsingTimeCalc.getSum()) + " ms", serverMetricsLogFileName, false);
+		logger.log("Server - DataParsing - Average (Single Parse) = " + std::to_string(dataParsingTimeCalc.getAverage()) + " ms", serverMetricsLogFileName, false);
+		logger.log("Server - DataParsing - # of Conversions = " + std::to_string(numDataParsesServer), serverMetricsLogFileName, false);
+		logger.log("Server - DataParsing - Total Size of Parsed Data = " + std::to_string((int)sizeOfDataParsedDataServerCalc.getSum()) + " Bytes", serverMetricsLogFileName, false);
+		logger.emptyLine(serverMetricsLogFileName, false);
 		addLogDivider(false);
 	}
 
 	void logCalcInfo(float calcTime, int numCalc) {
 		//calculation results
-		logger.log("Server - Calculations - Average time used for a calculation: " + std::to_string((calcTime/numCalc)*1000) + " µs", serverMetricsLogFileName);
-		logger.log("Server - Calculations - Total time used for calculation: " + std::to_string(calcTime) + " ms", serverMetricsLogFileName);
-		logger.log("Server - Calculations - Total number of calculations done: " + std::to_string(numCalc) + " ms", serverMetricsLogFileName);
-		logger.emptyLine(serverMetricsLogFileName);
+		logger.log("Server - Calculations - Average time used for a calculation: " + std::to_string((calcTime/numCalc)*1000) + " µs", serverMetricsLogFileName, false);
+		logger.log("Server - Calculations - Total time used for calculation: " + std::to_string(calcTime) + " ms", serverMetricsLogFileName, false);
+		logger.log("Server - Calculations - Total number of calculations done: " + std::to_string(numCalc) + " ms", serverMetricsLogFileName, false);
+		logger.emptyLine(serverMetricsLogFileName, false);
 	}
 
 	void logMemoryMetricsServer(Calculations sizeOfMemoryServerCalc) {
 		//memory results
-		logger.log("Server - Memory - Total Memory Allocated: " + std::to_string(sizeOfMemoryServerCalc.getSum()) + " Bytes", serverMetricsLogFileName);
-		logger.emptyLine(serverMetricsLogFileName);
+		logger.log("Server - Memory - Total Memory Allocated: " + std::to_string(sizeOfMemoryServerCalc.getSum()) + " Bytes", serverMetricsLogFileName, false);
+		logger.emptyLine(serverMetricsLogFileName, false);
 	}
 
 	void logNetworkMetricsClient(int numTransmissions, int avgHandshake, int handshakeTransmissionCount, std::string networkType) {
 		// Client Network Results
-		logger.log("Client - Network - Network Type: " + networkType, clientMetricsLogFileName);
-		logger.log("Client - Network - Number of Transmissions: " + std::to_string(numTransmissions), clientMetricsLogFileName);
-		logger.log("Client - Network - Average Handshake Time: " + std::to_string(avgHandshake) +  " µs", clientMetricsLogFileName);
-		logger.log("Client - Network - Number of Transmissions in Handshake: " + std::to_string(handshakeTransmissionCount), clientMetricsLogFileName);
-		logger.emptyLine(clientMetricsLogFileName);
+		logger.log("Client - Network - Network Type: " + networkType, clientMetricsLogFileName, true);
+		logger.log("Client - Network - Number of Transmissions: " + std::to_string(numTransmissions), clientMetricsLogFileName, true);
+		logger.log("Client - Network - Average Handshake Time: " + std::to_string(avgHandshake) +  " µs", clientMetricsLogFileName, true);
+		logger.log("Client - Network - Number of Transmissions in Handshake: " + std::to_string(handshakeTransmissionCount), clientMetricsLogFileName, true);
+		logger.emptyLine(clientMetricsLogFileName, true);
 		
 	}
 
@@ -222,14 +230,14 @@ namespace Metrics {
 		int numCurrentConnections, int numCompletedConnections, int numFailedConnections, std::string errMessage) {
 
 		// Server Network Results
-		logger.log("Server - Network - PlaneID: " + std::to_string(planeID), serverMetricsLogFileName);
-		logger.log("Server - Network - Current Server Uptime: " + std::to_string(currentUptime.count()) + "ms", serverMetricsLogFileName);
-		logger.log("Server - Network - Total Connection Counter: " + std::to_string(numTotalConnections), serverMetricsLogFileName);
-		logger.log("Server - Network - Current Connection Counter: " + std::to_string(numCurrentConnections), serverMetricsLogFileName);
-		logger.log("Server - Network - Completed Connection Counter: " + std::to_string(numCompletedConnections), serverMetricsLogFileName);
-		logger.log("Server - Network - Failed Connection Counter: " + std::to_string(numFailedConnections), serverMetricsLogFileName);
-		if (errMessage != "") { logger.log("Server - Network - Reason For Failure: " + errMessage, serverMetricsLogFileName); }
-		logger.emptyLine(serverMetricsLogFileName);
+		logger.log("Server - Network - PlaneID: " + std::to_string(planeID), serverMetricsLogFileName, false);
+		logger.log("Server - Network - Current Server Uptime: " + std::to_string(currentUptime.count()) + " ms", serverMetricsLogFileName, false);
+		logger.log("Server - Network - Total Connection Counter: " + std::to_string(numTotalConnections), serverMetricsLogFileName, false);
+		logger.log("Server - Network - Current Connection Counter: " + std::to_string(numCurrentConnections), serverMetricsLogFileName, false);
+		logger.log("Server - Network - Completed Connection Counter: " + std::to_string(numCompletedConnections), serverMetricsLogFileName, false);
+		logger.log("Server - Network - Failed Connection Counter: " + std::to_string(numFailedConnections), serverMetricsLogFileName, false);
+		if (errMessage != "") { logger.log("Server - Network - Reason For Failure: " + errMessage, serverMetricsLogFileName, false); }
+		logger.emptyLine(serverMetricsLogFileName, false);
 	}
 	/// <summary>
 	/// calls logger function on appropriate target
@@ -237,9 +245,9 @@ namespace Metrics {
 	/// <param name="clientOrServer">Client = True, Server = False</param>
 	void addLogEndOfFileSpacing(bool clientOrServer){
 		if ( clientOrServer ) {
-			logger.addLogEndOfFileSpacingArchive(clientMetricsLogFileName);
+			logger.addLogEndOfFileSpacingArchive("Client - Metrics", true);
 		} else {
-			logger.addLogEndOfFileSpacingArchive(serverMetricsLogFileName);
+			logger.addLogEndOfFileSpacingArchive("Server - Metrics", false);
 		}
 	}
 

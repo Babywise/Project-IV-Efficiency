@@ -10,6 +10,8 @@
 
 //define statements
 #define LOGSPATH "../Logs/"
+#define LOGSPATHCLIENT "../Logs/Client/"
+#define LOGSPATHSERVER "../Logs/Server/"
 #define DEFAULT_LOG "log"
 #define LOGEXTENSION ".log"
 #define ARCHIVE "../Archive/"
@@ -22,11 +24,11 @@ class Logger {
 public:
 	Logger();
 	std::string getFileTimeName();
-	void log(std::string message);
-	void log(std::string message, int severity);
-	void log(std::string message,int severity,std::string logname);
-	void log(std::string message, std::string logName);
-	void Archive(std::string message, std::string logname);
-	void emptyLine(std::string logname);
-	void addLogEndOfFileSpacingArchive(std::string logname);
+	void log(std::string message, bool clientOrServer);
+	void log(std::string message, int severity, bool clientOrServer);
+	void log(std::string message,int severity,std::string logname, bool clientOrServer);
+	void log(std::string message, std::string logName, bool clientOrServer);
+	void Archive(std::string message, std::string logname, bool clientOrServer);
+	void emptyLine(std::string logname, bool clientOrServer);
+	void addLogEndOfFileSpacingArchive(std::string logname, bool clientOrServer);
 };

@@ -93,9 +93,16 @@ int main(int argc, char* argv[])
 
 #ifdef METRICS
 	numTransmissions++;
+	timer.start();
 #endif
 
 	Packet plane(Rx);
+
+#ifdef METRICS
+	numDataParsesClient += 3; 
+	dataParsingTimeCalc.addPoint(timer.getTime());
+	sizeOfDataParsedDataClientCalc.addPoint(Packet::getPacketSize());
+#endif
 
 	std::string paramName;
 	std::string timestamp;
@@ -116,6 +123,7 @@ int main(int argc, char* argv[])
 #ifdef METRICS
 		IOCalculations.addPoint(timer.getTime());
 		lineCounter.addPoint(1); // add 1 for the get line above, add one for close file at end of loop add one for file init
+		timer.start();
 #endif
 
 		if (l == 0)
@@ -123,10 +131,15 @@ int main(int argc, char* argv[])
 			int endpos = strInput.find_first_of(',');
 			paramName = strInput.substr(0, endpos);
 #ifdef METRICS
+			dataParsingTimeCalc.addPoint(timer.getTime());
 			numDataParsesClient++;
+			sizeOfDataParsedDataClientCalc.addPoint(sizeof(paramName));
 #endif
 		}
 
+#ifdef METRICS
+		timer.start();
+#endif
 		if (l > 0)
 		{
 			size_t offset, preOffset;
@@ -136,27 +149,30 @@ int main(int argc, char* argv[])
 				offset = strInput.find_first_of(',', preOffset + 1);
 				if (pCounter == 0) {
 					timestamp = strInput.substr(preOffset + 1, offset - (preOffset + 1));
+#ifdef METRICS
+					dataParsingTimeCalc.addPoint(timer.getTime());
+					numDataParsesClient++;
+					sizeOfDataParsedDataClientCalc.addPoint(sizeof(timestamp));
+#endif
 
 				} else {
 					if (l == 1) {
 						startingFuel = atof(strInput.substr(preOffset + 1, offset - (preOffset + 1)).c_str());
 #ifdef METRICS
-						sizeOfDataParsedDataClientCalc.addPoint(sizeof(startingFuel));
+						dataParsingTimeCalc.addPoint(timer.getTime());
 						numDataParsesClient++;
+						sizeOfDataParsedDataClientCalc.addPoint(sizeof(startingFuel));
 #endif
 					}
 					fuelValue = strInput.substr(preOffset + 1, offset - (preOffset + 1));
 #ifdef METRICS
-					sizeOfDataParsedDataClientCalc.addPoint(sizeof(startingFuel));
+					dataParsingTimeCalc.addPoint(timer.getTime());
 					numDataParsesClient++;
+					sizeOfDataParsedDataClientCalc.addPoint(sizeof(fuelValue));
 #endif
+					
 				}
 				preOffset = offset; // Update offset to next column
-#ifdef METRICS
-				numDataParsesClient++;
-				sizeOfDataParsedDataClientCalc.addPoint(sizeof(timestamp));
-				dataParsingTimeCalc.addPoint(timer.getTime());
-#endif
 			}
 #ifdef LAN
 			plane = Packet("src", lanAddr, paramName, plane.getPlaneID(), timestamp, atof(fuelValue.c_str()));
@@ -171,6 +187,10 @@ int main(int argc, char* argv[])
 #endif
 
 			send(ClientSocket, plane.serialize(), Packet::getPacketSize(), 0); // Send parameter name to server
+#ifdef METRICS
+			numDataParsesClient += 3;
+			sizeOfDataParsedDataClientCalc.addPoint(Packet::getPacketSize());
+#endif
 			size_t result = recv(ClientSocket, Rx, Packet::getPacketSize(), 0); // Recieve PlaneID
 
 #ifdef METRICS
@@ -200,9 +220,15 @@ int main(int argc, char* argv[])
 				break;
 
 			} else {
-
+#ifdef METRICS
+				timer.start();
+#endif
 				plane = Packet(Rx);
-
+#ifdef METRICS
+				dataParsingTimeCalc.addPoint(timer.getTime());
+				numDataParsesClient += 3;
+				sizeOfDataParsedDataClientCalc.addPoint(Packet::getPacketSize());
+#endif
 				if (l < countTo - 1)
 				{
 					std::cout << "Timestamp: " << plane.getTimestamp() << " | Fuel Consumption: " << plane.getCurrentFuelConsumption() <<
@@ -223,6 +249,7 @@ int main(int argc, char* argv[])
 
 #ifdef METRICS
 	timer.start();
+	Metrics::setClientLogName(configurations.getConfigChar("clientMetricsLogFileName") + std::string(" - ") + std::to_string(plane.getPlaneID()));
 	Metrics::logStartOfClient(configurations.getConfigChar("dataFile"), plane.getPlaneID());
 	Metrics::logSystemStatsMetrics(true);
 	Metrics::logDataParsingMetricsClient(dataParsingTimeCalc, sizeOfDataParsedDataClientCalc, numDataParsesClient);

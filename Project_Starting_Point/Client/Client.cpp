@@ -12,7 +12,7 @@
 // defines
 //#define WAN
 #define LAN
-//#define METRICS
+#define METRICS
 
 //variables
 configuration::configManager configurations("../Shared/config.conf");
@@ -186,6 +186,7 @@ int main(int argc, char* argv[])
 #endif
 
 			send(ClientSocket, plane.serialize(), Packet::getPacketSize(), 0); // Send parameter name to server
+			plane.freeBuffer();
 #ifdef METRICS
 			numDataParsesClient += 3;
 			sizeOfDataParsedDataClientCalc.addPoint(Packet::getPacketSize());
@@ -256,6 +257,7 @@ int main(int argc, char* argv[])
 
 	closesocket(ClientSocket); // cleanup
 	WSACleanup();
+	free(Rx);
 
 #ifdef METRICS
 

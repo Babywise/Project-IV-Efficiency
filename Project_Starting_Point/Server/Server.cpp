@@ -13,7 +13,7 @@
 
 configuration::configManager configurations("../Shared/config.conf");
 
-//#define METRICS
+#define METRICS
 #ifdef METRICS
 
 #include "../Shared/Metrics.h"
@@ -34,6 +34,7 @@ int numCurrentConnections;
 int numFailedConnections;
 CRITICAL_SECTION critical;
 CRITICAL_SECTION loggingCritical;
+CRITICAL_SECTION parsingCritical;
 
 std::chrono::time_point<std::chrono::system_clock> serverStartTime;
 
@@ -63,6 +64,9 @@ static float calcTime = 0;
 void clientHandler(SOCKET clientSocket)
 {
 #ifdef METRICS
+	int localDataParsingTimeCalc = 0;
+	int localSizeOfDataParsedDataServerCalc = 0;
+	int localNumDataParsesServer = 0;
 	// This is a critical section to avoid a deadlock while updating the global variables.
 	EnterCriticalSection(&critical);
 	numTotalConnections++;
@@ -82,13 +86,14 @@ void clientHandler(SOCKET clientSocket)
 #endif
 	Packet p(planeID);
 #ifdef METRICS
-	dataParsingTimeCalc.addPoint(timer.getTime());
-	numDataParsesServer += 3;
+	localDataParsingTimeCalc += timer.getTime();
+	localNumDataParsesServer += 3;
 #endif
 	send(clientSocket, p.serialize(), Packet::getPacketSize(), 0);
+	p.freeBuffer();
 #ifdef METRICS
-	numDataParsesServer += 3;
-	sizeOfDataParsedDataServerCalc.addPoint(Packet::getPacketSize());
+	localNumDataParsesServer += 3;
+	localSizeOfDataParsedDataServerCalc += Packet::getPacketSize();
 #endif
 	StorageTypes plane;
 	char* RxBuffer = (char*)malloc(Packet::getPacketSize());
@@ -130,9 +135,9 @@ void clientHandler(SOCKET clientSocket)
 		p = Packet(RxBuffer);
 
 #ifdef METRICS
-		dataParsingTimeCalc.addPoint(timer.getTime());
-		numDataParsesServer += 3;
-		sizeOfDataParsedDataServerCalc.addPoint(sizeof(p));
+		localDataParsingTimeCalc += timer.getTime();
+		localNumDataParsesServer += 3;
+		localSizeOfDataParsedDataServerCalc += Packet::getPacketSize();
 #endif
 
 		if (strcmp(p.getTimestamp().c_str(), "*") == 0) 
@@ -156,9 +161,10 @@ void clientHandler(SOCKET clientSocket)
 			p.setTimeStamp(std::to_string(diff));
 
 			send(clientSocket, p.serialize(), Packet::getPacketSize(), 0); //send final stats back 
+			p.freeBuffer();
 #ifdef METRICS
-			numDataParsesServer += 3;
-			sizeOfDataParsedDataServerCalc.addPoint(Packet::getPacketSize());
+			localNumDataParsesServer += 3;
+			localSizeOfDataParsedDataServerCalc += Packet::getPacketSize();
 #endif
 			exit = true; 
 		} else {
@@ -180,10 +186,11 @@ void clientHandler(SOCKET clientSocket)
 				p.swapIP();
 
 				send(clientSocket, p.serialize(), Packet::getPacketSize(), 0);//send average back 
+				p.freeBuffer();
 
 #ifdef METRICS
-				numDataParsesServer += 3;
-				sizeOfDataParsedDataServerCalc.addPoint(Packet::getPacketSize());
+				localNumDataParsesServer += 3;
+				localSizeOfDataParsedDataServerCalc += Packet::getPacketSize();
 #endif
 			} else {
 
@@ -204,8 +211,15 @@ void clientHandler(SOCKET clientSocket)
 	connectionEndTime = std::chrono::system_clock::now();
 	auto currentUptime = std::chrono::duration_cast<std::chrono::milliseconds>(connectionEndTime - serverStartTime);
 
+	EnterCriticalSection(&loggingCritical);
+
+	std::cout << "Started logging Plane: " << planeID << std::endl;
+	numDataParsesServer += localNumDataParsesServer;
+	dataParsingTimeCalc.addPoint(localNumDataParsesServer);
+	sizeOfDataParsedDataServerCalc.addPoint(localNumDataParsesServer);
+
 	// This is a critical section to avoid a deadlock while updating the global variables.
-	EnterCriticalSection(&critical);
+	//EnterCriticalSection(&critical);
 	numCurrentConnections--; // socket closed so decrement the current connections.
 	// if the failed boolean is false we have a completed connection
 	if (failedConn == false) {
@@ -213,14 +227,15 @@ void clientHandler(SOCKET clientSocket)
 	} else {
 		numFailedConnections++;
 	}
-	LeaveCriticalSection(&critical);
+	//LeaveCriticalSection(&critical);
 
-	EnterCriticalSection(&loggingCritical);
 	Metrics::logNetworkMetricsServer(planeID, currentUptime, numTotalConnections, numCurrentConnections, numCompletedConnections, numFailedConnections, errMessage);
 	Metrics::logCalcInfo(calcTime, numCalc);
 	Metrics::logDataParsingMetricsServer(dataParsingTimeCalc, sizeOfDataParsedDataServerCalc, numDataParsesServer);
+	std::cout << "Finished logging Plane: " << planeID << std::endl;
 	LeaveCriticalSection(&loggingCritical);
 #endif
+	free(RxBuffer);
 }
 
 int main()
@@ -229,6 +244,7 @@ int main()
 #ifdef METRICS
 	InitializeCriticalSection(&critical);
 	InitializeCriticalSection(&loggingCritical);
+	InitializeCriticalSection(&parsingCritical);
 #endif // METRICS
 
 
@@ -299,6 +315,7 @@ int main()
 #ifdef METRICS
 	DeleteCriticalSection(&critical);
 	DeleteCriticalSection(&loggingCritical);
+	DeleteCriticalSection(&parsingCritical);
 #endif // METRICS
 
 	return 0;

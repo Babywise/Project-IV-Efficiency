@@ -183,5 +183,7 @@ public:
 	static int getPacketSize() {
 		return sizeof(head) + sizeof(FD) + sizeof(FR);
 	}
-
+	void freeBuffer() {
+		free(this->TxBuffer);
+	}
 };

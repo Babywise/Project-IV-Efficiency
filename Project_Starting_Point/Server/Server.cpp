@@ -215,8 +215,8 @@ void clientHandler(SOCKET clientSocket)
 
 	std::cout << "Started logging Plane: " << planeID << std::endl;
 	numDataParsesServer += localNumDataParsesServer;
-	dataParsingTimeCalc.addPoint(localNumDataParsesServer);
-	sizeOfDataParsedDataServerCalc.addPoint(localNumDataParsesServer);
+	dataParsingTimeCalc.addPoint(localDataParsingTimeCalc);
+	sizeOfDataParsedDataServerCalc.addPoint(localSizeOfDataParsedDataServerCalc);
 
 	// This is a critical section to avoid a deadlock while updating the global variables.
 	//EnterCriticalSection(&critical);

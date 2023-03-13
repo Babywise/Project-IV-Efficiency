@@ -64,7 +64,7 @@ static float calcTime = 0;
 void clientHandler(SOCKET clientSocket)
 {
 #ifdef METRICS
-	int localDataParsingTimeCalc = 0;
+	float localDataParsingTimeCalc = 0;
 	int localSizeOfDataParsedDataServerCalc = 0;
 	int localNumDataParsesServer = 0;
 	// This is a critical section to avoid a deadlock while updating the global variables.

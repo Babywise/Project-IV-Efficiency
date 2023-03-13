@@ -101,6 +101,9 @@ fileIO::fileBuffer::fileBuffer(std::string path, std::string config) {
 	std::function t = [this, path]() {this->helper(path); }; // begin buffering
 	std::thread worker(t);
 	worker.detach();
+	while (this->chunks.size() ==0) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
 }
 
 /// <summary>

@@ -60,6 +60,7 @@ int main(int argc, char* argv[])
 	sizeThread.detach();
 	fileIO::fileBuffer* buffer = new fileIO::fileBuffer(configurations.getConfigChar("dataFile"), "../Shared/config.conf"); // begin buffering file
 	
+
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	SvrAddr.sin_family = AF_INET;
@@ -114,6 +115,7 @@ int main(int argc, char* argv[])
 #ifdef METRICS
 		timer.start();
 #endif
+		
 		strInput = buffer->next();
 
 #ifdef METRICS
@@ -160,6 +162,7 @@ int main(int argc, char* argv[])
 						sizeOfDataParsedDataClientCalc.addPoint(sizeof(startingFuel));
 #endif
 					}
+				
 					fuelValue = strInput.substr(preOffset + 1, offset - (preOffset + 1));
 #ifdef METRICS
 					dataParsingTimeCalc.addPoint(timer.getTime());

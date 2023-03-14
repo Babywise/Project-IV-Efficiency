@@ -3,8 +3,8 @@
 
 //Constants for packet structure
 const int maxParamNameStringLength = 64;
-const int maxIPStringLength = 16;
 const int maxTimeStampStringLength = 20;
+const int maxIPStringLength = 16;
 
 /// <summary>
 /// Packet Structure for sending FlightData

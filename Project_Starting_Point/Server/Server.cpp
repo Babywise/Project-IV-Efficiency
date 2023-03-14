@@ -232,6 +232,7 @@ void clientHandler(SOCKET clientSocket)
 	Metrics::logNetworkMetricsServer(planeID, currentUptime, numTotalConnections, numCurrentConnections, numCompletedConnections, numFailedConnections, errMessage);
 	Metrics::logCalcInfo(calcTime, numCalc);
 	Metrics::logDataParsingMetricsServer(dataParsingTimeCalc, sizeOfDataParsedDataServerCalc, numDataParsesServer);
+	Metrics::logFlightStatisticsServer(p, plane.startingFuel);
 	std::cout << "Finished logging Plane: " << planeID << std::endl;
 	LeaveCriticalSection(&loggingCritical);
 #endif

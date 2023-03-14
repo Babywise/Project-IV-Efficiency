@@ -245,6 +245,21 @@ namespace Metrics {
 		if (errMessage != "") { logger.log("Server - Network - Reason For Failure: " + errMessage, serverMetricsLogFileName, false); }
 		logger.emptyLine(serverMetricsLogFileName, false);
 	}
+
+	void logFlightStatisticsServer(Packet plane, float startingFuel) {
+		logger.log("Server - Flight Statistics - PlaneID: " + std::to_string(plane.getPlaneID()), serverMetricsLogFileName, false);
+
+		logger.log("Flight ID: " + std::to_string(plane.getPlaneID()), serverMetricsLogFileName, false);
+		logger.log("Flight Duration (seconds): " + plane.getTimestamp(), serverMetricsLogFileName, false);
+		logger.log("Flight Starting Fuel: " + std::to_string(startingFuel), serverMetricsLogFileName, false);
+		logger.log("Flight Ending Fuel: " + std::to_string(startingFuel - plane.getCurrentFuelConsumption()), serverMetricsLogFileName, false);
+		logger.log("Flight Total Fuel Consumption: " + std::to_string(plane.getCurrentFuelConsumption()), serverMetricsLogFileName, false);
+		logger.log("Flight Average Fuel: " + std::to_string(plane.getAverageFuelConsumption()), serverMetricsLogFileName, false);
+
+		logger.emptyLine(serverMetricsLogFileName, false);
+	}
+
+
 	/// <summary>
 	/// calls logger function on appropriate target
 	/// </summary>

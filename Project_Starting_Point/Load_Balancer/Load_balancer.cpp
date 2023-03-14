@@ -22,12 +22,12 @@ void handleClient(SOCKET sock, load_packet packet);
 
 
 void RouteTraffic(SOCKET sock) {
-	std::cout << "SEND ACK";
+	std::cout << "SEND ACK -> ";
 	send(sock, (char*)"ACK", 3, 0);
 	char* RxBuffer = (char*)malloc(load_packet::getPacketSize());
 	memset(RxBuffer, NULL, load_packet::getPacketSize());
 	recv(sock, RxBuffer, load_packet::getPacketSize(), 0);
-	std::cout << "Recieved";
+	std::cout << "Recieved -> ";
 	load_packet pack(RxBuffer);
 	std::string type = pack.getClientServer();
 	if (strcmp(type.c_str(), "client") == 0) {

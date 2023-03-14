@@ -302,13 +302,13 @@ void setup() {
 	SvrAddr.sin_port = htons(balanceport);
 
 	SvrAddr.sin_addr.s_addr = inet_addr(configurations.getConfigChar("balancer_IP"));
-	std::cout << "Connecting";
+	std::cout << "Connecting -> ";
 	int v = connect(ClientSocket, (struct sockaddr*)&SvrAddr, sizeof(SvrAddr)); // connect
-	std::cout << "Connected";
+	std::cout << "Connected" << std::endl;
 	recv(ClientSocket, Rx, 3, 0);
 	Rx[3] = '\0';
 	if (strcmp(Rx, "ACK") == 0) {
-		std::cout << "got ACK";
+		std::cout << "ACK Received -> ";
 		load_packet pack("client","","");
 		send(ClientSocket, pack.serialize(), load_packet::getPacketSize(), 0);
 	}
@@ -320,7 +320,7 @@ void setup() {
 		strcpy_s(lanAddr,strlen(rcv_pack.getRedirectIP().c_str())+1, rcv_pack.getRedirectIP().c_str());
 		port = atoi(rcv_pack.getRedirectPort().c_str());
 	}
-	std::cout << "\ngot address : " << lanAddr << ":" << port << std::endl;
-	std::cout << "Closing";
+	std::cout << "Address: " << lanAddr << ":" << port << std::endl;
+	std::cout << "Closing" << std::endl;
 	closesocket(ClientSocket);
 }

@@ -292,6 +292,7 @@ int main()
 		}
 
 		std::vector<std::thread> threads;
+		DWORD timeout = atoi(configurations.getConfigChar("sockettimeoutseconds")) * 1000;
 
 		// Accept incoming connections and spawn a thread to handle each client
 		while ( true ) {
@@ -303,7 +304,6 @@ int main()
 				return 1;
 			}
 
-			DWORD timeout = atoi(configurations.getConfigChar("sockettimeoutseconds")) * 1000;
 			setsockopt(clientSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
 
 			threads.emplace_back(clientHandler, clientSocket);

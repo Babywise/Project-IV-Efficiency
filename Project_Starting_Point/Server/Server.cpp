@@ -213,7 +213,7 @@ void clientHandler(SOCKET clientSocket)
 
 	EnterCriticalSection(&loggingCritical);
 
-	std::cout << "Started logging Plane: " << planeID << std::endl;
+	std::cout << "Writing report to log for plane: " << planeID << std::endl;
 	numDataParsesServer += localNumDataParsesServer;
 	dataParsingTimeCalc.addPoint(localDataParsingTimeCalc);
 	sizeOfDataParsedDataServerCalc.addPoint(localSizeOfDataParsedDataServerCalc);
@@ -229,11 +229,11 @@ void clientHandler(SOCKET clientSocket)
 	}
 	//LeaveCriticalSection(&critical);
 
+	Metrics::logFlightStatisticsServer(p, plane.startingFuel);
 	Metrics::logNetworkMetricsServer(planeID, currentUptime, numTotalConnections, numCurrentConnections, numCompletedConnections, numFailedConnections, errMessage);
 	Metrics::logCalcInfo(calcTime, numCalc);
 	Metrics::logDataParsingMetricsServer(dataParsingTimeCalc, sizeOfDataParsedDataServerCalc, numDataParsesServer);
-	Metrics::logFlightStatisticsServer(p, plane.startingFuel);
-	std::cout << "Finished logging Plane: " << planeID << std::endl;
+	std::cout << "Finished writing report to log for plane: " << planeID << std::endl;
 	LeaveCriticalSection(&loggingCritical);
 #endif
 	free(RxBuffer);

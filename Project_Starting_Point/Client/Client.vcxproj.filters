@@ -21,11 +21,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Client.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Shared\Logger.cpp">
       <Filter>SharedCPP</Filter>
+    </ClCompile>
+    <ClCompile Include="Client.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -37,11 +37,22 @@
     <ClInclude Include="..\Shared\Logger.h">
       <Filter>Shared_H</Filter>
     </ClInclude>
-    <ClInclude Include="..\Shared\Metrics.h">
-      <Filter>Shared_H</Filter>
-    </ClInclude>
     <ClInclude Include="..\Shared\configManager.h">
       <Filter>Shared_H</Filter>
     </ClInclude>
+    <ClInclude Include="..\Shared\Metrics.h">
+      <Filter>Shared_H</Filter>
+    </ClInclude>
+    <ClInclude Include="IO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\Packet.h">
+      <Filter>Shared_H</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Shared\config.conf">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

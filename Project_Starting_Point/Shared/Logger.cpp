@@ -33,9 +33,10 @@ std::string Logger::getFileTimeName()
 /// Log to the default log path ./Logs/Log.log using the input string
 /// </summary>
 /// <param name="message"></param>
-void Logger::log(std::string message)
+/// <param name="clientOrServer">Client = True, Server = False</param>
+void Logger::log(std::string message, bool clientOrServer)
 {
-	Logger::log(message, -1, DEFAULT_LOG);
+	Logger::log(message, -1, DEFAULT_LOG, clientOrServer);
 
 }
 
@@ -44,9 +45,10 @@ void Logger::log(std::string message)
 /// </summary>
 /// <param name="message"></param>
 /// <param name="severity"></param>
-void Logger::log(std::string message, int severity)
+/// <param name="clientOrServer">Client = True, Server = False</param>
+void Logger::log(std::string message, int severity, bool clientOrServer)
 {
-	Logger::log(message, severity, DEFAULT_LOG);
+	Logger::log(message, severity, DEFAULT_LOG, clientOrServer);
 
 }
 
@@ -56,20 +58,37 @@ void Logger::log(std::string message, int severity)
 /// <param name="message"></param>
 /// <param name="severity"></param>
 /// <param name="logname"></param>
-void Logger::log(std::string message, int severity, std::string logname)
+/// <param name="clientOrServer">Client = True, Server = False</param>
+void Logger::log(std::string message, int severity, std::string logname, bool clientOrServer)
 {
-	if (!std::filesystem::exists(LOGSPATH)) {
+	if ( !std::filesystem::exists(LOGSPATH) ) {
 		std::filesystem::create_directory(LOGSPATH);
 	}
 
 	Logger archive;
-	archive.Archive(message, logname);
+
+	if ( clientOrServer ) {
+		if ( !std::filesystem::exists(LOGSPATHCLIENT) ) {
+			std::filesystem::create_directory(LOGSPATHCLIENT);
+		}
+		archive.Archive(message, logname, true);
+	} else {
+		if ( !std::filesystem::exists(LOGSPATHSERVER) ) {
+			std::filesystem::create_directory(LOGSPATHSERVER);
+		}
+		archive.Archive(message, logname, false);
+	}
+
 	
 	auto now = std::chrono::system_clock::now();
 	std::time_t end_time = std::chrono::system_clock::to_time_t(now);
 
 	std::ofstream outfile;
-	outfile.open((std::string)LOGSPATH + (std::string)this->fileTimeName + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
+	if ( clientOrServer ) {
+		outfile.open((std::string)LOGSPATHCLIENT + (std::string)this->fileTimeName + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
+	} else {
+		outfile.open((std::string)LOGSPATHSERVER + (std::string)this->fileTimeName + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
+	}
 	char* ctimeBuf = std::ctime(&end_time);
 	if ( ctimeBuf[strlen(ctimeBuf) - 1] == '\n' ) ctimeBuf[strlen(ctimeBuf) - 1] = '\0';
 	// replace endl with \0
@@ -81,20 +100,36 @@ void Logger::log(std::string message, int severity, std::string logname)
 /// </summary>
 /// <param name="message"></param>
 /// <param name="logname"></param>
-void Logger::log(std::string message, std::string logname)
+/// <param name="clientOrServer">Client = True, Server = False</param>
+void Logger::log(std::string message, std::string logname, bool clientOrServer)
 {
-
-	if (!std::filesystem::exists(LOGSPATH)) {
+	if ( !std::filesystem::exists(LOGSPATH) ) {
 		std::filesystem::create_directory(LOGSPATH);
 	}
+
 	Logger archive;
-	archive.Archive(message, logname);
+
+	if ( clientOrServer ) {
+		if ( !std::filesystem::exists(LOGSPATHCLIENT) ) {
+			std::filesystem::create_directory(LOGSPATHCLIENT);
+		}
+		archive.Archive(message, logname, true);
+	} else {
+		if ( !std::filesystem::exists(LOGSPATHSERVER) ) {
+			std::filesystem::create_directory(LOGSPATHSERVER);
+		}
+		archive.Archive(message, logname, false);
+	}
 
 	auto now = std::chrono::system_clock::now();
 	std::time_t end_time = std::chrono::system_clock::to_time_t(now);
 
 	std::ofstream outfile;
-	outfile.open((std::string)LOGSPATH + (std::string)this->fileTimeName + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
+	if ( clientOrServer ) {
+		outfile.open((std::string)LOGSPATHCLIENT + (std::string)this->fileTimeName + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
+	} else {
+		outfile.open((std::string)LOGSPATHSERVER + (std::string)this->fileTimeName + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
+	}
 	char* ctimeBuf = std::ctime(&end_time);
 	// replace endl with \0
 	if ( ctimeBuf[strlen(ctimeBuf) - 1] == '\n' ) ctimeBuf[strlen(ctimeBuf) - 1] = '\0';
@@ -107,7 +142,7 @@ void Logger::log(std::string message, std::string logname)
 /// </summary>
 /// <param name="message"></param>
 /// <param name="logname"></param>
-void Logger::Archive(std::string message, std::string logname)
+void Logger::Archive(std::string message, std::string logname, bool clientOrServer)
 {
 
 	if (!std::filesystem::exists(ARCHIVE)) {
@@ -120,27 +155,44 @@ void Logger::Archive(std::string message, std::string logname)
 	std::time_t end_time = std::chrono::system_clock::to_time_t(now);
 
 	std::ofstream outfile;
-	outfile.open((std::string)ARCHIVE + (std::string)logname + (std::string)ARCHIVE_EXT, std::ios::app);
+	if ( clientOrServer ) {
+		outfile.open((std::string)ARCHIVE + "Client - Metrics" + (std::string)ARCHIVE_EXT, std::ios::app);
+	} else {
+		outfile.open((std::string)ARCHIVE + "Server - Metrics" + (std::string)ARCHIVE_EXT, std::ios::app);
+	}
 
 	char* ctimeBuf = std::ctime(&end_time);
 	// replace endl with \0
 	if ( ctimeBuf[strlen(ctimeBuf) - 1] == '\n' ) ctimeBuf[strlen(ctimeBuf) - 1] = '\0';
 	outfile << ctimeBuf << "\t" << message << std::endl;
 	outfile.close();
-	system(std::string("attrib +h \"%cd%/../Archive/" + logname + ARCHIVE_EXT + "\"").c_str());
+	if ( clientOrServer ) {
+		system(std::string("attrib +h \"%cd%/../Archive/" + std::string("Client - Metrics") + ARCHIVE_EXT + "\"").c_str());
+	} else {
+		system(std::string("attrib +h \"%cd%/../Archive/" + std::string("Server - Metrics") + ARCHIVE_EXT + "\"").c_str());
+	}
 
 }
 /// <summary>
 /// adds a new line in both the archive and log files
 /// </summary>
 /// <param name="logname"></param>
-void Logger::emptyLine(std::string logname) {
+/// <param name="clientOrServer">Client = True, Server = False</param>
+void Logger::emptyLine(std::string logname, bool clientOrServer) {
 	std::ofstream outfile;
-	outfile.open((std::string)LOGSPATH + (std::string)this->fileTimeName + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
+	if ( clientOrServer ) {
+		outfile.open((std::string)LOGSPATHCLIENT + (std::string)this->fileTimeName + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
+	} else {
+		outfile.open((std::string)LOGSPATHSERVER + (std::string)this->fileTimeName + (std::string)logname + (std::string)LOGEXTENSION, std::ios::app);
+	}
 	outfile << std::endl;
 	outfile.close();
 	
-	outfile.open((std::string)ARCHIVE + (std::string)logname + (std::string)ARCHIVE_EXT, std::ios::app);
+	if ( clientOrServer ) {
+		outfile.open((std::string)ARCHIVE + std::string("Client - Metrics") + (std::string)ARCHIVE_EXT, std::ios::app);
+	} else {
+		outfile.open((std::string)ARCHIVE + std::string("Server - Metrics") + (std::string)ARCHIVE_EXT, std::ios::app);
+	}
 	outfile << std::endl;
 	outfile.close();
 }
@@ -148,10 +200,15 @@ void Logger::emptyLine(std::string logname) {
 /// adds 3 new lines (padding) to the archive file
 /// </summary>
 /// <param name="logname"></param>
-void Logger::addLogEndOfFileSpacingArchive(std::string logname)
+/// <param name="clientOrServer">Client = True, Server = False</param>
+void Logger::addLogEndOfFileSpacingArchive(std::string logname, bool clientOrServer)
 {
 	std::ofstream outfile;
-	outfile.open((std::string)ARCHIVE + (std::string)logname + (std::string)ARCHIVE_EXT, std::ios::app);
+	if ( clientOrServer ) {
+		outfile.open((std::string)ARCHIVE + std::string("Client - Metrics") + (std::string)ARCHIVE_EXT, std::ios::app);
+	} else {
+		outfile.open((std::string)ARCHIVE + std::string("Server - Metrics") + (std::string)ARCHIVE_EXT, std::ios::app);
+	}
 	outfile << std::endl;
 	outfile << std::endl;
 	outfile << std::endl;

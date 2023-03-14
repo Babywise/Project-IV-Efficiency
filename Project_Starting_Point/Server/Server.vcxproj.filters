@@ -35,5 +35,13 @@
     <ClInclude Include="..\Shared\Metrics.h">
       <Filter>Shared_H</Filter>
     </ClInclude>
+    <ClInclude Include="..\Shared\Packet.h">
+      <Filter>Shared_H</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Shared\config.conf">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

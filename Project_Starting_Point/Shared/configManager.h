@@ -4,6 +4,7 @@
 #include <cstdarg>
 #include <iostream>
 #include <fstream>
+#include <string>
 namespace configuration {
 	class configManager {
 		std::vector<std::string> params;
@@ -15,17 +16,22 @@ namespace configuration {
 		/// </summary>
 		/// <param name="file"></param>
 		configManager(std::string file) {
-			string strInput;
+			std::string strInput;
 			unsigned int uiSize = 0;
-			ifstream ifs(file);
+			std::ifstream ifs(file);
 
 			if (ifs.is_open())
 			{
 				while (!ifs.eof())
 				{
 					getline(ifs, strInput);
-					params.push_back(strInput.substr(0, strInput.find_first_of('=')-1)); // get param name
-					paramValues.push_back(strInput.substr(strInput.find_first_of('=') + 2,(strInput.length()- strInput.find_first_of('=') + 1)));// get associated value
+					if (strInput.length() > 0) { // empty lines ignored
+						if (strInput.at(0) != '#') { // lines that start with pound ignored
+							params.push_back(strInput.substr(0, strInput.find_first_of('=') - 1)); // get param name
+							paramValues.push_back(strInput.substr(strInput.find_first_of('=') + 2, (strInput.length() - strInput.find_first_of('=') + 1)));// get associated value
+
+						}
+					}
 				}
 			}
 			
@@ -35,7 +41,7 @@ namespace configuration {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		string getConfig(std::string name) {
+		std::string getConfig(std::string name) {
 			
 			for (int i = 0; i < params.size(); i++) { // for all paramaters
 				if (strcmp(name.c_str(), params.at(i).c_str()) == 0) { //if param passed in is in list

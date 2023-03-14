@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "../Shared/Packet.h"
-
+#include "../Shared/load_packet.h"
 #include "../Shared/Logger.h"
 #include "../Shared/configManager.h"
 
@@ -222,9 +222,13 @@ void clientHandler(SOCKET clientSocket)
 	LeaveCriticalSection(&loggingCritical);
 #endif
 }
-
+void setup();
 int main()
 {
+	setup();
+
+
+
 
 #ifdef METRICS
 	InitializeCriticalSection(&critical);
@@ -341,4 +345,67 @@ float CalcFuelConsumption(StorageTypes* plane, float currentFuel) {
 	numCalc++;
 #endif
 	return result;
+}
+
+
+
+
+void setup() {
+
+	//setup
+	WSADATA wsaData;
+	SOCKET ClientSocket;
+	sockaddr_in SvrAddr;
+	char* Rx = (char*)malloc(4);
+
+
+
+
+	WSAStartup(MAKEWORD(2, 2), &wsaData);
+	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	SvrAddr.sin_family = AF_INET;
+	int port = atoi(configurations.getConfigChar("balancer_port"));
+	SvrAddr.sin_port = htons(port);
+
+	SvrAddr.sin_addr.s_addr = inet_addr(configurations.getConfigChar("balancer_IP"));
+
+	int v =connect(ClientSocket, (struct sockaddr*)&SvrAddr, sizeof(SvrAddr)); // connect
+	recv(ClientSocket, Rx, 3, 0);
+	Rx[3] = '\0';
+	if (strcmp(Rx, "ACK") == 0) {
+
+		load_packet pack("server",configurations.getConfigChar("lanAddr"), configurations.getConfigChar("port"));
+		send(ClientSocket, pack.serialize(), load_packet::getPacketSize(),0);
+	}
+	closesocket(ClientSocket);
+}
+
+void tearDown() {
+	//setup
+	WSADATA wsaData;
+	SOCKET ClientSocket;
+	sockaddr_in SvrAddr;
+	char* Rx = (char*)malloc(4);
+
+
+
+
+	WSAStartup(MAKEWORD(2, 2), &wsaData);
+	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	SvrAddr.sin_family = AF_INET;
+	int port = atoi(configurations.getConfigChar("balancer_port"));
+	SvrAddr.sin_port = htons(port);
+
+	SvrAddr.sin_addr.s_addr = inet_addr(configurations.getConfigChar("balancer_IP"));
+
+	int v = connect(ClientSocket, (struct sockaddr*)&SvrAddr, sizeof(SvrAddr)); // connect
+	recv(ClientSocket, Rx, 3, 0);
+	Rx[3] = '\0';
+	if (strcmp(Rx, "ACK") == 0) {
+
+		load_packet pack("server", configurations.getConfigChar("lanAddr"), configurations.getConfigChar("port"));
+		pack.setTerminate(true);
+		send(ClientSocket, pack.serialize(), load_packet::getPacketSize(), 0);
+	}
+	closesocket(ClientSocket);
 }

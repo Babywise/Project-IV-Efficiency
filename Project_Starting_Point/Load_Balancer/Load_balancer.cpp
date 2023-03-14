@@ -22,10 +22,12 @@ void handleClient(SOCKET sock, load_packet packet);
 
 
 void RouteTraffic(SOCKET sock) {
+	std::cout << "SEND ACK";
 	send(sock, (char*)"ACK", 3, 0);
 	char* RxBuffer = (char*)malloc(load_packet::getPacketSize());
 	memset(RxBuffer, NULL, load_packet::getPacketSize());
 	recv(sock, RxBuffer, load_packet::getPacketSize(), 0);
+	std::cout << "Recieved";
 	load_packet pack(RxBuffer);
 	std::string type = pack.getClientServer();
 	if (strcmp(type.c_str(), "client") == 0) {
@@ -42,30 +44,35 @@ SERVER getNextServer() {
 	temp.ip = hosts.at(index);
 	temp.port = ports.at(index);
 	index++;
-	if (index > hosts.size()) { // reset to beginning of list for round robin
+	if (index >= hosts.size()) { // reset to beginning of list for round robin
 		index = 0;
 	}
 	lock.unlock();
+	std::cout << "Connecting to server : " << temp.ip << ":" << temp.port<<std::endl;
 	return temp;
 }
 void handleServer(SOCKET sock, load_packet packet) {
 	if (packet.getTermination() == false) {
 		closesocket(sock);
 		lock.lock();
+		std::cout << "Adding server : " << packet.getRedirectIP() << ":" << packet.getRedirectPort() << std::endl;
 		hosts.push_back(packet.getRedirectIP());
 		ports.push_back(packet.getRedirectPort());
 		lock.unlock();
 	}
 	else {
-		int iterator = 0;
-		for (int i = 0; i < hosts.size(); i++) {
-			if (hosts.at(i) == packet.getRedirectIP()) {
-				iterator = i;
-				break;
+		if (hosts.size() > 0) {
+			int iterator = 0;
+			for (int i = 0; i < hosts.size(); i++) {
+				if (hosts.at(i) == packet.getRedirectIP()) {
+					iterator = i;
+					break;
+				}
 			}
+
+			hosts.erase(hosts.begin() + iterator);
+			ports.erase(ports.begin() + iterator);
 		}
-		hosts.erase(hosts.begin() + iterator);
-		ports.erase(ports.begin() + iterator);
 	}
 }
 void handleClient(SOCKET sock,load_packet packet) {

@@ -8,6 +8,7 @@
 //include local stuff
 #include "IO.h"
 #include "../Shared/Packet.h"
+#include "../Shared/load_packet.h"
 
 // defines
 //#define WAN
@@ -16,12 +17,12 @@
 
 //variables
 configuration::configManager configurations("../Shared/config.conf");
-const char* lanAddr = configurations.getConfigChar("lanAddr");
+char* lanAddr = configurations.getConfigChar("lanAddr");
 const char* wanAddr = configurations.getConfigChar("wanAddr");
-const int port = atof(configurations.getConfig("port").c_str());
+int port = atof(configurations.getConfig("port").c_str());
 const std::string wan = configurations.getConfigChar("wan");
 const std::string lan = configurations.getConfigChar("lan");
-
+void setup();
 //metrics variables
 #ifdef METRICS
 int numDataParsesClient = 0;
@@ -40,6 +41,7 @@ float logTime; // used to measure getSize since it has been refactored for futur
 /// <returns></returns>
 int main(int argc, char* argv[])
 {
+	setup();
 	//setup
 	WSADATA wsaData;
 	SOCKET ClientSocket;
@@ -74,7 +76,7 @@ int main(int argc, char* argv[])
 #ifdef WAN
 	SvrAddr.sin_addr.s_addr = inet_addr(wanAddr); 
 #endif
-
+	std::cout << "connecting to " << lanAddr << ":" << port << std::endl;
 	connect(ClientSocket, (struct sockaddr*)&SvrAddr, sizeof(SvrAddr)); // connect
 
 #ifdef METRICS
@@ -277,4 +279,46 @@ int main(int argc, char* argv[])
 #endif
 
 	return 1;
+}
+
+
+
+void setup() {
+	//setup
+	WSADATA wsaData;
+	SOCKET ClientSocket;
+	sockaddr_in SvrAddr;
+	char* Rx = (char*)malloc(4);
+
+
+
+
+	WSAStartup(MAKEWORD(2, 2), &wsaData);
+	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	SvrAddr.sin_family = AF_INET;
+	int balanceport = atoi(configurations.getConfigChar("balancer_port"));
+	SvrAddr.sin_port = htons(balanceport);
+
+	SvrAddr.sin_addr.s_addr = inet_addr(configurations.getConfigChar("balancer_IP"));
+	std::cout << "Connecting";
+	int v = connect(ClientSocket, (struct sockaddr*)&SvrAddr, sizeof(SvrAddr)); // connect
+	std::cout << "Connected";
+	recv(ClientSocket, Rx, 3, 0);
+	Rx[3] = '\0';
+	if (strcmp(Rx, "ACK") == 0) {
+		std::cout << "got ACK";
+		load_packet pack("client","","");
+		send(ClientSocket, pack.serialize(), load_packet::getPacketSize(), 0);
+	}
+	Rx = (char*)malloc(load_packet::getPacketSize());
+	recv(ClientSocket, Rx, load_packet::getPacketSize(), 0);
+	load_packet rcv_pack(Rx);
+	if (strcmp(rcv_pack.getRedirectIP().c_str(), "0.0.0.0") != 0) {
+		lanAddr = (char*)malloc(strlen(rcv_pack.getRedirectIP().c_str())*sizeof(char) + 1);
+		strcpy_s(lanAddr,strlen(rcv_pack.getRedirectIP().c_str())+1, rcv_pack.getRedirectIP().c_str());
+		port = atoi(rcv_pack.getRedirectPort().c_str());
+	}
+	std::cout << "\ngot address : " << lanAddr << ":" << port << std::endl;
+	std::cout << "Closing";
+	closesocket(ClientSocket);
 }

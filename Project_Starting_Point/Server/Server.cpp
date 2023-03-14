@@ -223,6 +223,7 @@ void clientHandler(SOCKET clientSocket)
 #endif
 }
 void setup();
+void tearDown();
 int main()
 {
 	setup();
@@ -304,7 +305,7 @@ int main()
 	DeleteCriticalSection(&critical);
 	DeleteCriticalSection(&loggingCritical);
 #endif // METRICS
-
+	tearDown();
 	return 0;
 }
 
@@ -349,7 +350,9 @@ float CalcFuelConsumption(StorageTypes* plane, float currentFuel) {
 
 
 
-
+/// <summary>
+/// add server to load balancer
+/// </summary>
 void setup() {
 
 	//setup
@@ -360,7 +363,7 @@ void setup() {
 
 
 
-
+	std::cout << "SETUP";
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	SvrAddr.sin_family = AF_INET;
@@ -368,18 +371,21 @@ void setup() {
 	SvrAddr.sin_port = htons(port);
 
 	SvrAddr.sin_addr.s_addr = inet_addr(configurations.getConfigChar("balancer_IP"));
-
+	std::cout << "Connecting";
 	int v =connect(ClientSocket, (struct sockaddr*)&SvrAddr, sizeof(SvrAddr)); // connect
 	recv(ClientSocket, Rx, 3, 0);
 	Rx[3] = '\0';
 	if (strcmp(Rx, "ACK") == 0) {
-
+		std::cout << "ACK";
 		load_packet pack("server",configurations.getConfigChar("lanAddr"), configurations.getConfigChar("port"));
 		send(ClientSocket, pack.serialize(), load_packet::getPacketSize(),0);
 	}
+	std::cout << "Closing";
 	closesocket(ClientSocket);
 }
-
+/// <summary>
+/// remove server from load balancer
+/// </summary>
 void tearDown() {
 	//setup
 	WSADATA wsaData;
